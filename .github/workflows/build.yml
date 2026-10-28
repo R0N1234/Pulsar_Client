@@ -17,9 +17,15 @@ jobs:
             17
       - name: Compilar o mod 1.8.9
         working-directory: mod
+        shell: bash
         run: |
           chmod +x gradlew
-          ./gradlew build --no-daemon
+          set -o pipefail
+          if ! ./gradlew build --no-daemon --stacktrace 2>&1 | tee build.log; then
+            msg=$(grep -E "error:|What went wrong|Could not|Caused by|> [A-Z]|FAILURE|warning: \[" build.log | head -40 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=Falha ao compilar o mod::${msg}"
+            exit 1
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: pulsar-mod
