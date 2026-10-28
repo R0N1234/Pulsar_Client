@@ -17,7 +17,9 @@ jobs:
             17
       - name: Compilar o mod 1.8.9
         working-directory: mod
-        run: ./gradlew build --no-daemon
+        run: |
+          chmod +x gradlew
+          ./gradlew build --no-daemon
       - uses: actions/upload-artifact@v4
         with:
           name: pulsar-mod
