@@ -1,0 +1,32 @@
+{
+  "name": "pulsar-launcher",
+  "productName": "Pulsar Client",
+  "version": "0.1.0",
+  "description": "Launcher do Pulsar Client, focado em PVP no Minecraft 1.8.9",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --x64",
+    "dist:linux": "electron-builder --linux AppImage",
+    "dist:mac": "electron-builder --mac"
+  },
+  "dependencies": {
+    "minecraft-launcher-core": "3.18.2",
+    "msmc": "5.0.5"
+  },
+  "devDependencies": {
+    "electron": "40.10.6",
+    "electron-builder": "26.0.12"
+  },
+  "build": {
+    "appId": "dev.pulsarclient.launcher",
+    "productName": "Pulsar Client",
+    "files": ["main.js", "preload.js", "lib/**", "src/**"],
+    "extraResources": [
+      { "from": "../mod/build/libs", "to": "mods", "filter": ["pulsar-client-*.jar", "!*-sources.jar", "!*-dev.jar"] }
+    ],
+    "win": { "target": "nsis" },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true }
+  }
+}
