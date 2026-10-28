@@ -22,7 +22,7 @@ jobs:
           chmod +x gradlew
           set -o pipefail
           if ! ./gradlew build --no-daemon --stacktrace 2>&1 | tee build.log; then
-            msg=$(grep -E "error:|What went wrong|Could not|Caused by|> [A-Z]|FAILURE|warning: \[" build.log | head -40 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            msg=$( { grep -A12 "What went wrong" build.log; grep -E "error:" build.log | head -20; grep -m6 "Caused by" build.log; } | head -45 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
             echo "::error title=Falha ao compilar o mod::${msg}"
             exit 1
           fi
