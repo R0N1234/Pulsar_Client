@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:">
+  <title>Pulsar Client</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <canvas id="stars"></canvas>
+
+  <header class="topbar">
+    <div class="logo"><span class="dot"></span>PULSAR <small>CLIENT</small></div>
+    <nav class="nav" id="nav">
+      <button type="button" data-view="home" class="on">Início</button>
+      <button type="button" data-view="mods">Mods</button>
+      <button type="button" data-view="settings">Ajustes</button>
+    </nav>
+    <div class="right">
+      <div class="acct" id="acct">
+        <button type="button" class="btn-ghost" id="btnLogin">Entrar com Microsoft</button>
+      </div>
+      <div class="winctl">
+        <button type="button" id="btnMin" aria-label="Minimizar">–</button>
+        <button type="button" id="btnClose" aria-label="Fechar">×</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Início: modelo A · Núcleo -->
+  <main class="view on" id="view-home">
+    <div class="pulsar hero-pulsar"><div class="halo"></div><div class="tilt"><div class="beams"></div></div><div class="field"></div><div class="field f2"></div><div class="core"></div></div>
+    <div class="home-center">
+      <div class="home-title">PULSAR</div>
+      <div class="ver">
+        <div class="v"><small>VERSÃO · PVP</small><b>1.8.9</b></div>
+        <div class="sep"></div>
+        <div class="v"><small>MODS LIGADOS</small><b class="ui" id="homeModCount">0</b></div>
+        <button class="btn-play" type="button" id="btnPlay">JOGAR</button>
+      </div>
+      <div class="status" id="status" role="status">Pronto para jogar</div>
+      <div class="bar" id="bar" hidden><span id="barFill"></span></div>
+    </div>
+    <section class="card news">
+      <h4>Novidades</h4>
+      <p><b>Versão 0.1:</b> primeiros mods prontos. Teclas Pulse, Frequência CPS, FPS, Latência, Coordenadas e Propulsão. Aperte <b>Shift direito</b> no jogo para mover a HUD.</p>
+    </section>
+    <section class="card log">
+      <h4>Registro do jogo</h4>
+      <pre id="log">Os logs do Minecraft aparecem aqui quando o jogo abrir.</pre>
+    </section>
+  </main>
+
+  <!-- Mods: modelo C · Painel -->
+  <main class="view" id="view-mods">
+    <div class="mods-head">
+      <div class="pulsar mini"><div class="halo"></div><div class="tilt"><div class="beams"></div></div><div class="core"></div></div>
+      <div>
+        <h2>Mods · 1.8.9 PVP</h2>
+        <p id="modsSummary"></p>
+      </div>
+    </div>
+    <div class="mods-tools">
+      <input id="search" type="search" placeholder="Buscar mod…" autocomplete="off">
+      <div class="chips" id="chips"></div>
+      <label class="onlyready"><input type="checkbox" id="onlyReady"> só os prontos</label>
+    </div>
+    <div class="mods-body">
+      <div class="grid" id="grid"></div>
+      <aside class="preview">
+        <h4>Prévia da HUD</h4>
+        <div class="mc" id="mc">
+          <div class="hud keys" data-mod="teclas_pulse"><span></span><span class="on">W</span><span></span><span class="on">A</span><span>S</span><span>D</span><span class="w2 on">LMB</span></div>
+          <div class="hud box tl" data-mod="frequencia_cps">CPS <b>12 Hz</b></div>
+          <div class="hud box tr"><span data-mod="fps">FPS <b>412</b><br></span><span data-mod="latencia">Ping <b>14ms</b><br></span><span data-mod="coordenadas">XYZ <b>104 / 64 / -38</b></span></div>
+          <div class="hud box bl" data-mod="propulsao">[Correndo (fixo)]</div>
+          <div class="xh"></div>
+          <div class="hotbar"><span class="sel"></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+        <p class="hint">No jogo, aperte Shift direito para arrastar cada elemento.</p>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Ajustes -->
+  <main class="view" id="view-settings">
+    <form class="settings" id="settingsForm">
+      <h2>Ajustes</h2>
+      <label for="mem">Memória para o jogo <output id="memOut">3 GB</output></label>
+      <input id="mem" type="range" min="1" max="8" step="1" value="3">
+
+      <label for="java">Caminho do Java 8</label>
+      <input id="java" type="text" placeholder="Deixe vazio para usar o Java do sistema">
+      <p class="help">A versão 1.8.9 precisa do Java 8. No Windows, algo como C:\Program Files\Java\jre1.8.0_421\bin\javaw.exe</p>
+
+      <label for="dir">Pasta do jogo</label>
+      <input id="dir" type="text">
+      <p class="help">Fica separada da sua .minecraft, para não misturar mods.</p>
+
+      <div class="row">
+        <button class="btn-ghost" type="submit">Salvar</button>
+        <span id="saved" class="help" role="status"></span>
+      </div>
+    </form>
+  </main>
+
+  <script src="mods.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

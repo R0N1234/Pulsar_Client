@@ -1,0 +1,10 @@
+[
+  {
+    "modid": "pulsar",
+    "name": "Pulsar Client",
+    "description": "Client de PVP com tema espacial. HUD, Teclas Pulse, Frequência CPS e mais.",
+    "version": "${version}",
+    "mcversion": "1.8.9",
+    "authorList": ["Rick"]
+  }
+]
