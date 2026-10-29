@@ -25,6 +25,7 @@ jobs:
         run: |
           chmod +x gradlew
           set -o pipefail
+          for u in https://repo.essential.gg/repository/maven-public/gg/essential/architectury-loom/maven-metadata.xml https://repo.essential.gg/repository/maven-releases/gg/essential/architectury-loom/maven-metadata.xml https://repo.essential.gg/public/gg/essential/architectury-loom/maven-metadata.xml https://repo.essential.gg/repository/maven-public/gg/essential/loom/gg.essential.loom.gradle.plugin/maven-metadata.xml; do echo "== $u" >> /tmp/probe.log; curl -sSL "$u" 2>&1 | grep -oE "<version>[^<]+</version>|<latest>[^<]+</latest>|HTTP|404|Not Found" | tail -15 >> /tmp/probe.log; done
           if ! ./gradlew build --no-daemon --stacktrace 2>&1 | tee build.log; then
             # Publica o log no branch ci-log para facilitar o diagnóstico
             cp build.log /tmp/build.log
@@ -33,7 +34,7 @@ jobs:
             git config user.email "github-actions@users.noreply.github.com"
             git checkout --orphan ci-log
             git rm -rfq --cached .
-            cp /tmp/build.log build.log
+            cat /tmp/probe.log /tmp/build.log > build.log
             git add build.log
             git commit -qm "Log do build ${GITHUB_SHA}"
             git push -f origin ci-log
