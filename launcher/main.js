@@ -5,6 +5,9 @@ const { Config } = require("./lib/config");
 const { Accounts } = require("./lib/auth");
 const { launch } = require("./lib/launch");
 
+// Janelas (inclusive o login da Microsoft) em português.
+app.commandLine.appendSwitch("lang", "pt-BR");
+
 let win;
 let config;
 let accounts;
