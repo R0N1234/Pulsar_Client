@@ -243,7 +243,8 @@ public class GuiPulsarPanel extends GuiScreen {
             drawCenteredString(fontRendererObj, done ? "Feito!" : s.label(), mx + mw / 2, cy, done ? BEAM : TEXT);
             return;
         }
-        fontRendererObj.drawString(fontRendererObj.trimStringToWidth(s.label(), mw - 130), mx + 6, cy, TEXT);
+        int room = s instanceof BoolSetting ? mw - 44 : mw - 130;
+        fontRendererObj.drawString(fontRendererObj.trimStringToWidth(s.label(), room), mx + 6, cy, TEXT);
         if (s instanceof BoolSetting) {
             toggle(mx + mw - 28, y + 6, ((BoolSetting) s).get());
         } else if (s instanceof SliderSetting) {

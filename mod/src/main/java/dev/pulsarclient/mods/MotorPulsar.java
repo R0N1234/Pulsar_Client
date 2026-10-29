@@ -18,7 +18,7 @@ import org.lwjgl.opengl.Display;
  * e segura o FPS quando a janela está em segundo plano.
  */
 public class MotorPulsar extends PulsarMod {
-    private final BoolSetting background = add(new BoolSetting("fundo", "Poupar PC com a janela minimizada", true));
+    private final BoolSetting background = add(new BoolSetting("fundo", "Poupar PC em segundo plano", true));
     private final SliderSetting backgroundFps = add(new SliderSetting("fundo_fps", "FPS em segundo plano", 15, 5, 60, 5, ""));
     private final BoolSetting armorStands = add(new BoolSetting("suportes", "Esconder suportes de armadura", true));
     private final BoolSetting cullMobs = add(new BoolSetting("mobs", "Limitar distância dos mobs", true));
