@@ -52,6 +52,22 @@ Você precisa de:
 
 Para gerar o instalador do Windows: `npm run dist` dentro de `launcher/` (compile o mod antes, o instalador leva o jar junto).
 
+## Atualizações automáticas
+
+O launcher procura versão nova ao abrir e a cada 30 minutos. Quando acha, baixa em segundo plano e mostra no topo o botão **Atualizar e reiniciar**. Se o jogador fechar o launcher sem clicar, a atualização é instalada na próxima vez que ele abrir.
+
+Os instaladores ficam públicos em [R0N1234/Pulsar_Client-releases](https://github.com/R0N1234/Pulsar_Client-releases/releases). O código continua privado aqui.
+
+### Para lançar uma versão
+1. Aba **Actions** > **Lançar versão** > **Run workflow**.
+2. Digite a versão nova, sempre maior que a anterior (ex.: `0.3.0`), e o que mudou.
+3. Em alguns minutos a versão aparece em Releases e os launchers atualizam sozinhos.
+
+### Configuração (uma vez só)
+1. Crie o repositório **público** `Pulsar_Client-releases`, marcando "Add a README".
+2. Em GitHub > Settings > Developer settings > Personal access tokens > **Fine-grained tokens**, gere um token com acesso só ao `Pulsar_Client-releases` e permissão **Contents: Read and write**.
+3. Neste repositório, em Settings > Secrets and variables > Actions, crie o segredo `RELEASES_TOKEN` com esse token.
+
 ## Próximos passos sugeridos
 
 - Mods de combate que faltam: Blindagem, Efeitos, Alcance, Combo, Animações Clássicas, Mira de Pulsar
