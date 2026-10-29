@@ -30,7 +30,7 @@ Ligar ou desligar um mod no launcher grava em `.pulsar/pulsar/config.json`, o me
 ## Como rodar no seu PC
 
 Você precisa de:
-- **Java 17** (para compilar) e **Java 8** (para jogar a 1.8.9). Recomendo o Temurin: https://adoptium.net
+- **Java 21** (para compilar) e **Java 8** (para jogar a 1.8.9). Recomendo o Temurin: https://adoptium.net
 - **Node.js 22**: https://nodejs.org
 
 1. Compile o mod:

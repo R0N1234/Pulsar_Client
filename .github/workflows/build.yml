@@ -18,7 +18,7 @@ jobs:
           distribution: temurin
           java-version: |
             8
-            17
+            21
       - name: Compilar o mod 1.8.9
         working-directory: mod
         shell: bash
