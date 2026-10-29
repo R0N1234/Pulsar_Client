@@ -35,18 +35,26 @@ public class GuiHudEditor extends GuiScreen {
 
         ScaledResolution res = new ScaledResolution(mc);
         for (HudMod mod : PulsarClient.get().hudMods()) {
-            PulsarClient.keepOnScreen(mod, res);
-            int color = mod.isEnabled() ? OUTLINE : OUTLINE_OFF;
-            outline(mod.x - 3, mod.y - 3, mod.x + mod.width() + 3, mod.y + mod.height() + 3, color);
-            mod.render(true);
-            if (!mod.isEnabled()) {
-                drawRect(mod.x - 2, mod.y - 2, mod.x + mod.width() + 2, mod.y + mod.height() + 2, 0x99000000);
-            }
-            if (mod.contains(mouseX, mouseY)) {
-                fontRendererObj.drawStringWithShadow(mod.name(), mod.x, mod.y - 13, 0xFFFFFFFF);
+            try {
+                drawMod(mod, res, mouseX, mouseY);
+            } catch (Throwable t) {
+                PulsarClient.get().fail(mod, t);
             }
         }
         super.drawScreen(mouseX, mouseY, partialTicks);
+    }
+
+    private void drawMod(HudMod mod, ScaledResolution res, int mouseX, int mouseY) {
+        PulsarClient.keepOnScreen(mod, res);
+        int color = mod.isEnabled() ? OUTLINE : OUTLINE_OFF;
+        outline(mod.x - 3, mod.y - 3, mod.x + mod.width() + 3, mod.y + mod.height() + 3, color);
+        mod.render(true);
+        if (!mod.isEnabled()) {
+            drawRect(mod.x - 2, mod.y - 2, mod.x + mod.width() + 2, mod.y + mod.height() + 2, 0x99000000);
+        }
+        if (mod.contains(mouseX, mouseY)) {
+            fontRendererObj.drawStringWithShadow(mod.name(), mod.x, mod.y - 13, 0xFFFFFFFF);
+        }
     }
 
     private static void outline(int l, int t, int r, int b, int color) {

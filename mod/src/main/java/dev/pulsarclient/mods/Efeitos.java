@@ -35,10 +35,17 @@ public class Efeitos extends HudMod {
         return out;
     }
 
+    /** Alguns servidores mandam id ou nível fora do normal (nível 255 chega como -1), então tudo é conferido. */
+    private static Potion potion(PotionEffect e) {
+        int id = e.getPotionID();
+        return id >= 0 && id < Potion.potionTypes.length ? Potion.potionTypes[id] : null;
+    }
+
     private static String name(PotionEffect e) {
-        Potion p = Potion.potionTypes[e.getPotionID()];
-        String amp = e.getAmplifier() < ROMAN.length ? ROMAN[e.getAmplifier()] : " " + (e.getAmplifier() + 1);
-        return (p == null ? "?" : I18n.format(p.getName())) + amp;
+        Potion p = potion(e);
+        int level = e.getAmplifier();
+        String amp = level < 0 ? "" : level < ROMAN.length ? ROMAN[level] : " " + (level + 1);
+        return (p == null ? "Efeito" : I18n.format(p.getName())) + amp;
     }
 
     @Override
@@ -60,7 +67,7 @@ public class Efeitos extends HudMod {
         if (background.get()) Gui.drawRect(x - 2, y - 2, x + width() + 2, y + list.size() * ROW, BACKGROUND);
         int ry = y;
         for (PotionEffect e : list) {
-            Potion p = Potion.potionTypes[e.getPotionID()];
+            Potion p = potion(e);
             if (p != null && p.hasStatusIcon()) {
                 int icon = p.getStatusIconIndex();
                 GlStateManager.color(1f, 1f, 1f, 1f);

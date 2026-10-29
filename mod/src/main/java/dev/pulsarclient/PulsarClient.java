@@ -39,16 +39,19 @@ import org.lwjgl.input.Keyboard;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Mod(modid = PulsarClient.MODID, name = "Pulsar Client", version = PulsarClient.VERSION, clientSideOnly = true, acceptedMinecraftVersions = "[1.8.9]")
 public class PulsarClient {
     public static final String MODID = "pulsar";
-    public static final String VERSION = "0.4.0";
+    public static final String VERSION = "0.4.1";
     private static PulsarClient instance;
 
     private final List<PulsarMod> mods = new ArrayList<PulsarMod>();
     private final List<HudMod> hudMods = new ArrayList<HudMod>();
+    private final Set<PulsarMod> broken = new HashSet<PulsarMod>();
     private final Propulsao propulsao = new Propulsao();
     private final Telescopio telescopio = new Telescopio();
     private final MotorPulsar motor = new MotorPulsar();
@@ -133,10 +136,24 @@ public class PulsarClient {
         Minecraft mc = Minecraft.getMinecraft();
         if (mc.gameSettings.showDebugInfo || mc.currentScreen instanceof GuiHudEditor) return;
         for (HudMod mod : hudMods) {
-            if (!mod.isEnabled()) continue;
-            keepOnScreen(mod, event.resolution);
-            mod.render(false);
+            if (!mod.isEnabled() || broken.contains(mod)) continue;
+            try {
+                keepOnScreen(mod, event.resolution);
+                mod.render(false);
+            } catch (Throwable t) {
+                fail(mod, t);
+            }
         }
+    }
+
+    /**
+     * Um erro num mod nunca pode fechar o jogo: o mod para de rodar até reiniciar o jogo
+     * e o erro vai para o log, para ser corrigido.
+     */
+    public void fail(PulsarMod mod, Throwable t) {
+        if (!broken.add(mod)) return;
+        System.err.println("[Pulsar] O mod " + mod.name() + " deu erro e foi pausado até reiniciar o jogo:");
+        t.printStackTrace();
     }
 
     /** Mantém o mod dentro da tela, mesmo depois de mudar o tamanho da janela ou a escala da interface. */
@@ -148,7 +165,14 @@ public class PulsarClient {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
-        for (PulsarMod mod : mods) mod.tick();
+        for (PulsarMod mod : mods) {
+            if (broken.contains(mod)) continue;
+            try {
+                mod.tick();
+            } catch (Throwable t) {
+                fail(mod, t);
+            }
+        }
     }
 
     @SubscribeEvent
