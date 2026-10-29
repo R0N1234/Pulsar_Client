@@ -6,17 +6,22 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 
-function defaultGameDir() {
-  if (process.platform === "win32") return path.join(process.env.APPDATA || os.homedir(), ".pulsar");
-  if (process.platform === "darwin") return path.join(os.homedir(), "Library", "Application Support", "pulsar");
-  return path.join(os.homedir(), ".pulsar");
+// A mesma pasta .minecraft do launcher oficial (o Lunar e o Silent também usam ela).
+function minecraftDir() {
+  if (process.platform === "win32") return path.join(process.env.APPDATA || os.homedir(), ".minecraft");
+  if (process.platform === "darwin") return path.join(os.homedir(), "Library", "Application Support", "minecraft");
+  return path.join(os.homedir(), ".minecraft");
 }
 
+const CONFIG_VERSION = 2;
+
 const DEFAULTS = {
-  gameDir: defaultGameDir(),
+  configVersion: CONFIG_VERSION,
+  gameDir: minecraftDir(),
   memoryMaxGb: 3,
   javaPath: "",
-  profile: "Ranqueada",
+  loader: "forge",
+  optifinePath: "",
   version: "1.8.9",
 };
 
@@ -36,7 +41,10 @@ function writeJson(file, data) {
 class Config {
   constructor(userDataDir) {
     this.file = path.join(userDataDir, "launcher.json");
-    this.data = { ...DEFAULTS, ...readJson(this.file, {}) };
+    const saved = readJson(this.file, {});
+    // A 0.1 usava uma pasta .pulsar separada; a partir da 0.2 o padrão é a .minecraft.
+    if ((saved.configVersion || 1) < CONFIG_VERSION) delete saved.gameDir;
+    this.data = { ...DEFAULTS, ...saved, configVersion: CONFIG_VERSION };
   }
 
   get() {
@@ -72,4 +80,4 @@ class Config {
   }
 }
 
-module.exports = { Config };
+module.exports = { Config, minecraftDir };
