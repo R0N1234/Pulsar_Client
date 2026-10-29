@@ -9,7 +9,7 @@ Client de PVP para Minecraft 1.8.9 com tema espacial. O projeto tem duas partes:
 
 O launcher instala o Forge 1.8.9 e o jar do mod numa pasta própria (`%APPDATA%\.pulsar` no Windows), separada da sua `.minecraft`.
 
-## O que já funciona (versão 0.3)
+## O que já funciona (versão 0.4)
 
 Launcher:
 - Tela inicial no estilo Núcleo (pulsar no centro, 1.8.9 e botão JOGAR)
@@ -19,14 +19,13 @@ Launcher:
 - Modos Forge + Pulsar, OptiFine + Forge + Pulsar e Só OptiFine (o jar do OptiFine é escolhido pelo jogador)
 - Atualização automática pelos Releases
 
-Mod (11 prontos):
-- **Teclas Pulse**, **Frequência CPS**, **FPS**, **Latência**, **Coordenadas**
-- **Propulsão** (correr fixo, tecla R)
-- **Mira de Pulsar** (formato, cor, tamanho, contorno)
-- **Telescópio** (zoom segurando C, roda do mouse ajusta)
-- **Supernova** (brilho total)
-- **Contorno** (cor e espessura da linha do bloco)
-- **Motor Pulsar**: otimizador próprio. Esconde suportes de armadura (mantém hologramas), não desenha mobs longe, controla partículas, segura o FPS com a janela em segundo plano e tem o botão "Aplicar modo desempenho"
+Mod (23 prontos):
+- HUD: **Teclas Pulse**, **Frequência CPS**, **FPS**, **Latência**, **Coordenadas**, **Relógio**, **Memória**, **Bússola**, **Servidor**, **Saturação**
+- Combate: **Propulsão** (correr fixo, tecla R), **Mira de Pulsar**, **Blindagem** (armadura e item na mão), **Efeitos** (poções), **Combo**, **Alcance**, **Tremor de Dano** (sem balanço da câmera), **Campo de Colisão** (hitbox)
+- Visual: **Telescópio** (zoom segurando C), **Supernova** (brilho total), **Contorno** do bloco, **Atmosfera** (sem chuva e hora do dia fixa só para você)
+- **Motor Pulsar**: otimizador próprio. Não desenha entidades escondidas atrás de paredes nem mobs longe, esconde suportes de armadura (mantém hologramas), pode limitar a distância dos nomes, controla partículas, segura o FPS com a janela em segundo plano e tem o botão "Aplicar modo desempenho"
+
+Tela de carregamento e menu: o jar também é um coremod (`dev.pulsarclient.core`) que troca a tela de carregamento do Forge pela do Pulsar (universo de fundo, "PC" no círculo e uma barra). Se der qualquer erro, a tela normal do Forge aparece. O menu principal do jogo é trocado pelo do Pulsar, com o mesmo fundo. A arte sai de `tools/arte_espaco.py`.
 
 Painel do Pulsar: aperte **Shift direito** no jogo. Categorias à esquerda, busca, cartões dos mods (clique liga ou desliga, as três barras ou o botão direito abrem as opções) e o botão **Editar HUD**. O painel também abre pelo botão **Pulsar Client** no menu do Esc, pelo botão **Motor Pulsar** em Opções > Vídeo e pelo botão **Pulsar** no menu inicial.
 
