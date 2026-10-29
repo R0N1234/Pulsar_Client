@@ -113,6 +113,13 @@
       <input id="dir" type="text">
       <p class="help">A mesma .minecraft do launcher oficial: seus mundos, packs, servidores e opções aparecem no Pulsar. Os mods do Pulsar ficam em mods/1.8.9 e não atrapalham outras versões.</p>
 
+      <label for="updToken">Chave de atualização</label>
+      <div class="pick">
+        <input id="updToken" type="password" placeholder="Cole a chave do GitHub (github_pat_…)" autocomplete="off">
+        <button class="btn-ghost" type="button" id="btnUpdToken">Salvar chave</button>
+      </div>
+      <p class="help" id="updHelp">Com a chave, o launcher baixa sozinho as versões novas do repositório privado. Ela fica guardada só neste computador.</p>
+
       <div class="row">
         <button class="btn-ghost" type="submit">Salvar</button>
         <span id="saved" class="help" role="status"></span>

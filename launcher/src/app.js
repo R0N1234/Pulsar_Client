@@ -196,10 +196,20 @@ async function loadSettings() {
   $("java").value = cfg.javaPath;
   $("dir").value = cfg.gameDir;
   $("loader").value = cfg.loader;
+  renderUpdateToken(cfg);
   renderOptifine(cfg);
   updateCounts();
 }
 $("mem").addEventListener("input", () => ($("memOut").textContent = $("mem").value + " GB"));
+function renderUpdateToken(cfg) {
+  $("updToken").value = "";
+  $("updToken").placeholder = cfg.hasUpdateToken ? "Chave salva. Cole outra para trocar." : "Cole a chave do GitHub (github_pat_…)";
+}
+$("btnUpdToken").onclick = async () => {
+  const cfg = await api.setUpdateToken($("updToken").value);
+  renderUpdateToken(cfg);
+  $("saved").textContent = cfg.hasUpdateToken ? "Chave salva. Procurando atualização…" : "Chave removida.";
+};
 $("btnPickOf").onclick = async () => renderOptifine(await api.pickOptifine());
 $("btnOfSite").onclick = () => api.openLink("https://optifine.net/downloads");
 $("loader").addEventListener("change", async () => {
@@ -227,6 +237,11 @@ api.onUpdate((u) => {
     b.className = "update";
     b.textContent = `Baixando atualização${u.version ? " " + u.version : ""}… ${u.percent || 0}%`;
     if (u.version) b.dataset.version = u.version;
+  } else if (u.state === "none") {
+    b.hidden = true;
+  } else if (u.state === "error") {
+    b.className = "update";
+    b.textContent = u.text;
   } else if (u.state === "ready") {
     b.className = "update ready";
     b.textContent = `Atualizar para ${u.version} e reiniciar`;
