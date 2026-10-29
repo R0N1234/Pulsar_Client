@@ -36,15 +36,22 @@
       <div class="ver">
         <div class="v"><small>VERSÃO · PVP</small><b>1.8.9</b></div>
         <div class="sep"></div>
-        <div class="v"><small>MODS LIGADOS</small><b class="ui" id="homeModCount">0</b></div>
+        <label class="v mode" for="loader"><small>MODO</small>
+          <select id="loader">
+            <option value="forge">Forge + Pulsar</option>
+            <option value="forge_optifine">OptiFine + Forge + Pulsar</option>
+            <option value="optifine">Só OptiFine</option>
+          </select>
+        </label>
         <button class="btn-play" type="button" id="btnPlay">JOGAR</button>
       </div>
       <div class="status" id="status" role="status">Pronto para jogar</div>
+      <div class="sub" id="homeSub"><span id="homeModCount">0</span> mods do Pulsar ligados</div>
       <div class="bar" id="bar" hidden><span id="barFill"></span></div>
     </div>
     <section class="card news">
       <h4>Novidades</h4>
-      <p><b>Versão 0.1:</b> primeiros mods prontos. Teclas Pulse, Frequência CPS, FPS, Latência, Coordenadas e Propulsão. Aperte <b>Shift direito</b> no jogo para mover a HUD.</p>
+      <p><b>Versão 0.2:</b> usa a sua pasta .minecraft, baixa o Java 8 sozinho e agora tem os modos Forge, OptiFine e OptiFine + Forge. Aperte <b>Shift direito</b> no jogo para mover a HUD.</p>
     </section>
     <section class="card log">
       <h4>Registro do jogo</h4>
@@ -90,13 +97,20 @@
       <label for="mem">Memória para o jogo <output id="memOut">3 GB</output></label>
       <input id="mem" type="range" min="1" max="8" step="1" value="3">
 
-      <label for="java">Caminho do Java 8</label>
-      <input id="java" type="text" placeholder="Deixe vazio para usar o Java do sistema">
-      <p class="help">A versão 1.8.9 precisa do Java 8. No Windows, algo como C:\Program Files\Java\jre1.8.0_421\bin\javaw.exe</p>
+      <label>OptiFine 1.8.9</label>
+      <div class="pick">
+        <span id="ofFile" class="mono">Nenhum arquivo escolhido</span>
+        <button class="btn-ghost" type="button" id="btnPickOf">Escolher arquivo</button>
+      </div>
+      <p class="help">O OptiFine não pode ser distribuído junto com o Pulsar, então baixe o <b>OptiFine 1.8.9 HD U M5</b> no site oficial e escolha o arquivo aqui. <button type="button" class="linkbtn" id="btnOfSite">Abrir optifine.net</button></p>
 
-      <label for="dir">Pasta do jogo</label>
+      <label for="java">Java</label>
+      <input id="java" type="text" placeholder="Automático: o Pulsar baixa o Java 8 sozinho">
+      <p class="help">Deixe vazio para usar o Java 8 do Pulsar. Para usar outro, cole o caminho do javaw.exe de um Java 8.</p>
+
+      <label for="dir">Pasta do Minecraft</label>
       <input id="dir" type="text">
-      <p class="help">Fica separada da sua .minecraft, para não misturar mods.</p>
+      <p class="help">A mesma .minecraft do launcher oficial: seus mundos, packs, servidores e opções aparecem no Pulsar. Os mods do Pulsar ficam em mods/1.8.9 e não atrapalham outras versões.</p>
 
       <div class="row">
         <button class="btn-ghost" type="submit">Salvar</button>

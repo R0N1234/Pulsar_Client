@@ -3,6 +3,8 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("pulsar", {
   getConfig: () => ipcRenderer.invoke("config:get"),
   setConfig: (patch) => ipcRenderer.invoke("config:set", patch),
+  pickOptifine: () => ipcRenderer.invoke("optifine:pick"),
+  openLink: (url) => ipcRenderer.invoke("link:open", url),
   getMods: () => ipcRenderer.invoke("mods:get"),
   setMod: (id, enabled) => ipcRenderer.invoke("mods:set", id, enabled),
   restoreAccount: () => ipcRenderer.invoke("account:restore"),

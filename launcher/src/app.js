@@ -125,6 +125,7 @@ function updateCounts() {
   const ready = MODS.filter((m) => m.pronto);
   const on = ready.filter(isOn).length;
   $("homeModCount").textContent = `${on} de ${ready.length}`;
+  $("homeSub").hidden = $("loader").value === "optifine";
   $("modsSummary").textContent = `${on} mods ligados. ${ready.length} prontos e ${MODS.length - ready.length} a caminho.`;
   document.querySelectorAll("#mc [data-mod]").forEach((el) => {
     const m = MODS.find((x) => x.id === el.dataset.mod);
@@ -182,14 +183,32 @@ $("search").addEventListener("input", renderGrid);
 $("onlyReady").addEventListener("change", renderGrid);
 
 /* ---------- ajustes ---------- */
+function renderOptifine(cfg) {
+  const el = $("ofFile");
+  el.textContent = cfg.optifinePath ? cfg.optifinePath.split(/[\\/]/).pop() : "Nenhum arquivo escolhido";
+  el.classList.toggle("ok", !!cfg.optifinePath);
+}
+
 async function loadSettings() {
   const cfg = await api.getConfig();
   $("mem").value = cfg.memoryMaxGb;
   $("memOut").textContent = cfg.memoryMaxGb + " GB";
   $("java").value = cfg.javaPath;
   $("dir").value = cfg.gameDir;
+  $("loader").value = cfg.loader;
+  renderOptifine(cfg);
+  updateCounts();
 }
 $("mem").addEventListener("input", () => ($("memOut").textContent = $("mem").value + " GB"));
+$("btnPickOf").onclick = async () => renderOptifine(await api.pickOptifine());
+$("btnOfSite").onclick = () => api.openLink("https://optifine.net/downloads");
+$("loader").addEventListener("change", async () => {
+  const cfg = await api.setConfig({ loader: $("loader").value });
+  updateCounts();
+  if (cfg.loader !== "forge" && !cfg.optifinePath) setStatus("Escolha o arquivo do OptiFine em Ajustes para usar esse modo.", true);
+  else if (cfg.loader === "optifine") setStatus("Só OptiFine: mais leve, mas sem os mods do Pulsar.");
+  else setStatus("Pronto para jogar");
+});
 $("settingsForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   await api.setConfig({ memoryMaxGb: Number($("mem").value), javaPath: $("java").value.trim(), gameDir: $("dir").value.trim() });
@@ -205,8 +224,7 @@ $("settingsForm").addEventListener("submit", async (e) => {
   enabled = await api.getMods();
   renderChips();
   renderGrid();
-  updateCounts();
-  loadSettings();
+  await loadSettings();
   renderAccount(null);
   setStatus("Conectando sua conta…");
   const profile = await api.restoreAccount().catch(() => null);

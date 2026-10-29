@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, safeStorage, shell } = require("electron");
+const { app, BrowserWindow, dialog, ipcMain, safeStorage, shell } = require("electron");
 const path = require("path");
 const { Config } = require("./lib/config");
 const { Accounts } = require("./lib/auth");
@@ -69,6 +69,19 @@ app.whenReady().then(() => {
     config.set(safe);
     return publicConfig();
   });
+  ipcMain.handle("optifine:pick", async () => {
+    const r = await dialog.showOpenDialog(win, {
+      title: "Escolha o OptiFine 1.8.9",
+      filters: [{ name: "OptiFine", extensions: ["jar"] }],
+      properties: ["openFile"],
+    });
+    if (r.canceled || !r.filePaths[0]) return publicConfig();
+    config.set({ optifinePath: r.filePaths[0] });
+    return publicConfig();
+  });
+  ipcMain.handle("link:open", (_e, url) => {
+    if (/^https:\/\/(optifine\.net|adoptium\.net)\//.test(String(url))) shell.openExternal(url);
+  });
   ipcMain.handle("mods:get", () => config.getEnabledMods());
   ipcMain.handle("mods:set", (_e, id, enabled) => config.setModEnabled(String(id), !!enabled));
 
@@ -82,6 +95,7 @@ app.whenReady().then(() => {
       config: config.get(),
       authorization: accounts.mclc(),
       modSourceDir: modSourceDir(),
+      runtimeDir: path.join(app.getPath("userData"), "runtime"),
       onStatus: (s) => send("game:status", s),
       onLog: (l) => send("game:log", String(l)),
       onClose: (code) => {

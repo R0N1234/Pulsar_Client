@@ -1,11 +1,37 @@
-// Abre o Minecraft 1.8.9 com Forge e o mod do Pulsar.
-// O minecraft-launcher-core baixa o jogo, as bibliotecas e os assets da Mojang na primeira vez.
+// Abre o Minecraft 1.8.9 no modo escolhido: Forge, OptiFine ou OptiFine + Forge.
+// Usa a pasta .minecraft do jogador (igual Lunar e Silent), então mundos, packs, servidores
+// e opções são os mesmos do launcher oficial, e o que já foi baixado é reaproveitado.
 const fs = require("fs");
 const path = require("path");
+const { spawn } = require("child_process");
+const AdmZip = require("adm-zip");
 const { Client } = require("minecraft-launcher-core");
+const { ensureJava } = require("./java");
 
+const MC_VERSION = "1.8.9";
+const ASSET_INDEX = "1.8";
 const FORGE_VERSION = "1.8.9-11.15.1.2318-1.8.9";
 const FORGE_URL = `https://maven.minecraftforge.net/net/minecraftforge/forge/${FORGE_VERSION}/forge-${FORGE_VERSION}-universal.jar`;
+const MANIFEST_URL = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
+const OPTIFINE_VERSION_ID = "1.8.9-OptiFine-Pulsar";
+const OPTIFINE_MOD_NAME = "OptiFine-pulsar.jar";
+
+// Flags de JVM para menos travadas (coleta de lixo curta e previsível).
+const JVM_FLAGS = [
+  "-XX:+UseG1GC",
+  "-XX:+UnlockExperimentalVMOptions",
+  "-XX:G1NewSizePercent=20",
+  "-XX:G1ReservePercent=20",
+  "-XX:MaxGCPauseMillis=50",
+  "-XX:G1HeapRegionSize=16M",
+  "-Dfml.readTimeout=180",
+];
+
+const LOADERS = {
+  forge: { forge: true, optifine: false },
+  optifine: { forge: false, optifine: true },
+  forge_optifine: { forge: true, optifine: true },
+};
 
 async function download(url, dest) {
   const res = await fetch(url);
@@ -16,57 +42,191 @@ async function download(url, dest) {
   fs.renameSync(tmp, dest);
 }
 
-async function ensureForge(gameDir) {
-  const jar = path.join(gameDir, "pulsar", "forge", `forge-${FORGE_VERSION}-universal.jar`);
+async function ensureForge(root) {
+  const jar = path.join(root, "pulsar", "forge", `forge-${FORGE_VERSION}-universal.jar`);
   if (!fs.existsSync(jar)) await download(FORGE_URL, jar);
   return jar;
 }
 
-// Copia o jar do mod (gerado em mod/build/libs, ou embutido no instalador) para a pasta mods.
-function installPulsarMod(gameDir, modSourceDir) {
+// Jar do Minecraft 1.8.9 puro, necessário para preparar o OptiFine.
+async function ensureVanillaJar(root) {
+  const jar = path.join(root, "versions", MC_VERSION, `${MC_VERSION}.jar`);
+  if (fs.existsSync(jar)) return jar;
+  const manifest = await (await fetch(MANIFEST_URL)).json();
+  const entry = manifest.versions.find((v) => v.id === MC_VERSION);
+  const versionJson = await (await fetch(entry.url)).json();
+  await download(versionJson.downloads.client.url, jar);
+  return jar;
+}
+
+function isPulsarJar(f) {
+  return /^pulsar-client-.*\.jar$/.test(f);
+}
+
+// Copia o jar do Pulsar para mods/1.8.9, que o Forge 1.8.9 só lê nessa versão.
+function installPulsarMod(modsDir, modSourceDir) {
   const jars = fs.existsSync(modSourceDir)
-    ? fs.readdirSync(modSourceDir).filter((f) => /^pulsar-client-.*\.jar$/.test(f) && !/-(sources|dev)\.jar$/.test(f))
+    ? fs.readdirSync(modSourceDir).filter((f) => isPulsarJar(f) && !/-(sources|dev)\.jar$/.test(f))
     : [];
   if (jars.length === 0) {
     throw new Error(`O mod do Pulsar não foi encontrado em ${modSourceDir}. Rode "./gradlew build" na pasta mod primeiro.`);
   }
-  const modsDir = path.join(gameDir, "mods");
   fs.mkdirSync(modsDir, { recursive: true });
-  for (const f of fs.readdirSync(modsDir)) {
-    if (/^pulsar-client-.*\.jar$/.test(f)) fs.rmSync(path.join(modsDir, f));
-  }
+  for (const f of fs.readdirSync(modsDir)) if (isPulsarJar(f)) fs.rmSync(path.join(modsDir, f));
   const newest = jars.sort().at(-1);
   fs.copyFileSync(path.join(modSourceDir, newest), path.join(modsDir, newest));
-  return newest;
 }
 
-async function launch({ config, authorization, modSourceDir, onStatus, onLog, onClose }) {
-  const { gameDir, memoryMaxGb, javaPath } = config;
+// No modo OptiFine + Forge, o OptiFine entra como mod. Nos outros modos, sai da pasta.
+function syncOptifineMod(modsDir, optifinePath) {
+  const dest = path.join(modsDir, OPTIFINE_MOD_NAME);
+  if (optifinePath) {
+    fs.mkdirSync(modsDir, { recursive: true });
+    fs.copyFileSync(optifinePath, dest);
+  } else if (fs.existsSync(dest)) {
+    fs.rmSync(dest);
+  }
+}
 
-  onStatus({ step: "forge", text: "Preparando o Forge 1.8.9" });
-  const forge = await ensureForge(gameDir);
+function checkOptifineFile(optifinePath) {
+  if (!optifinePath || !fs.existsSync(optifinePath)) {
+    throw new Error("Escolha o arquivo do OptiFine 1.8.9 em Ajustes antes de jogar nesse modo.");
+  }
+  if (!/1\.8\.9/.test(path.basename(optifinePath))) {
+    throw new Error("O arquivo do OptiFine precisa ser da versão 1.8.9 (por exemplo OptiFine_1.8.9_HD_U_M5.jar).");
+  }
+}
 
-  onStatus({ step: "mod", text: "Instalando o Pulsar" });
-  installPulsarMod(gameDir, modSourceDir);
+function run(java, args, onLog) {
+  return new Promise((resolve, reject) => {
+    const p = spawn(java, args);
+    p.stdout.on("data", (d) => onLog(String(d)));
+    p.stderr.on("data", (d) => onLog(String(d)));
+    p.on("error", reject);
+    p.on("close", (code) => (code === 0 ? resolve() : reject(new Error(`O preparo do OptiFine falhou (código ${code}).`))));
+  });
+}
+
+// Monta uma versão "1.8.9-OptiFine-Pulsar" do mesmo jeito que o instalador oficial do OptiFine.
+async function ensureOptifineVersion(root, optifinePath, java, onLog) {
+  const ofVersion = (path.basename(optifinePath).match(/1\.8\.9_HD_[A-Z]+_[A-Z0-9]+/) || ["1.8.9_HD_custom"])[0];
+  const vanillaJar = await ensureVanillaJar(root);
+  const zip = new AdmZip(optifinePath);
+  const libRoot = path.join(root, "libraries");
+
+  const ofLib = path.join(libRoot, "optifine", "OptiFine", ofVersion, `OptiFine-${ofVersion}.jar`);
+  if (!fs.existsSync(ofLib)) {
+    fs.mkdirSync(path.dirname(ofLib), { recursive: true });
+    if (zip.getEntry("optifine/Patcher.class")) {
+      await run(java, ["-cp", optifinePath, "optifine.Patcher", vanillaJar, optifinePath, ofLib], onLog);
+    } else {
+      fs.copyFileSync(optifinePath, ofLib);
+    }
+  }
+
+  let launchwrapper = { name: "net.minecraft:launchwrapper:1.12", url: "https://libraries.minecraft.net/" };
+  const lwEntry = zip.getEntry("launchwrapper-of.txt");
+  if (lwEntry) {
+    const lwVersion = zip.readAsText(lwEntry).trim();
+    const lwJar = path.join(libRoot, "optifine", "launchwrapper-of", lwVersion, `launchwrapper-of-${lwVersion}.jar`);
+    if (!fs.existsSync(lwJar)) {
+      fs.mkdirSync(path.dirname(lwJar), { recursive: true });
+      fs.writeFileSync(lwJar, zip.readFile(`launchwrapper-of-${lwVersion}.jar`));
+    }
+    launchwrapper = { name: `optifine:launchwrapper-of:${lwVersion}` };
+  }
+
+  const dir = path.join(root, "versions", OPTIFINE_VERSION_ID);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.copyFileSync(vanillaJar, path.join(dir, `${OPTIFINE_VERSION_ID}.jar`));
+  fs.writeFileSync(
+    path.join(dir, `${OPTIFINE_VERSION_ID}.json`),
+    JSON.stringify(
+      {
+        id: OPTIFINE_VERSION_ID,
+        inheritsFrom: MC_VERSION,
+        type: "release",
+        mainClass: "net.minecraft.launchwrapper.Launch",
+        minecraftArguments:
+          "--username ${auth_player_name} --version ${version_name} --gameDir ${game_directory} --assetsDir ${assets_root} " +
+          "--assetIndex ${assets_index_name} --uuid ${auth_uuid} --accessToken ${auth_access_token} " +
+          "--userProperties ${user_properties} --userType ${user_type} --tweakClass optifine.OptiFineTweaker",
+        libraries: [{ name: `optifine:OptiFine:${ofVersion}` }, launchwrapper],
+      },
+      null,
+      2
+    )
+  );
+  return OPTIFINE_VERSION_ID;
+}
+
+async function launch({ config, authorization, modSourceDir, runtimeDir, onStatus, onLog, onClose }) {
+  const root = config.gameDir;
+  const loader = LOADERS[config.loader] ? config.loader : "forge";
+  const { forge, optifine } = LOADERS[loader];
+  const modsDir = path.join(root, "mods", MC_VERSION);
+
+  if (optifine) checkOptifineFile(config.optifinePath);
+
+  const java = await ensureJava({ javaPath: config.javaPath, runtimeDir, onStatus });
+
+  const options = {
+    authorization,
+    root,
+    version: { number: MC_VERSION, type: "release" },
+    memory: { max: `${config.memoryMaxGb}G`, min: "1G" },
+    javaPath: java,
+    customArgs: JVM_FLAGS,
+    overrides: { assetIndex: ASSET_INDEX, gameDirectory: root },
+  };
+
+  if (forge) {
+    onStatus({ step: "forge", text: "Preparando o Forge 1.8.9" });
+    options.forge = await ensureForge(root);
+    onStatus({ step: "mod", text: "Instalando o Pulsar" });
+    installPulsarMod(modsDir, modSourceDir);
+    syncOptifineMod(modsDir, optifine ? config.optifinePath : null);
+  } else {
+    onStatus({ step: "optifine", text: "Preparando o OptiFine" });
+    syncOptifineMod(modsDir, null);
+    options.version.custom = await ensureOptifineVersion(root, config.optifinePath, java, onLog);
+  }
 
   const client = new Client();
-  client.on("debug", (l) => onLog(l));
-  client.on("data", (l) => onLog(l));
-  client.on("progress", (p) => onStatus({ step: "download", text: `Baixando ${p.type}`, done: p.task, total: p.total }));
-  client.on("close", (code) => onClose(code));
-
-  onStatus({ step: "start", text: "Abrindo o Minecraft" });
-  const proc = await client.launch({
-    authorization,
-    root: gameDir,
-    version: { number: "1.8.9", type: "release" },
-    forge,
-    memory: { max: `${memoryMaxGb}G`, min: "1G" },
-    javaPath: javaPath || undefined,
+  let lastStep = "";
+  client.on("debug", (l) => {
+    onLog(l);
+    // Mostra a etapa atual, para não parecer travado durante downloads longos.
+    const m = String(l).match(/\[MCLC\]: (Attempting to download|Downloaded|Collected|Generating|Launching)/);
+    if (m && m[1] !== lastStep) {
+      lastStep = m[1];
+      onStatus({ step: "prepare", text: STEP_TEXT[m[1]] });
+    }
   });
-  if (!proc) throw new Error("O Minecraft não abriu. Confira se o Java 8 está instalado (veja Ajustes).");
+  client.on("data", (l) => onLog(l));
+  client.on("progress", (p) => onStatus({ step: "download", text: `Baixando ${PROGRESS_TEXT[p.type] || p.type}`, done: p.task, total: p.total }));
+
+  onStatus({ step: "start", text: "Verificando os arquivos do Minecraft" });
+  const proc = await client.launch(options);
+  if (!proc) throw new Error("O Minecraft não abriu. Veja o registro do jogo para o motivo.");
+  proc.on("close", (code) => onClose(code));
   onStatus({ step: "running", text: "Jogando" });
   return proc;
 }
 
-module.exports = { launch, FORGE_VERSION };
+const STEP_TEXT = {
+  "Attempting to download": "Baixando arquivos do Minecraft",
+  Downloaded: "Arquivos baixados",
+  Collected: "Bibliotecas prontas",
+  Generating: "Preparando o Forge",
+  Launching: "Abrindo o Minecraft",
+};
+const PROGRESS_TEXT = {
+  assets: "sons e texturas",
+  natives: "arquivos do sistema",
+  classes: "bibliotecas",
+  "classes-custom": "bibliotecas do Forge",
+  "classes-maven-custom": "bibliotecas do Forge",
+};
+
+module.exports = { launch, FORGE_VERSION, LOADERS };

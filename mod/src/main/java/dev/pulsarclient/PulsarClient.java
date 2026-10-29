@@ -56,6 +56,7 @@ public class PulsarClient {
         ClientRegistry.registerKeyBinding(keyHudEditor);
         ClientRegistry.registerKeyBinding(keySprint);
         MinecraftForge.EVENT_BUS.register(this);
+        System.out.println("[Pulsar] Pulsar Client iniciado com " + mods.size() + " mods");
     }
 
     public List<PulsarMod> mods() {
