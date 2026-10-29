@@ -8,6 +8,24 @@ const path = require("path");
 const SHARED_DIRS = ["saves", "resourcepacks", "screenshots"];
 const SEED_FILES = ["options.txt", "servers.dat"];
 const OLD_FILES = /^(pulsar-client-.*|OptiFine-pulsar)\.jar$/;
+const SPLASH_ART = path.join(__dirname, "..", "assets", "splash");
+
+// Tela de carregamento do Forge com a cara do Pulsar: fundo do espaço, "PC" no círculo e a barra embaixo.
+// O Forge lê as cores de config/splash.properties e as imagens da pasta resources da instância.
+const SPLASH_PROPERTIES = [
+  "enabled=true",
+  "rotate=false",
+  "showMemory=false",
+  "logoOffset=0",
+  "background=0x05070F",
+  "font=0xE6ECFF",
+  "barBorder=0x7FE7FF",
+  "bar=0x7FE7FF",
+  "barBackground=0x0A0F1E",
+  "logoTexture=pulsar:textures/splash/logo.png",
+  "forgeTexture=pulsar:textures/splash/vazio.png",
+  "resourcePackPath=resources",
+].join("\n");
 
 function instanceDir(root) {
   return path.join(root, "pulsar", "instancia-1.8.9");
@@ -33,6 +51,15 @@ function linkShared(target, link) {
   }
 }
 
+function installSplash(dir) {
+  fs.mkdirSync(path.join(dir, "config"), { recursive: true });
+  fs.writeFileSync(path.join(dir, "config", "splash.properties"), SPLASH_PROPERTIES + "\n");
+  const out = path.join(dir, "resources", "assets", "pulsar", "textures", "splash");
+  fs.mkdirSync(out, { recursive: true });
+  // readFileSync em vez de copyFileSync porque, no instalador, a arte fica dentro do app.asar.
+  for (const f of fs.readdirSync(SPLASH_ART)) fs.writeFileSync(path.join(out, f), fs.readFileSync(path.join(SPLASH_ART, f)));
+}
+
 function prepareInstance(root) {
   const dir = instanceDir(root);
   fs.mkdirSync(path.join(dir, "mods"), { recursive: true });
@@ -54,6 +81,7 @@ function prepareInstance(root) {
     fs.mkdirSync(path.dirname(newCfg), { recursive: true });
     fs.copyFileSync(oldCfg, newCfg);
   }
+  installSplash(dir);
   return dir;
 }
 

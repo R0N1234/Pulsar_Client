@@ -26,9 +26,9 @@ let proc;
 if (PRINTS) fs.mkdirSync(PRINTS, { recursive: true });
 
 // Espera a tela desenhar e tira um print da tela virtual inteira.
-function takePrint(name) {
+function takePrint(name, delay = 1500) {
   prints = prints
-    .then(() => new Promise((r) => setTimeout(r, 1500)))
+    .then(() => new Promise((r) => setTimeout(r, delay)))
     .then(() => new Promise((r) => execFile("import", ["-window", "root", path.join(PRINTS, `${name}.png`)], () => r())));
 }
 
@@ -43,6 +43,9 @@ const onLog = (line) => {
   log.write(text.endsWith("\n") ? text : text + "\n");
   if (SUCCESS.test(text)) pulsarLoaded = true;
   if (READY.test(text)) gameReady = true;
+  // Prints da tela de carregamento: um quando o Forge acha os mods e outro quando o Pulsar inicia.
+  if (PRINTS && /Forge Mod Loader has identified/.test(text)) takePrint("carregando-1", 300);
+  if (PRINTS && SUCCESS.test(text)) takePrint("carregando-2", 300);
   const step = PRINTS && text.match(SELFTEST);
   if (step && step[1] === "fim") prints.then(() => { selftestDone = true; check(); });
   else if (step) takePrint(step[1]);
