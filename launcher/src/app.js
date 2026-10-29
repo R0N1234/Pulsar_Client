@@ -110,11 +110,21 @@ api.onStatus((s) => {
 const logLines = [];
 api.onLog((line) => {
   logLines.push(line.trimEnd());
-  if (logLines.length > 200) logLines.splice(0, logLines.length - 200);
+  if (logLines.length > 2000) logLines.splice(0, logLines.length - 2000);
   const pre = $("log");
   pre.textContent = logLines.join("\n");
   pre.scrollTop = pre.scrollHeight;
 });
+
+$("btnCopyLog").onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(logLines.join("\n"));
+    $("btnCopyLog").textContent = "copiado";
+  } catch {
+    $("btnCopyLog").textContent = "não deu para copiar";
+  }
+  setTimeout(() => ($("btnCopyLog").textContent = "copiar"), 2000);
+};
 
 /* ---------- mods ---------- */
 function isOn(m) {

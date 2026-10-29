@@ -1,12 +1,13 @@
 // Abre o Minecraft 1.8.9 no modo escolhido: Forge, OptiFine ou OptiFine + Forge.
-// Usa a pasta .minecraft do jogador (igual Lunar e Silent), então mundos, packs, servidores
-// e opções são os mesmos do launcher oficial, e o que já foi baixado é reaproveitado.
+// Usa a .minecraft do jogador (igual Lunar e Silent) para reaproveitar o que já foi baixado,
+// com uma pasta de jogo própria (veja instance.js) para os mods não se misturarem.
 const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
 const AdmZip = require("adm-zip");
 const { Client } = require("minecraft-launcher-core");
 const { ensureJava } = require("./java");
+const { prepareInstance } = require("./instance");
 
 const MC_VERSION = "1.8.9";
 const ASSET_INDEX = "1.8";
@@ -63,7 +64,7 @@ function isPulsarJar(f) {
   return /^pulsar-client-.*\.jar$/.test(f);
 }
 
-// Copia o jar do Pulsar para mods/1.8.9, que o Forge 1.8.9 só lê nessa versão.
+// Copia o jar do Pulsar para a pasta mods da instância do Pulsar.
 function installPulsarMod(modsDir, modSourceDir) {
   const jars = fs.existsSync(modSourceDir)
     ? fs.readdirSync(modSourceDir).filter((f) => isPulsarJar(f) && !/-(sources|dev)\.jar$/.test(f))
@@ -164,7 +165,8 @@ async function launch({ config, authorization, modSourceDir, runtimeDir, onStatu
   const root = config.gameDir;
   const loader = LOADERS[config.loader] ? config.loader : "forge";
   const { forge, optifine } = LOADERS[loader];
-  const modsDir = path.join(root, "mods", MC_VERSION);
+  const gameDir = prepareInstance(root);
+  const modsDir = path.join(gameDir, "mods");
 
   if (optifine) checkOptifineFile(config.optifinePath);
 
@@ -177,7 +179,7 @@ async function launch({ config, authorization, modSourceDir, runtimeDir, onStatu
     memory: { max: `${config.memoryMaxGb}G`, min: "1G" },
     javaPath: java,
     customArgs: JVM_FLAGS,
-    overrides: { assetIndex: ASSET_INDEX, gameDirectory: root },
+    overrides: { assetIndex: ASSET_INDEX, gameDirectory: gameDir },
   };
 
   if (forge) {

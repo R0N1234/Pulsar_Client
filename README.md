@@ -25,7 +25,7 @@ Mod (6 prontos):
 - **Propulsão** (correr fixo, tecla R)
 - **Editor de HUD**: aperte **Shift direito** no jogo, arraste para mover, botão direito liga ou desliga
 
-Ligar ou desligar um mod no launcher grava em `.pulsar/pulsar/config.json`, o mesmo arquivo que o mod lê ao abrir o jogo. As posições da HUD ficam no mesmo arquivo.
+Ligar ou desligar um mod no launcher grava em `.minecraft/pulsar/instancia-1.8.9/pulsar/config.json`, o mesmo arquivo que o mod lê ao abrir o jogo. As posições da HUD ficam no mesmo arquivo.
 
 ## Como rodar no seu PC
 

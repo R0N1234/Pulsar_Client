@@ -5,6 +5,7 @@
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
+const { instanceDir } = require("./instance");
 
 // A mesma pasta .minecraft do launcher oficial (o Lunar e o Silent também usam ela).
 function minecraftDir() {
@@ -58,7 +59,7 @@ class Config {
   }
 
   modConfigFile() {
-    return path.join(this.data.gameDir, "pulsar", "config.json");
+    return path.join(instanceDir(this.data.gameDir), "pulsar", "config.json");
   }
 
   // { "teclas_pulse": true, ... }
