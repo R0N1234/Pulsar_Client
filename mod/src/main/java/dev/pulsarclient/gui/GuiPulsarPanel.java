@@ -104,14 +104,9 @@ public class GuiPulsarPanel extends GuiScreen {
         drawRect(px + 1, py + 1, px + SIDE_W, py + ph - 1, SIDEBAR);
         drawRect(px + SIDE_W, py + 1, px + SIDE_W + 1, py + ph - 1, LINE);
 
-        // Pulsar: núcleo com dois feixes, a marca do client.
+        // Logo "PC" do client.
         int cx = px + SIDE_W / 2;
-        int cy = py + 24;
-        drawGradientRect(cx - 1, py + 6, cx + 1, cy - 3, 0x007FE7FF, BEAM);
-        drawGradientRect(cx - 1, cy + 3, cx + 1, cy + 18, BEAM, 0x007FE7FF);
-        drawRect(cx - 5, cy - 5, cx + 5, cy + 5, 0x337FE7FF);
-        drawRect(cx - 3, cy - 3, cx + 3, cy + 3, 0x887FE7FF);
-        drawRect(cx - 1, cy - 1, cx + 1, cy + 1, 0xFFFFFFFF);
+        Universo.logo(cx - 20, py + 4, 40);
         drawCenteredString(fontRendererObj, "PULSAR", cx, py + 46, TEXT);
         drawCenteredString(fontRendererObj, "client 1.8.9", cx, py + 56, MUTED);
 

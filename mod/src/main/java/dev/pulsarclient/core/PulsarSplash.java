@@ -94,8 +94,8 @@ public final class PulsarSplash {
         rect(bx, by, barW * shown, barH, 0x7FE7FF, 1f);
 
         if (font != null) {
-            String text = "Carregando o Minecraft   " + Math.round(shown * 100) + "%";
-            int s = Math.max(1, Math.round(h / 400f));
+            String text = "Carregando o Minecraft  " + Math.round(shown * 100) + "%";
+            int s = Math.max(1, Math.round(h / 320f));
             GL11.glPushMatrix();
             GL11.glTranslatef(cx - font.getStringWidth(text) * s / 2f, by + barH + 10, 0);
             GL11.glScalef(s, s, 1);

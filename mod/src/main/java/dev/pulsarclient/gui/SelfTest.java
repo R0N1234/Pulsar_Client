@@ -23,12 +23,12 @@ public class SelfTest {
         if (event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getMinecraft();
         if (ticks < 0) {
-            if (mc.currentScreen instanceof GuiMainMenu) ticks = 0;
+            if (mc.currentScreen instanceof GuiPulsarMenu || mc.currentScreen instanceof GuiMainMenu) ticks = 0;
             return;
         }
         ticks++;
         if (ticks % STEP != 0) return;
-        GuiMainMenu menu = new GuiMainMenu();
+        GuiPulsarMenu menu = new GuiPulsarMenu();
         switch (ticks / STEP) {
             case 1: show("menu", menu); break;
             case 2: show("painel", new GuiPulsarPanel(menu)); break;

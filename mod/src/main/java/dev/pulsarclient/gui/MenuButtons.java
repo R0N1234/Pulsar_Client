@@ -8,13 +8,20 @@ import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiVideoSettings;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-/** Põe botões do Pulsar no menu do Esc, nas Opções de vídeo e no menu inicial. */
+/** Troca o menu principal pelo do Pulsar e põe botões do Pulsar no menu do Esc e nas Opções de vídeo. */
 public class MenuButtons {
     private static final int PANEL = 0x50A1;
     private static final int MOTOR = 0x50A2;
+
+    @SubscribeEvent
+    public void onOpen(GuiOpenEvent event) {
+        // Só o menu do jogo puro; um menu de outro mod que estenda o do jogo fica como está.
+        if (event.gui != null && event.gui.getClass() == GuiMainMenu.class) event.gui = new GuiPulsarMenu();
+    }
 
     @SubscribeEvent
     public void onInit(GuiScreenEvent.InitGuiEvent.Post event) {
