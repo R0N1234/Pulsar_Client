@@ -1,14 +1,18 @@
 // Teste de ponta a ponta usado no GitHub Actions: abre o Minecraft 1.8.9 de verdade
 // (conta offline, tela virtual) e confere se o Forge carregou o Pulsar.
+// Com E2E_PRINTS=<pasta>, o mod abre cada tela do Pulsar sozinho e o teste tira um print de cada.
 // Uso: node test/e2e.js <pasta-temporária>
 const fs = require("fs");
+const { execFile } = require("child_process");
 const path = require("path");
 const { Authenticator } = require("minecraft-launcher-core");
 const { launch } = require("../lib/launch");
 
 const work = path.resolve(process.argv[2] || "e2e-work");
 const logFile = path.join(work, "e2e.log");
-const SUCCESS = /\[Pulsar\] Pulsar Client iniciado/;
+const SUCCESS = /\[Pulsar\] Pulsar Client .*iniciado/;
+const SELFTEST = /\[Pulsar\] selftest: (\w+)/;
+const PRINTS = process.env.E2E_PRINTS ? path.resolve(process.env.E2E_PRINTS) : "";
 const READY = /Sound engine started|Created: \d+x\d+ textures-atlas/;
 const TIMEOUT_MS = 8 * 60 * 1000;
 
@@ -16,7 +20,17 @@ fs.mkdirSync(work, { recursive: true });
 const log = fs.createWriteStream(logFile);
 let pulsarLoaded = false;
 let gameReady = false;
+let selftestDone = !PRINTS;
+let prints = Promise.resolve();
 let proc;
+if (PRINTS) fs.mkdirSync(PRINTS, { recursive: true });
+
+// Espera a tela desenhar e tira um print da tela virtual inteira.
+function takePrint(name) {
+  prints = prints
+    .then(() => new Promise((r) => setTimeout(r, 1500)))
+    .then(() => new Promise((r) => execFile("import", ["-window", "root", path.join(PRINTS, `${name}.png`)], () => r())));
+}
 
 function finish(code, why) {
   console.log(`\n== ${why}`);
@@ -29,10 +43,17 @@ const onLog = (line) => {
   log.write(text.endsWith("\n") ? text : text + "\n");
   if (SUCCESS.test(text)) pulsarLoaded = true;
   if (READY.test(text)) gameReady = true;
-  if (pulsarLoaded && gameReady) finish(0, "OK: Forge carregou o Pulsar e o jogo abriu");
+  const step = PRINTS && text.match(SELFTEST);
+  if (step && step[1] === "fim") prints.then(() => { selftestDone = true; check(); });
+  else if (step) takePrint(step[1]);
+  check();
 };
 
-setTimeout(() => finish(1, `FALHOU: tempo esgotado (pulsar=${pulsarLoaded}, jogo=${gameReady})`), TIMEOUT_MS);
+function check() {
+  if (pulsarLoaded && gameReady && selftestDone) finish(0, "OK: Forge carregou o Pulsar e o jogo abriu");
+}
+
+setTimeout(() => finish(1, `FALHOU: tempo esgotado (pulsar=${pulsarLoaded}, jogo=${gameReady}, telas=${selftestDone})`), TIMEOUT_MS);
 
 (async () => {
   try {
@@ -43,7 +64,8 @@ setTimeout(() => finish(1, `FALHOU: tempo esgotado (pulsar=${pulsarLoaded}, jogo
       runtimeDir: path.join(work, "runtime"),
       onStatus: (s) => console.log(`[status] ${s.text}${s.total ? ` ${s.done}/${s.total}` : ""}`),
       onLog,
-      onClose: (code) => finish(pulsarLoaded && gameReady ? 0 : 1, `O jogo fechou com código ${code}`),
+      extraJvmArgs: PRINTS ? ["-Dpulsar.selftest=true"] : [],
+      onClose: (code) => finish(pulsarLoaded && gameReady && selftestDone ? 0 : 1, `O jogo fechou com código ${code}`),
     });
   } catch (err) {
     onLog(String(err && err.stack ? err.stack : err));

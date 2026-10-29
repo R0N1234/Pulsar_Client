@@ -128,7 +128,7 @@ $("btnCopyLog").onclick = async () => {
 
 /* ---------- mods ---------- */
 function isOn(m) {
-  return m.pronto && enabled[m.id] !== false;
+  return m.pronto && (enabled[m.id] ?? m.padrao);
 }
 
 function updateCounts() {

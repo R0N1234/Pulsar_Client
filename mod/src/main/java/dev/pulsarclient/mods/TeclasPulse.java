@@ -5,14 +5,13 @@ import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
 
 /** Teclas Pulse: WASD, cliques com CPS e barra de espaço. Equivale ao Keystrokes. */
-public class TeclasPulse extends PulsarMod {
+public class TeclasPulse extends HudMod {
     private static final int KEY = 22;
     private static final int GAP = 2;
-    private static final int PRESSED = 0xCC7FE7FF;
-    private static final int PRESSED_TEXT = 0xFF04121A;
+        private static final int PRESSED_TEXT = 0xFF04121A;
 
     public TeclasPulse() {
-        super("teclas_pulse", "Teclas Pulse", 5, 5);
+        super("teclas_pulse", "Teclas Pulse", "WASD, cliques e pulo na tela", Category.COMBATE, 5, 5);
     }
 
     @Override public int width() { return KEY * 3 + GAP * 2; }
@@ -34,7 +33,7 @@ public class TeclasPulse extends PulsarMod {
 
     private void key(KeyBinding bind, String text, int kx, int ky, int w, int h) {
         boolean down = GameSettings.isKeyDown(bind);
-        Gui.drawRect(kx, ky, kx + w, ky + h, down ? PRESSED : BACKGROUND);
+        Gui.drawRect(kx, ky, kx + w, ky + h, down ? color.argb(0xCC) : background.get() ? BACKGROUND : 0x22000000);
         if (text.isEmpty()) {
             Gui.drawRect(kx + w / 4, ky + h / 2 - 1, kx + w * 3 / 4, ky + h / 2, down ? PRESSED_TEXT : WHITE);
             return;

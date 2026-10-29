@@ -161,7 +161,7 @@ async function ensureOptifineVersion(root, optifinePath, java, onLog) {
   return OPTIFINE_VERSION_ID;
 }
 
-async function launch({ config, authorization, modSourceDir, runtimeDir, onStatus, onLog, onClose }) {
+async function launch({ config, authorization, modSourceDir, runtimeDir, onStatus, onLog, onClose, extraJvmArgs = [] }) {
   const root = config.gameDir;
   const loader = LOADERS[config.loader] ? config.loader : "forge";
   const { forge, optifine } = LOADERS[loader];
@@ -178,7 +178,7 @@ async function launch({ config, authorization, modSourceDir, runtimeDir, onStatu
     version: { number: MC_VERSION, type: "release" },
     memory: { max: `${config.memoryMaxGb}G`, min: "1G" },
     javaPath: java,
-    customArgs: JVM_FLAGS,
+    customArgs: [...JVM_FLAGS, ...extraJvmArgs],
     overrides: { assetIndex: ASSET_INDEX, gameDirectory: gameDir },
   };
 

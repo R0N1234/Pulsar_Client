@@ -5,7 +5,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import dev.pulsarclient.mods.HudMod;
 import dev.pulsarclient.mods.PulsarMod;
+import dev.pulsarclient.settings.Setting;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,7 +21,7 @@ import java.util.List;
 
 /**
  * Lê e grava pulsar/config.json dentro da pasta do jogo.
- * O launcher escreve "enabled" de cada mod; o jogo escreve "x" e "y" da HUD.
+ * O launcher escreve "enabled" de cada mod; o jogo escreve "x" e "y" da HUD e as opções em "settings".
  * Campos que o jogo não conhece são preservados.
  */
 public class PulsarConfig {
@@ -41,24 +43,43 @@ public class PulsarConfig {
     }
 
     public void load(List<PulsarMod> mods) {
-        JsonObject all = mods(read());
+        JsonObject all = object(read(), "mods");
         for (PulsarMod mod : mods) {
             if (!all.has(mod.id()) || !all.get(mod.id()).isJsonObject()) continue;
             JsonObject m = all.getAsJsonObject(mod.id());
-            if (m.has("enabled")) mod.setEnabled(m.get("enabled").getAsBoolean());
-            if (m.has("x")) mod.x = m.get("x").getAsInt();
-            if (m.has("y")) mod.y = m.get("y").getAsInt();
+            try {
+                if (m.has("enabled")) mod.setEnabled(m.get("enabled").getAsBoolean());
+                if (mod instanceof HudMod) {
+                    HudMod hud = (HudMod) mod;
+                    if (m.has("x")) hud.x = m.get("x").getAsInt();
+                    if (m.has("y")) hud.y = m.get("y").getAsInt();
+                }
+                JsonObject values = object(m, "settings");
+                for (Setting s : mod.settings()) {
+                    if (values.has(s.key())) s.load(values.get(s.key()));
+                }
+            } catch (Exception e) {
+                System.err.println("[Pulsar] Config inválida para " + mod.id() + ": " + e);
+            }
         }
     }
 
     public void save(List<PulsarMod> mods) {
         JsonObject root = read();
-        JsonObject all = mods(root);
+        JsonObject all = object(root, "mods");
         for (PulsarMod mod : mods) {
-            JsonObject m = all.has(mod.id()) && all.get(mod.id()).isJsonObject() ? all.getAsJsonObject(mod.id()) : new JsonObject();
+            JsonObject m = object(all, mod.id());
             m.addProperty("enabled", mod.isEnabled());
-            m.addProperty("x", mod.x);
-            m.addProperty("y", mod.y);
+            if (mod instanceof HudMod) {
+                m.addProperty("x", ((HudMod) mod).x);
+                m.addProperty("y", ((HudMod) mod).y);
+            }
+            JsonObject values = object(m, "settings");
+            for (Setting s : mod.settings()) {
+                JsonElement v = s.save();
+                if (v != null) values.add(s.key(), v);
+            }
+            if (values.entrySet().size() > 0) m.add("settings", values);
             all.add(mod.id(), m);
         }
         root.add("mods", all);
@@ -70,7 +91,7 @@ public class PulsarConfig {
         }
     }
 
-    private static JsonObject mods(JsonObject root) {
-        return root.has("mods") && root.get("mods").isJsonObject() ? root.getAsJsonObject("mods") : new JsonObject();
+    private static JsonObject object(JsonObject parent, String key) {
+        return parent.has(key) && parent.get(key).isJsonObject() ? parent.getAsJsonObject(key) : new JsonObject();
     }
 }
