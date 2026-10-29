@@ -7,8 +7,8 @@ import net.minecraft.client.network.NetworkPlayerInfo;
 public final class SimpleHudMods {
     private SimpleHudMods() {}
 
-    private abstract static class LineMod extends PulsarMod {
-        LineMod(String id, String name, int x, int y) { super(id, name, x, y); }
+    private abstract static class LineMod extends HudMod {
+        LineMod(String id, String name, String desc, int x, int y) { super(id, name, desc, Category.HUD, x, y); }
 
         abstract String label();
         abstract String value();
@@ -20,19 +20,19 @@ public final class SimpleHudMods {
 
     /** Frequência CPS: cliques por segundo em Hz, como a rotação de um pulsar. */
     public static class FrequenciaCps extends LineMod {
-        public FrequenciaCps() { super("frequencia_cps", "Frequência CPS", 5, 86); }
+        public FrequenciaCps() { super("frequencia_cps", "Frequência CPS", "Cliques por segundo em Hz", 5, 86); }
         @Override String label() { return "CPS"; }
         @Override String value() { return ClickTracker.left() + " | " + ClickTracker.right() + " Hz"; }
     }
 
     public static class Fps extends LineMod {
-        public Fps() { super("fps", "FPS", 5, 100); }
+        public Fps() { super("fps", "FPS", "Quadros por segundo", 5, 100); }
         @Override String label() { return "FPS"; }
         @Override String value() { return String.valueOf(Minecraft.getDebugFPS()); }
     }
 
     public static class Latencia extends LineMod {
-        public Latencia() { super("latencia", "Latência", 5, 114); }
+        public Latencia() { super("latencia", "Latência", "Seu ping no servidor", 5, 114); }
         @Override String label() { return "Ping"; }
 
         @Override
@@ -44,7 +44,7 @@ public final class SimpleHudMods {
     }
 
     public static class Coordenadas extends LineMod {
-        public Coordenadas() { super("coordenadas", "Coordenadas", 5, 128); }
+        public Coordenadas() { super("coordenadas", "Coordenadas", "Posição X, Y, Z e direção", 5, 128); }
         @Override String label() { return "XYZ"; }
 
         @Override

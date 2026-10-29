@@ -57,25 +57,30 @@ jobs:
         with:
           node-version: 22
       - name: Instalar tela virtual
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb x11-xserver-utils libgl1-mesa-dri
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb x11-xserver-utils libgl1-mesa-dri imagemagick
       - name: Abrir o Minecraft 1.8.9 com o Pulsar
         working-directory: launcher
         shell: bash
+        env:
+          E2E_PRINTS: ${{ runner.temp }}/prints
         run: |
           npm install --ignore-scripts --no-audit --no-fund
-          if ! xvfb-run -a -s "-screen 0 1280x720x24" node test/e2e.js "$RUNNER_TEMP/e2e"; then
-            cp "$RUNNER_TEMP/e2e/e2e.log" /tmp/build.log || echo "sem log" > /tmp/build.log
-            cd "$GITHUB_WORKSPACE"
-            git config user.name "github-actions"
-            git config user.email "github-actions@users.noreply.github.com"
-            git checkout --orphan ci-log
-            git rm -rfq --cached .
-            cp /tmp/build.log build.log
-            git add build.log
-            git commit -qm "Log do e2e ${GITHUB_SHA}"
-            git push -f origin ci-log
-            exit 1
-          fi
+          status=0
+          xvfb-run -a -s "-screen 0 1280x720x24" node test/e2e.js "$RUNNER_TEMP/e2e" || status=$?
+          # Publica o log e os prints das telas do Pulsar no ramo ci-log, para conferir o visual.
+          mkdir -p /tmp/ci-log
+          cp "$RUNNER_TEMP/e2e/e2e.log" /tmp/ci-log/build.log || echo "sem log" > /tmp/ci-log/build.log
+          cp "$E2E_PRINTS"/*.png /tmp/ci-log/ 2>/dev/null || true
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git checkout -q --orphan ci-log
+          git rm -rfq --cached .
+          cp /tmp/ci-log/* .
+          git add build.log *.png 2>/dev/null || git add build.log
+          git commit -qm "Log e prints do e2e ${GITHUB_SHA}"
+          git push -qf origin ci-log || true
+          exit $status
 
   launcher-windows:
     needs: mod

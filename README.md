@@ -9,23 +9,28 @@ Client de PVP para Minecraft 1.8.9 com tema espacial. O projeto tem duas partes:
 
 O launcher instala o Forge 1.8.9 e o jar do mod numa pasta própria (`%APPDATA%\.pulsar` no Windows), separada da sua `.minecraft`.
 
-## O que já funciona (versão 0.1)
+## O que já funciona (versão 0.3)
 
 Launcher:
 - Tela inicial no estilo Núcleo (pulsar no centro, 1.8.9 e botão JOGAR)
 - Aba Mods no estilo Painel, com os 58 mods do catálogo, busca, filtros e prévia da HUD
-- Login com conta Microsoft (o token fica salvo criptografado pelo sistema)
-- Baixa o Minecraft 1.8.9 e o Forge na primeira vez e abre o jogo
-- Ajustes de memória, caminho do Java e pasta do jogo
+- Login com conta Microsoft em português (o token fica salvo criptografado pelo sistema)
+- Usa a `.minecraft` com uma instância própria (`.minecraft/pulsar/instancia-1.8.9`), baixa o Java 8 sozinho
+- Modos Forge + Pulsar, OptiFine + Forge + Pulsar e Só OptiFine (o jar do OptiFine é escolhido pelo jogador)
+- Atualização automática pelos Releases
 
-Mod (6 prontos):
-- **Teclas Pulse** (WASD, cliques com CPS e espaço)
-- **Frequência CPS** (em Hz)
-- **FPS**, **Latência**, **Coordenadas**
+Mod (11 prontos):
+- **Teclas Pulse**, **Frequência CPS**, **FPS**, **Latência**, **Coordenadas**
 - **Propulsão** (correr fixo, tecla R)
-- **Editor de HUD**: aperte **Shift direito** no jogo, arraste para mover, botão direito liga ou desliga
+- **Mira de Pulsar** (formato, cor, tamanho, contorno)
+- **Telescópio** (zoom segurando C, roda do mouse ajusta)
+- **Supernova** (brilho total)
+- **Contorno** (cor e espessura da linha do bloco)
+- **Motor Pulsar**: otimizador próprio. Esconde suportes de armadura (mantém hologramas), não desenha mobs longe, controla partículas, segura o FPS com a janela em segundo plano e tem o botão "Aplicar modo desempenho"
 
-Ligar ou desligar um mod no launcher grava em `.minecraft/pulsar/instancia-1.8.9/pulsar/config.json`, o mesmo arquivo que o mod lê ao abrir o jogo. As posições da HUD ficam no mesmo arquivo.
+Painel do Pulsar: aperte **Shift direito** no jogo. Categorias à esquerda, busca, cartões dos mods (clique liga ou desliga, as três barras ou o botão direito abrem as opções) e o botão **Editar HUD**. O painel também abre pelo botão **Pulsar Client** no menu do Esc, pelo botão **Motor Pulsar** em Opções > Vídeo e pelo botão **Pulsar** no menu inicial.
+
+Tudo fica em `.minecraft/pulsar/instancia-1.8.9/pulsar/config.json`: o launcher grava se cada mod está ligado, e o jogo grava as posições da HUD e as opções de cada mod.
 
 ## Como rodar no seu PC
 
@@ -39,7 +44,7 @@ Você precisa de:
    gradlew build        (no Windows)
    ./gradlew build      (Linux/Mac)
    ```
-   O jar sai em `mod/build/libs/pulsar-client-0.1.0.jar`. A primeira compilação demora porque baixa o Minecraft e o Forge.
+   O jar sai em `mod/build/libs/pulsar-client-0.3.0.jar`. A primeira compilação demora porque baixa o Minecraft e o Forge.
 
 2. Abra o launcher:
    ```
@@ -68,8 +73,9 @@ GitHub > foto > Settings > Developer settings > Personal access tokens > **Fine-
 
 ## Próximos passos sugeridos
 
-- Mods de combate que faltam: Blindagem, Efeitos, Alcance, Combo, Animações Clássicas, Mira de Pulsar
-- Telescópio (zoom) e Órbita Livre (freelook)
+- Mods de combate que faltam: Blindagem, Efeitos, Alcance, Combo, Animações Clássicas
+- Órbita Livre (freelook)
+- Motor Pulsar mais fundo (culling de entidades atrás de paredes, carregamento de chunks), que precisa de Mixins
 - Cosméticos (Hangar), que precisam de um servidor próprio
 
 ## Observações

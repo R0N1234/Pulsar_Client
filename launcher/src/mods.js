@@ -1,4 +1,4 @@
-// Catálogo de mods do Pulsar. "pronto: true" quer dizer que o mod já existe no jar 1.8.9.
+// Catálogo de mods do Pulsar. "pronto" quer dizer que o mod já existe no jar 1.8.9.
 // O id é a chave usada em pulsar/config.json e no código Java (PulsarMod.id()).
 window.PULSAR_CATS = {
   Combate: "var(--ember)",
@@ -15,7 +15,7 @@ window.PULSAR_MODS = [
   ["alcance", "Alcance", "Distância de cada hit que você acerta", "Combate"],
   ["combo", "Combo", "Conta quantos hits seguidos você deu", "Combate"],
   ["animacoes_classicas", "Animações Clássicas", "Bloqueio e swing no estilo da 1.7", "Combate"],
-  ["mira_pulsar", "Mira de Pulsar", "Editor de mira com formas, cores e animação", "Combate"],
+  ["mira_pulsar", "Mira de Pulsar", "Mira com formato, cor, tamanho e contorno", "Combate", "off"],
   ["impacto", "Impacto", "Muda a cor do inimigo quando ele leva dano", "Combate"],
   ["campo_colisao", "Campo de Colisão", "Mostra a hitbox de jogadores e projéteis", "Combate"],
   ["blindagem", "Blindagem", "Durabilidade da armadura e do item na mão", "Combate"],
@@ -41,11 +41,11 @@ window.PULSAR_MODS = [
   ["lista_tab", "Lista Tab", "Tab com ping em número e cabeças", "HUD"],
   ["etiquetas", "Etiquetas", "Ajusta nomes acima dos jogadores", "HUD"],
   ["chat_plus", "Chat+", "Chat com histórico, filtros e mensagens empilhadas", "HUD"],
-  ["telescopio", "Telescópio", "Zoom suave com a roda do mouse", "Visual"],
+  ["telescopio", "Telescópio", "Zoom suave segurando C, a roda do mouse ajusta", "Visual", true],
   ["orbita_livre", "Órbita Livre", "Olha em volta sem virar o personagem", "Visual"],
   ["rastro_cometa", "Rastro de Cometa", "Desfoque de movimento", "Visual"],
-  ["supernova", "Supernova", "Brilho total, enxerga no escuro", "Visual"],
-  ["contorno", "Contorno", "Cor e espessura do contorno do bloco", "Visual"],
+  ["supernova", "Supernova", "Brilho total, enxerga no escuro", "Visual", "off"],
+  ["contorno", "Contorno", "Cor e espessura do contorno do bloco", "Visual", "off"],
   ["aura_encanto", "Aura de Encanto", "Muda a cor do brilho de encantamento", "Visual"],
   ["poeira_estelar", "Poeira Estelar", "Multiplica ou esconde partículas de hit", "Visual"],
   ["ciclo_solar", "Ciclo Solar", "Fixa a hora do dia só para você", "Visual"],
@@ -66,6 +66,7 @@ window.PULSAR_MODS = [
   ["radio_pulsar", "Rádio Pulsar", "Controle de música dentro do jogo", "Social"],
   ["replay", "Replay", "Grava partidas para rever depois", "Social"],
   ["capturas", "Capturas", "Salva e envia prints com um clique", "Social"],
-  ["motor_pulsar", "Motor Pulsar", "Otimizações de FPS e carregamento de chunks", "Desempenho"],
+  ["motor_pulsar", "Motor Pulsar", "Otimizador do Pulsar: corta entidades longe, partículas e poupa o PC em segundo plano", "Desempenho", true],
   ["organizador_packs", "Organizador de Packs", "Pastas e busca para resource packs", "Desempenho"],
-].map(([id, nome, desc, cat, pronto]) => ({ id, nome, desc, cat, pronto: !!pronto }));
+  // true = pronto e ligado de fábrica; "off" = pronto, mas começa desligado.
+].map(([id, nome, desc, cat, pronto]) => ({ id, nome, desc, cat, pronto: !!pronto, padrao: pronto !== "off" }));

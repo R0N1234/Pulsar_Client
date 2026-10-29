@@ -1,29 +1,36 @@
 package dev.pulsarclient.hud;
 
 import dev.pulsarclient.PulsarClient;
-import dev.pulsarclient.mods.PulsarMod;
+import dev.pulsarclient.mods.HudMod;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 
+import java.io.IOException;
+
 /**
- * Editor de HUD (Shift direito no jogo).
+ * Editor de HUD, aberto pelo painel do Pulsar.
  * Arraste com o botão esquerdo para mover. Botão direito liga ou desliga o mod.
  */
 public class GuiHudEditor extends GuiScreen {
     private static final int OUTLINE = 0x887FE7FF;
     private static final int OUTLINE_OFF = 0x55FF6B6B;
 
-    private PulsarMod dragging;
+    private final GuiScreen parent;
+    private HudMod dragging;
     private int offsetX;
     private int offsetY;
+
+    public GuiHudEditor(GuiScreen parent) {
+        this.parent = parent;
+    }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         drawRect(0, 0, width, height, 0x55000000);
         drawCenteredString(fontRendererObj, "Pulsar · Editor de HUD", width / 2, 12, 0xFF7FE7FF);
-        drawCenteredString(fontRendererObj, "Arraste para mover. Botão direito liga ou desliga. Esc para salvar.", width / 2, 24, 0xFFB0BCD8);
+        drawCenteredString(fontRendererObj, "Arraste para mover. Botão direito liga ou desliga. Esc para voltar.", width / 2, 24, 0xFFB0BCD8);
 
-        for (PulsarMod mod : PulsarClient.get().mods()) {
+        for (HudMod mod : PulsarClient.get().hudMods()) {
             int color = mod.isEnabled() ? OUTLINE : OUTLINE_OFF;
             outline(mod.x - 3, mod.y - 3, mod.x + mod.width() + 3, mod.y + mod.height() + 3, color);
             mod.render(true);
@@ -44,10 +51,10 @@ public class GuiHudEditor extends GuiScreen {
         Gui.drawRect(r - 1, t, r, b, color);
     }
 
-    private PulsarMod modAt(int mouseX, int mouseY) {
+    private HudMod modAt(int mouseX, int mouseY) {
         // Do último para o primeiro, para pegar o que está desenhado por cima.
-        for (int i = PulsarClient.get().mods().size() - 1; i >= 0; i--) {
-            PulsarMod mod = PulsarClient.get().mods().get(i);
+        for (int i = PulsarClient.get().hudMods().size() - 1; i >= 0; i--) {
+            HudMod mod = PulsarClient.get().hudMods().get(i);
             if (mod.contains(mouseX, mouseY)) return mod;
         }
         return null;
@@ -55,7 +62,7 @@ public class GuiHudEditor extends GuiScreen {
 
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int button) {
-        PulsarMod mod = modAt(mouseX, mouseY);
+        HudMod mod = modAt(mouseX, mouseY);
         if (mod == null) return;
         if (button == 1) {
             mod.setEnabled(!mod.isEnabled());
@@ -80,6 +87,11 @@ public class GuiHudEditor extends GuiScreen {
 
     private static int clamp(int v, int min, int max) {
         return Math.max(min, Math.min(max, v));
+    }
+
+    @Override
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        if (keyCode == 1) mc.displayGuiScreen(parent);
     }
 
     @Override

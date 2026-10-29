@@ -4,22 +4,22 @@ import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
 
 /** Propulsão: correr fica ligado sem segurar a tecla. Equivale ao Toggle Sprint. */
-public class Propulsao extends PulsarMod {
+public class Propulsao extends HudMod {
     private boolean active = true;
 
     public Propulsao() {
-        super("propulsao", "Propulsão", 5, 142);
+        super("propulsao", "Propulsão", "Correr fica ligado sem segurar (tecla R)", Category.COMBATE, 5, 142);
     }
 
-    public void toggle() {
+    /** Tecla R: alterna entre correr fixo e manual sem desligar o mod. */
+    public void toggleActive() {
         active = !active;
         if (!active) release();
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
-        if (!enabled) release();
+    protected void onDisable() {
+        release();
     }
 
     @Override

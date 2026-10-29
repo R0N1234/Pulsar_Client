@@ -1,62 +1,57 @@
 package dev.pulsarclient.mods;
 
+import dev.pulsarclient.settings.Setting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Base de todo mod do Pulsar que desenha algo na tela.
- * O id é o mesmo usado pelo launcher (launcher/src/mods.js).
+ * Base de todo mod do Pulsar. O id é o mesmo usado pelo launcher (launcher/src/mods.js).
+ * Mods que desenham na tela estendem {@link HudMod}.
  */
 public abstract class PulsarMod {
-    public static final int BEAM = 0xFF7FE7FF;
-    public static final int WHITE = 0xFFFFFFFF;
-    public static final int BACKGROUND = 0x66000000;
-
     protected final Minecraft mc = Minecraft.getMinecraft();
     private final String id;
     private final String name;
-    private boolean enabled = true;
-    public int x;
-    public int y;
+    private final String description;
+    private final Category category;
+    private final List<Setting> settings = new ArrayList<Setting>();
+    private boolean enabled;
 
-    protected PulsarMod(String id, String name, int defaultX, int defaultY) {
+    protected PulsarMod(String id, String name, String description, Category category, boolean enabledByDefault) {
         this.id = id;
         this.name = name;
-        this.x = defaultX;
-        this.y = defaultY;
+        this.description = description;
+        this.category = category;
+        this.enabled = enabledByDefault;
     }
 
     public String id() { return id; }
     public String name() { return name; }
+    public String description() { return description; }
+    public Category category() { return category; }
+    public List<Setting> settings() { return Collections.unmodifiableList(settings); }
     public boolean isEnabled() { return enabled; }
-    public void setEnabled(boolean enabled) { this.enabled = enabled; }
 
-    public abstract int width();
-    public abstract int height();
+    public void setEnabled(boolean enabled) {
+        if (this.enabled == enabled) return;
+        this.enabled = enabled;
+        if (enabled) onEnable();
+        else onDisable();
+    }
 
-    /** Desenha o mod com o canto superior esquerdo em (x, y). preview = editor de HUD aberto. */
-    public abstract void render(boolean preview);
+    public void toggle() { setEnabled(!enabled); }
 
-    /** Chamado a cada tick do cliente, mesmo com a HUD escondida. */
+    protected <T extends Setting> T add(T setting) {
+        settings.add(setting);
+        return setting;
+    }
+
+    protected void onEnable() {}
+    protected void onDisable() {}
+
+    /** Chamado a cada tick do cliente, ligado ou não. */
     public void tick() {}
-
-    public boolean contains(int mouseX, int mouseY) {
-        return mouseX >= x - 2 && mouseX <= x + width() + 2 && mouseY >= y - 2 && mouseY <= y + height() + 2;
-    }
-
-    protected FontRenderer font() {
-        return mc.fontRendererObj;
-    }
-
-    /** Caixa de fundo com "rótulo valor", o valor na cor do feixe do pulsar. */
-    protected void drawLabel(String label, String value) {
-        Gui.drawRect(x - 2, y - 2, x + width() + 2, y + height() + 2, BACKGROUND);
-        int lx = label.isEmpty() ? x : font().drawStringWithShadow(label + " ", x, y, WHITE);
-        font().drawStringWithShadow(value, lx, y, BEAM);
-    }
-
-    protected int labelWidth(String label, String value) {
-        return font().getStringWidth(label.isEmpty() ? value : label + " " + value);
-    }
 }
