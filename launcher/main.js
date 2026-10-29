@@ -10,23 +10,31 @@ let config;
 let accounts;
 let game = null;
 
-// Guarda o token da Microsoft criptografado pelo sistema quando possível.
+// Segredos (token da Microsoft, chave de atualização) ficam criptografados pelo sistema quando possível.
+function encrypt(text) {
+  if (!text) return "";
+  const buf = safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(text) : Buffer.from(text);
+  return buf.toString("base64");
+}
+
+function decrypt(raw) {
+  if (!raw) return "";
+  try {
+    const buf = Buffer.from(raw, "base64");
+    return safeStorage.isEncryptionAvailable() ? safeStorage.decryptString(buf) : buf.toString();
+  } catch {
+    return "";
+  }
+}
+
 function secretStore() {
   return {
     get() {
-      const raw = config.get().msRefreshTokenEnc;
-      if (!raw) return {};
-      try {
-        const buf = Buffer.from(raw, "base64");
-        return { msRefreshToken: safeStorage.isEncryptionAvailable() ? safeStorage.decryptString(buf) : buf.toString() };
-      } catch {
-        return {};
-      }
+      const token = decrypt(config.get().msRefreshTokenEnc);
+      return token ? { msRefreshToken: token } : {};
     },
     set({ msRefreshToken }) {
-      if (!msRefreshToken) return config.set({ msRefreshTokenEnc: "" });
-      const buf = safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(msRefreshToken) : Buffer.from(msRefreshToken);
-      config.set({ msRefreshTokenEnc: buf.toString("base64") });
+      config.set({ msRefreshTokenEnc: encrypt(msRefreshToken) });
     },
   };
 }
@@ -36,8 +44,8 @@ function modSourceDir() {
 }
 
 function publicConfig() {
-  const { msRefreshTokenEnc, ...rest } = config.get();
-  return rest;
+  const { msRefreshTokenEnc, updateTokenEnc, ...rest } = config.get();
+  return { ...rest, hasUpdateToken: !!updateTokenEnc };
 }
 
 function createWindow() {
@@ -58,19 +66,35 @@ function createWindow() {
   });
 }
 
-// Atualização automática: procura versão nova ao abrir e a cada 30 minutos,
-// baixa em segundo plano e instala quando o jogador reiniciar o launcher.
+// Atualização automática: as versões saem nos Releases do repositório privado Pulsar_Client.
+// Para baixar de um repositório privado, o launcher usa uma chave de leitura que o dono
+// cola em Ajustes (nenhuma chave vai dentro do instalador). Sem chave, não procura atualização.
+const UPDATE_REPO = { provider: "github", owner: "R0N1234", repo: "Pulsar_Client", private: true };
+let updatesWired = false;
+let updateTimer = null;
+
+function checkUpdates() {
+  const token = decrypt(config.get().updateTokenEnc);
+  if (!app.isPackaged || !token) return;
+  autoUpdater.setFeedURL({ ...UPDATE_REPO, token });
+  autoUpdater.checkForUpdates().catch((e) => {
+    console.error("[updater]", e);
+    send("update:status", { state: "error", text: "Não consegui procurar atualização. Confira a chave em Ajustes." });
+  });
+}
+
 function setupUpdates() {
-  if (!app.isPackaged) return;
+  if (!app.isPackaged || updatesWired) return;
+  updatesWired = true;
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.on("update-available", (i) => send("update:status", { state: "downloading", version: i.version, percent: 0 }));
+  autoUpdater.on("update-not-available", () => send("update:status", { state: "none" }));
   autoUpdater.on("download-progress", (p) => send("update:status", { state: "downloading", percent: Math.round(p.percent) }));
   autoUpdater.on("update-downloaded", (i) => send("update:status", { state: "ready", version: i.version }));
   autoUpdater.on("error", (e) => console.error("[updater]", e));
-  const check = () => autoUpdater.checkForUpdates().catch((e) => console.error("[updater]", e));
-  check();
-  setInterval(check, 30 * 60 * 1000);
+  checkUpdates();
+  updateTimer = setInterval(checkUpdates, 30 * 60 * 1000);
 }
 
 const send = (channel, payload) => win && !win.isDestroyed() && win.webContents.send(channel, payload);
@@ -81,7 +105,7 @@ app.whenReady().then(() => {
 
   ipcMain.handle("config:get", () => publicConfig());
   ipcMain.handle("config:set", (_e, patch) => {
-    const { msRefreshTokenEnc, ...safe } = patch || {};
+    const { msRefreshTokenEnc, updateTokenEnc, hasUpdateToken, ...safe } = patch || {};
     config.set(safe);
     return publicConfig();
   });
@@ -126,6 +150,12 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle("app:version", () => app.getVersion());
+  ipcMain.handle("update:token", (_e, token) => {
+    config.set({ updateTokenEnc: encrypt(String(token || "").trim()) });
+    checkUpdates();
+    return publicConfig();
+  });
+  ipcMain.handle("update:check", () => checkUpdates());
   ipcMain.handle("update:install", () => {
     if (game) throw new Error("Feche o Minecraft antes de atualizar.");
     autoUpdater.quitAndInstall();

@@ -53,7 +53,8 @@
       {
         "provider": "github",
         "owner": "R0N1234",
-        "repo": "Pulsar_Client-releases",
+        "repo": "Pulsar_Client",
+        "private": true,
         "releaseType": "release"
       }
     ]
