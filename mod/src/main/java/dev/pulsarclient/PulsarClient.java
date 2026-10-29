@@ -5,8 +5,14 @@ import dev.pulsarclient.gui.GuiPulsarPanel;
 import dev.pulsarclient.gui.MenuButtons;
 import dev.pulsarclient.gui.SelfTest;
 import dev.pulsarclient.hud.GuiHudEditor;
+import dev.pulsarclient.mods.Atmosfera;
+import dev.pulsarclient.mods.Blindagem;
+import dev.pulsarclient.mods.CampoColisao;
 import dev.pulsarclient.mods.ClickTracker;
+import dev.pulsarclient.mods.CombatHud;
+import dev.pulsarclient.mods.CombatTracker;
 import dev.pulsarclient.mods.Contorno;
+import dev.pulsarclient.mods.Efeitos;
 import dev.pulsarclient.mods.HudMod;
 import dev.pulsarclient.mods.MiraPulsar;
 import dev.pulsarclient.mods.MotorPulsar;
@@ -16,7 +22,9 @@ import dev.pulsarclient.mods.SimpleHudMods;
 import dev.pulsarclient.mods.Supernova;
 import dev.pulsarclient.mods.TeclasPulse;
 import dev.pulsarclient.mods.Telescopio;
+import dev.pulsarclient.mods.TremorDano;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -36,7 +44,7 @@ import java.util.List;
 @Mod(modid = PulsarClient.MODID, name = "Pulsar Client", version = PulsarClient.VERSION, clientSideOnly = true, acceptedMinecraftVersions = "[1.8.9]")
 public class PulsarClient {
     public static final String MODID = "pulsar";
-    public static final String VERSION = "0.3.0";
+    public static final String VERSION = "0.4.0";
     private static PulsarClient instance;
 
     private final List<PulsarMod> mods = new ArrayList<PulsarMod>();
@@ -61,11 +69,23 @@ public class PulsarClient {
         add(new SimpleHudMods.Fps());
         add(new SimpleHudMods.Latencia());
         add(new SimpleHudMods.Coordenadas());
+        add(new SimpleHudMods.Relogio());
+        add(new SimpleHudMods.Memoria());
+        add(new SimpleHudMods.Bussola());
+        add(new SimpleHudMods.Servidor());
+        add(new SimpleHudMods.Saturacao());
         add(propulsao);
         add(new MiraPulsar());
+        add(new Blindagem());
+        add(new Efeitos());
+        add(new CombatHud.Combo());
+        add(new CombatHud.Alcance());
+        add(new TremorDano());
+        add(new CampoColisao());
         add(telescopio);
         add(new Supernova());
         add(new Contorno());
+        add(new Atmosfera());
         add(motor);
 
         config = new PulsarConfig(Minecraft.getMinecraft().mcDataDir);
@@ -76,6 +96,7 @@ public class PulsarClient {
         ClientRegistry.registerKeyBinding(telescopio.key);
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new MenuButtons());
+        MinecraftForge.EVENT_BUS.register(new CombatTracker());
         if (Boolean.getBoolean("pulsar.selftest")) MinecraftForge.EVENT_BUS.register(new SelfTest());
         System.out.println("[Pulsar] Pulsar Client " + VERSION + " iniciado com " + mods.size() + " mods");
     }
@@ -112,8 +133,16 @@ public class PulsarClient {
         Minecraft mc = Minecraft.getMinecraft();
         if (mc.gameSettings.showDebugInfo || mc.currentScreen instanceof GuiHudEditor) return;
         for (HudMod mod : hudMods) {
-            if (mod.isEnabled()) mod.render(false);
+            if (!mod.isEnabled()) continue;
+            keepOnScreen(mod, event.resolution);
+            mod.render(false);
         }
+    }
+
+    /** Mantém o mod dentro da tela, mesmo depois de mudar o tamanho da janela ou a escala da interface. */
+    public static void keepOnScreen(HudMod mod, ScaledResolution res) {
+        mod.x = Math.max(2, Math.min(mod.x, res.getScaledWidth() - mod.width() - 2));
+        mod.y = Math.max(2, Math.min(mod.y, res.getScaledHeight() - mod.height() - 2));
     }
 
     @SubscribeEvent

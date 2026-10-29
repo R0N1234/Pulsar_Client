@@ -71,18 +71,13 @@ jobs:
           mkdir -p /tmp/ci-log
           cp "$RUNNER_TEMP/e2e/e2e.log" /tmp/ci-log/build.log || echo "sem log" > /tmp/ci-log/build.log
           cp "$E2E_PRINTS"/*.png /tmp/ci-log/ 2>/dev/null || true
-          # Temporário: bytecode da tela de carregamento do Forge, para ajustar a do Pulsar.
-          FORGE_JAR=$(ls "$RUNNER_TEMP"/e2e/minecraft/pulsar/forge/*universal*.jar | head -1)
-          for c in $(unzip -Z1 "$FORGE_JAR" | grep 'fml/client/SplashProgress.*\.class$' | sed 's/\.class$//; s|/|.|g'); do
-            javap -c -p -constants -cp "$FORGE_JAR" "$c"
-          done > /tmp/ci-log/splash-javap.txt 2>&1 || true
           cd "$GITHUB_WORKSPACE"
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
           git checkout -q --orphan ci-log
           git rm -rfq --cached .
           cp /tmp/ci-log/* .
-          git add build.log *.png *.txt 2>/dev/null || git add build.log
+          git add build.log *.png 2>/dev/null || git add build.log
           git commit -qm "Log e prints do e2e ${GITHUB_SHA}"
           git push -qf origin ci-log || true
           exit $status

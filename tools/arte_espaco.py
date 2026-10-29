@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MOD_TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "pulsar", "textures", "gui")
-SPLASH = os.path.join(ROOT, "launcher", "assets", "splash")
+SPLASH = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "pulsar", "textures", "splash")
 FONT = "/usr/share/fonts/opentype/inter/InterDisplay-Bold.otf"
 
 BG_EDGE = (5, 7, 15)
@@ -165,23 +165,14 @@ def menu_background():
     return img.convert("RGB")
 
 
-def splash():
-    """512x512, o tamanho exato em que o Forge desenha o logo da tela de carregamento."""
-    w = h = 512
-    img, rnd = space(w, h, 11, fade_edges=True, center=(256, 190))
-    add_galaxy(img, rnd, 92, 96, 52, (150, 120, 255), 0.45)
-    add_planet(img, 430, 372, 26, (230, 140, 80), ring=(240, 210, 170))
-    add_planet(img, 70, 330, 12, (90, 150, 255))
-    mark = emblem(300)
-    img.alpha_composite(mark, (256 - 150, 190 - 150))
-    # Bordas no mesmo tom do fundo da tela, para a imagem não aparecer como um quadrado.
-    edge = Image.new("RGBA", (w, h), BG_EDGE + (0,))
-    mask = Image.new("L", (w, h), 0)
-    md = ImageDraw.Draw(mask)
-    for i in range(48):
-        md.rectangle([i, i, w - 1 - i, h - 1 - i], outline=int(255 * (1 - i / 48) ** 2))
-    edge.putalpha(mask)
-    img.alpha_composite(edge)
+def splash_background():
+    """Fundo da tela de carregamento. Menor que o do menu, porque fica na memória de vídeo durante o jogo todo."""
+    w, h = 1280, 720
+    img, rnd = space(w, h, 11, center=(w * 0.5, h * 0.44))
+    add_galaxy(img, rnd, w * 0.15, h * 0.2, 100, (150, 120, 255), 0.45)
+    add_galaxy(img, rnd, w * 0.88, h * 0.12, 50, (110, 210, 255), 0.6)
+    add_planet(img, w * 0.86, h * 0.7, 58, (230, 140, 80), ring=(240, 210, 170))
+    add_planet(img, w * 0.1, h * 0.78, 28, (90, 150, 255))
     return img.convert("RGB")
 
 
@@ -190,8 +181,8 @@ def main():
     os.makedirs(SPLASH, exist_ok=True)
     menu_background().save(os.path.join(MOD_TEX, "fundo.png"), optimize=True)
     emblem(256).save(os.path.join(MOD_TEX, "logo.png"), optimize=True)
-    splash().save(os.path.join(SPLASH, "logo.png"), optimize=True)
-    Image.new("RGBA", (16, 16), (0, 0, 0, 0)).save(os.path.join(SPLASH, "vazio.png"))
+    splash_background().save(os.path.join(SPLASH, "fundo.png"), optimize=True)
+    emblem(512).save(os.path.join(SPLASH, "logo.png"), optimize=True)
     print("ok")
 
 

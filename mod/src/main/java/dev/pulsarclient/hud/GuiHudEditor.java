@@ -1,9 +1,11 @@
 package dev.pulsarclient.hud;
 
 import dev.pulsarclient.PulsarClient;
+import dev.pulsarclient.gui.Universo;
 import dev.pulsarclient.mods.HudMod;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.ScaledResolution;
 
 import java.io.IOException;
 
@@ -26,11 +28,14 @@ public class GuiHudEditor extends GuiScreen {
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        if (mc.theWorld == null) Universo.draw(width, height);
         drawRect(0, 0, width, height, 0x55000000);
         drawCenteredString(fontRendererObj, "Pulsar · Editor de HUD", width / 2, 12, 0xFF7FE7FF);
         drawCenteredString(fontRendererObj, "Arraste para mover. Botão direito liga ou desliga. Esc para voltar.", width / 2, 24, 0xFFB0BCD8);
 
+        ScaledResolution res = new ScaledResolution(mc);
         for (HudMod mod : PulsarClient.get().hudMods()) {
+            PulsarClient.keepOnScreen(mod, res);
             int color = mod.isEnabled() ? OUTLINE : OUTLINE_OFF;
             outline(mod.x - 3, mod.y - 3, mod.x + mod.width() + 3, mod.y + mod.height() + 3, color);
             mod.render(true);
