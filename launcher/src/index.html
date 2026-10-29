@@ -11,13 +11,14 @@
   <canvas id="stars"></canvas>
 
   <header class="topbar">
-    <div class="logo"><span class="dot"></span>PULSAR <small>CLIENT</small></div>
+    <div class="logo"><span class="dot"></span>PULSAR <small id="appVersion">CLIENT</small></div>
     <nav class="nav" id="nav">
       <button type="button" data-view="home" class="on">Início</button>
       <button type="button" data-view="mods">Mods</button>
       <button type="button" data-view="settings">Ajustes</button>
     </nav>
     <div class="right">
+      <button type="button" class="update" id="update" hidden></button>
       <div class="acct" id="acct">
         <button type="button" class="btn-ghost" id="btnLogin">Entrar com Microsoft</button>
       </div>

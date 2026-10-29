@@ -219,12 +219,35 @@ $("settingsForm").addEventListener("submit", async (e) => {
   setTimeout(() => ($("saved").textContent = ""), 2000);
 });
 
+/* ---------- atualização ---------- */
+api.onUpdate((u) => {
+  const b = $("update");
+  b.hidden = false;
+  if (u.state === "downloading") {
+    b.className = "update";
+    b.textContent = `Baixando atualização${u.version ? " " + u.version : ""}… ${u.percent || 0}%`;
+    if (u.version) b.dataset.version = u.version;
+  } else if (u.state === "ready") {
+    b.className = "update ready";
+    b.textContent = `Atualizar para ${u.version} e reiniciar`;
+  }
+});
+$("update").onclick = async () => {
+  if (!$("update").classList.contains("ready")) return;
+  try {
+    await api.installUpdate();
+  } catch (err) {
+    setStatus(cleanErr(err), true);
+  }
+};
+
 /* ---------- início ---------- */
 (async function init() {
   enabled = await api.getMods();
   renderChips();
   renderGrid();
   await loadSettings();
+  api.appVersion().then((v) => ($("appVersion").textContent = "CLIENT " + v)).catch(() => {});
   renderAccount(null);
   setStatus("Conectando sua conta…");
   const profile = await api.restoreAccount().catch(() => null);

@@ -1,5 +1,6 @@
 const { app, BrowserWindow, dialog, ipcMain, safeStorage, shell } = require("electron");
 const path = require("path");
+const { autoUpdater } = require("electron-updater");
 const { Config } = require("./lib/config");
 const { Accounts } = require("./lib/auth");
 const { launch } = require("./lib/launch");
@@ -57,6 +58,21 @@ function createWindow() {
   });
 }
 
+// Atualização automática: procura versão nova ao abrir e a cada 30 minutos,
+// baixa em segundo plano e instala quando o jogador reiniciar o launcher.
+function setupUpdates() {
+  if (!app.isPackaged) return;
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.on("update-available", (i) => send("update:status", { state: "downloading", version: i.version, percent: 0 }));
+  autoUpdater.on("download-progress", (p) => send("update:status", { state: "downloading", percent: Math.round(p.percent) }));
+  autoUpdater.on("update-downloaded", (i) => send("update:status", { state: "ready", version: i.version }));
+  autoUpdater.on("error", (e) => console.error("[updater]", e));
+  const check = () => autoUpdater.checkForUpdates().catch((e) => console.error("[updater]", e));
+  check();
+  setInterval(check, 30 * 60 * 1000);
+}
+
 const send = (channel, payload) => win && !win.isDestroyed() && win.webContents.send(channel, payload);
 
 app.whenReady().then(() => {
@@ -109,10 +125,17 @@ app.whenReady().then(() => {
     return true;
   });
 
+  ipcMain.handle("app:version", () => app.getVersion());
+  ipcMain.handle("update:install", () => {
+    if (game) throw new Error("Feche o Minecraft antes de atualizar.");
+    autoUpdater.quitAndInstall();
+  });
+
   ipcMain.on("window:minimize", () => win.minimize());
   ipcMain.on("window:close", () => win.close());
 
   createWindow();
+  win.webContents.once("did-finish-load", setupUpdates);
 });
 
 app.on("window-all-closed", () => app.quit());

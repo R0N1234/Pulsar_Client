@@ -150,3 +150,7 @@ body.playing .pulsar .beams{animation-duration:1.2s}
 .pick .mono{font-family:var(--f-mono);font-size:12px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .pick .mono.ok{color:var(--ok)}
 .linkbtn{background:none;border:0;padding:0;color:var(--beam);text-decoration:underline;cursor:pointer;font:inherit}
+
+/* Aviso de atualização no topo */
+.update{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line-2);border-radius:999px;padding:6px 12px;background:rgba(17,26,54,.6);color:var(--mute);cursor:default}
+.update.ready{border-color:var(--ember);color:#1A0B02;background:linear-gradient(180deg,var(--ember-2),var(--ember));font-weight:600;cursor:pointer}

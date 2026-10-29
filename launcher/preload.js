@@ -13,6 +13,9 @@ contextBridge.exposeInMainWorld("pulsar", {
   launch: () => ipcRenderer.invoke("game:launch"),
   onStatus: (fn) => ipcRenderer.on("game:status", (_e, s) => fn(s)),
   onLog: (fn) => ipcRenderer.on("game:log", (_e, l) => fn(l)),
+  appVersion: () => ipcRenderer.invoke("app:version"),
+  installUpdate: () => ipcRenderer.invoke("update:install"),
+  onUpdate: (fn) => ipcRenderer.on("update:status", (_e, s) => fn(s)),
   minimize: () => ipcRenderer.send("window:minimize"),
   close: () => ipcRenderer.send("window:close"),
 });
