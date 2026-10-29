@@ -29,8 +29,7 @@
       "main.js",
       "preload.js",
       "lib/**",
-      "src/**",
-      "assets/**"
+      "src/**"
     ],
     "extraResources": [
       {

@@ -1,14 +1,20 @@
 package dev.pulsarclient.mods;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.util.MathHelper;
 
-/** Mods de HUD de uma linha só: Frequência CPS, FPS, Latência e Coordenadas. */
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+/** Mods de HUD de uma linha só: CPS, FPS, Latência, Coordenadas, Relógio, Memória e outros. */
 public final class SimpleHudMods {
     private SimpleHudMods() {}
 
     private abstract static class LineMod extends HudMod {
         LineMod(String id, String name, String desc, int x, int y) { super(id, name, desc, Category.HUD, x, y); }
+        LineMod(String id, String name, String desc, int x, int y, boolean on) { super(id, name, desc, Category.HUD, x, y, on); }
 
         abstract String label();
         abstract String value();
@@ -61,6 +67,62 @@ public final class SimpleHudMods {
                 case EAST: return "L";
                 default: return "O";
             }
+        }
+    }
+
+    public static class Relogio extends LineMod {
+        private final SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+        public Relogio() { super("relogio", "Relógio", "Hora do seu computador", 5, 156, false); }
+        @Override String label() { return "Hora"; }
+        @Override String value() { return format.format(new Date()); }
+    }
+
+    public static class Memoria extends LineMod {
+        public Memoria() { super("memoria", "Memória", "Uso de RAM do jogo", 5, 170, false); }
+        @Override String label() { return "RAM"; }
+
+        @Override
+        String value() {
+            Runtime rt = Runtime.getRuntime();
+            long used = (rt.totalMemory() - rt.freeMemory()) / 1048576L;
+            long max = rt.maxMemory() / 1048576L;
+            return used + "/" + max + " MB (" + (used * 100 / Math.max(1, max)) + "%)";
+        }
+    }
+
+    public static class Bussola extends LineMod {
+        private static final String[] DIRS = {"S", "SO", "O", "NO", "N", "NE", "L", "SE"};
+        public Bussola() { super("bussola", "Bússola", "Direção para onde você está olhando", 5, 184, false); }
+        @Override String label() { return "Direção"; }
+
+        @Override
+        String value() {
+            if (mc.thePlayer == null) return "N 180°";
+            float yaw = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw);
+            int deg = Math.round(yaw < 0 ? yaw + 360 : yaw);
+            return DIRS[MathHelper.floor_double((deg + 22.5) / 45.0) & 7] + " " + deg + "°";
+        }
+    }
+
+    public static class Servidor extends LineMod {
+        public Servidor() { super("servidor", "Servidor", "Endereço do servidor atual", 5, 198, false); }
+        @Override String label() { return "IP"; }
+
+        @Override
+        String value() {
+            ServerData data = mc.getCurrentServerData();
+            return data == null ? "Um jogador" : data.serverIP;
+        }
+    }
+
+    public static class Saturacao extends LineMod {
+        public Saturacao() { super("saturacao", "Saturação", "Mostra a saturação da fome", 5, 212, false); }
+        @Override String label() { return "Saturação"; }
+
+        @Override
+        String value() {
+            if (mc.thePlayer == null) return "5.0";
+            return String.format("%.1f", mc.thePlayer.getFoodStats().getSaturationLevel());
         }
     }
 }

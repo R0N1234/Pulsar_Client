@@ -16,7 +16,11 @@ public abstract class HudMod extends PulsarMod {
     protected final ColorSetting color = add(new ColorSetting("cor", "Cor do valor", 0));
 
     protected HudMod(String id, String name, String description, Category category, int defaultX, int defaultY) {
-        super(id, name, description, category, true);
+        this(id, name, description, category, defaultX, defaultY, true);
+    }
+
+    protected HudMod(String id, String name, String description, Category category, int defaultX, int defaultY, boolean enabledByDefault) {
+        super(id, name, description, category, enabledByDefault);
         this.x = defaultX;
         this.y = defaultY;
     }

@@ -90,6 +90,7 @@ public class GuiPulsarPanel extends GuiScreen {
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        if (mc.theWorld == null) Universo.draw(width, height);
         drawRect(0, 0, width, height, 0x66000000);
         drawRect(px, py, px + pw, py + ph, BG);
         outline(px, py, px + pw, py + ph, LINE);

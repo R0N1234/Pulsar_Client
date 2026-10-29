@@ -6,7 +6,9 @@ import dev.pulsarclient.settings.ModeSetting;
 import dev.pulsarclient.settings.SliderSetting;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -14,15 +16,18 @@ import org.lwjgl.opengl.Display;
 
 /**
  * Motor Pulsar: o otimizador do próprio client.
- * Corta o que mais pesa em PVP (entidades longe, suportes de armadura, partículas)
- * e segura o FPS quando a janela está em segundo plano.
+ * Corta o que mais pesa em PVP (entidades atrás de paredes ou longe, suportes de armadura,
+ * nomes distantes, partículas) e segura o FPS quando a janela está em segundo plano.
  */
 public class MotorPulsar extends PulsarMod {
     private final BoolSetting background = add(new BoolSetting("fundo", "Poupar PC em segundo plano", true));
     private final SliderSetting backgroundFps = add(new SliderSetting("fundo_fps", "FPS em segundo plano", 15, 5, 60, 5, ""));
+    private final BoolSetting occlusion = add(new BoolSetting("oclusao", "Não desenhar entidades atrás de paredes", true));
     private final BoolSetting armorStands = add(new BoolSetting("suportes", "Esconder suportes de armadura", true));
     private final BoolSetting cullMobs = add(new BoolSetting("mobs", "Limitar distância dos mobs", true));
     private final SliderSetting mobDistance = add(new SliderSetting("mobs_dist", "Distância dos mobs", 48, 16, 128, 8, " blocos"));
+    private final BoolSetting limitNames = add(new BoolSetting("nomes", "Limitar distância dos nomes", false));
+    private final SliderSetting nameDistance = add(new SliderSetting("nomes_dist", "Distância dos nomes", 32, 8, 64, 4, " blocos"));
     private final ModeSetting particles = add(new ModeSetting("particulas", "Partículas", 1, "Todas", "Menos", "Mínimas"));
     private final ActionSetting preset = add(new ActionSetting("desempenho", "Aplicar modo desempenho", new Runnable() {
         @Override public void run() { applyPerformancePreset(); }
@@ -31,12 +36,20 @@ public class MotorPulsar extends PulsarMod {
         @Override public void run() { System.gc(); }
     }));
 
+    private final Oclusao oclusao = new Oclusao();
+    private World lastWorld;
+
     public MotorPulsar() {
         super("motor_pulsar", "Motor Pulsar", "Otimizador do Pulsar: mais FPS e menos travadas", Category.MOTOR, true);
     }
 
     @Override
     public void tick() {
+        oclusao.tick();
+        if (mc.theWorld != lastWorld) {
+            lastWorld = mc.theWorld;
+            oclusao.clear();
+        }
         if (!isEnabled()) return;
         if (mc.gameSettings.particleSetting != particles.index()) mc.gameSettings.particleSetting = particles.index();
     }
@@ -59,8 +72,24 @@ public class MotorPulsar extends PulsarMod {
         }
         if (cullMobs.get() && !(entity instanceof EntityPlayer)) {
             double max = mobDistance.get();
-            if (entity.getDistanceSqToEntity(mc.thePlayer) > max * max) event.setCanceled(true);
+            if (entity.getDistanceSqToEntity(mc.thePlayer) > max * max) {
+                event.setCanceled(true);
+                return;
+            }
         }
+        // Em terceira pessoa a câmera fica atrás do jogador, então a conta pelos olhos dele não vale.
+        Entity view = mc.getRenderViewEntity();
+        if (occlusion.get() && view != null && mc.gameSettings.thirdPersonView == 0
+                && oclusao.hidden(mc.theWorld, view.getPositionEyes(1f), entity)) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public void onRenderName(RenderLivingEvent.Specials.Pre event) {
+        if (!isEnabled() || !limitNames.get() || mc.thePlayer == null) return;
+        double max = nameDistance.get();
+        if (event.entity.getDistanceSqToEntity(mc.thePlayer) > max * max) event.setCanceled(true);
     }
 
     /** Ajustes de vídeo que mais rendem FPS na 1.8.9, de uma vez. */

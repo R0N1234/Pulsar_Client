@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "dev.pulsarclient"
-version = "0.3.0"
+version = "0.4.0"
 
 base {
     archivesName.set("pulsar-client")
@@ -39,10 +39,21 @@ dependencies {
     minecraft("com.mojang:minecraft:1.8.9")
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
+    // ASM já vem com o Forge no jogo; aqui é só para compilar o transformer da tela de carregamento.
+    compileOnly("org.ow2.asm:asm-debug-all:5.0.3")
 }
 
 tasks.withType(JavaCompile::class) {
     options.encoding = "UTF-8"
+}
+
+// O jar também é um "coremod": carrega antes do Minecraft para trocar a tela de carregamento do Forge.
+tasks.withType(Jar::class) {
+    manifest.attributes(
+        "FMLCorePlugin" to "dev.pulsarclient.core.PulsarCore",
+        "FMLCorePluginContainsFMLMod" to "true",
+        "ForceLoadAsMod" to "true",
+    )
 }
 
 tasks.processResources {
