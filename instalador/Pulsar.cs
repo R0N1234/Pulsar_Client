@@ -764,12 +764,13 @@ namespace PulsarInstalador
             {
                 float dx = (float)Math.Cos(ang) * lado;
                 float dy = (float)Math.Sin(ang) * lado;
-                const int passos = 26;
+                // Os feixes somem antes de chegar no título.
+                const int passos = 22;
                 for (int i = 0; i < passos; i++)
                 {
                     float a0 = tam * 0.5f + i * 5.2f;
                     float a1 = a0 + 5.6f;
-                    int alfa = (int)(150 * Math.Pow(1 - i / (float)passos, 1.6));
+                    int alfa = (int)(150 * Math.Pow(1 - i / (float)passos, 2.2));
                     using (Pen p = new Pen(Color.FromArgb(alfa, 200, 247, 255), 2.2f + i * 0.5f))
                         g.DrawLine(p, cx + dx * a0, cy + dy * a0, cx + dx * a1, cy + dy * a1);
                 }
