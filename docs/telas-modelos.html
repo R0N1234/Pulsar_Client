@@ -1,0 +1,507 @@
+<title>Pulsar Client · Telas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: página escura única (céu profundo); cada modelo é uma tela 1280x800 escalada dentro de um quadro 16:10 */
+:root{
+  --void:#05070F; --deep:#0A0F21; --panel:#10173000; --panel-s:#111A36; --panel-2:#16214A;
+  --line:rgba(140,170,255,.16); --line-2:rgba(140,170,255,.28);
+  --ink:#E9F1FF; --mute:#8D99BB; --dim:#5B6789;
+  --beam:#7FE7FF; --beam-soft:rgba(127,231,255,.18);
+  --ember:#FF8A3D; --ember-2:#FFB36B;
+  --nebula:#9B7CFF;
+  --f-display:"Unbounded","Chakra Petch",system-ui,sans-serif;
+  --f-ui:"Chakra Petch",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--void);color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding-block:40px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:64px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:.01em}
+p{margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--beam)}
+a{color:var(--beam)}
+:focus-visible{outline:2px solid var(--beam);outline-offset:2px}
+
+/* Cabeçalho da página */
+.intro{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center}
+.intro .mark{width:120px;height:120px;position:relative}
+.intro h1{font-size:clamp(28px,4.4vw,46px);font-weight:800;line-height:1.08}
+.intro p{color:var(--mute);max-width:64ch;margin-top:12px}
+.toc{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.toc a{font-family:var(--f-mono);font-size:13px;text-decoration:none;color:var(--ink);border:1px solid var(--line-2);padding:6px 12px;border-radius:999px}
+.toc a:hover{border-color:var(--beam);color:var(--beam)}
+@media (max-width:560px){.intro{grid-template-columns:1fr}.intro .mark{width:84px;height:84px}}
+
+/* Seções de modelo */
+.model{display:flex;flex-direction:column;gap:18px}
+.model-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px}
+.model-head h2{font-size:clamp(22px,3vw,30px);font-weight:600}
+.model-head .tag{font-family:var(--f-mono);font-size:12px;color:var(--mute)}
+.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;color:var(--mute);font-size:15px}
+.notes b{display:block;color:var(--ink);font-weight:600;margin-bottom:2px}
+@media (max-width:760px){.notes{grid-template-columns:1fr}}
+
+.stage{position:relative;width:100%;max-width:100%;aspect-ratio:16/10;overflow:hidden;border-radius:14px;border:1px solid var(--line-2);background:var(--void);box-shadow:0 30px 80px -40px rgba(127,231,255,.25)}
+.screen{position:absolute;top:0;left:0;width:1280px;height:800px;transform-origin:0 0;overflow:hidden;font-family:var(--f-ui);color:var(--ink);background:radial-gradient(120% 90% at 50% 45%,#0D1430 0%,var(--void) 70%)}
+.screen canvas.stars{position:absolute;inset:0;width:1280px;height:800px}
+
+/* ---------- Pulsar (componente) ---------- */
+.pulsar{position:absolute;aspect-ratio:1;pointer-events:none}
+.pulsar .halo{position:absolute;inset:-35%;border-radius:50%;background:radial-gradient(circle,rgba(127,231,255,.22) 0%,rgba(155,124,255,.10) 35%,transparent 65%)}
+.pulsar .beams{position:absolute;inset:-70%;border-radius:50%;
+  background:conic-gradient(from 0deg,transparent 0 83deg,rgba(127,231,255,.0) 84deg,rgba(200,247,255,.75) 90deg,rgba(127,231,255,0) 96deg,transparent 97deg 263deg,rgba(127,231,255,0) 264deg,rgba(200,247,255,.75) 270deg,rgba(127,231,255,0) 276deg,transparent 277deg);
+  -webkit-mask-image:radial-gradient(circle,#000 8%,rgba(0,0,0,.6) 30%,transparent 68%);mask-image:radial-gradient(circle,#000 8%,rgba(0,0,0,.6) 30%,transparent 68%);
+  animation:spin 3.2s linear infinite}
+.pulsar .field{position:absolute;inset:8%;border-radius:50%;border:1px solid rgba(127,231,255,.25);transform:rotateX(70deg)}
+.pulsar .field.f2{inset:-6%;border-color:rgba(155,124,255,.18)}
+.pulsar .core{position:absolute;inset:34%;border-radius:50%;background:radial-gradient(circle,#fff 0 18%,#CFF7FF 30%,rgba(127,231,255,.65) 48%,rgba(127,231,255,0) 72%);animation:beat 1.1s ease-in-out infinite}
+.pulsar .tilt{position:absolute;inset:0;transform:rotate(-24deg)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes beat{0%,100%{transform:scale(1);filter:brightness(1)}12%{transform:scale(1.12);filter:brightness(1.35)}}
+@media (prefers-reduced-motion:reduce){.pulsar .beams,.pulsar .core,.orbit-ring{animation:none!important}}
+
+/* Marca */
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;letter-spacing:.18em;font-size:18px}
+.logo .dot{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle,#fff 0 22%,var(--beam) 45%,transparent 72%);box-shadow:0 0 18px var(--beam)}
+.logo small{font-family:var(--f-mono);font-weight:400;letter-spacing:.1em;font-size:11px;color:var(--mute)}
+
+.btn-play{font-family:var(--f-display);font-weight:800;letter-spacing:.2em;color:#1A0B02;background:linear-gradient(180deg,var(--ember-2),var(--ember));border:0;border-radius:10px;cursor:pointer;box-shadow:0 0 0 1px rgba(255,180,110,.5),0 14px 40px -10px rgba(255,138,61,.7)}
+.btn-play:hover{filter:brightness(1.08)}
+.chip{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line-2);border-radius:999px;padding:4px 10px;color:var(--mute)}
+.mono{font-family:var(--f-mono)}
+
+/* ---------- Modelo A: Núcleo ---------- */
+.a-top{position:absolute;top:0;left:0;right:0;height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(5,7,15,.85),rgba(5,7,15,.2))}
+.a-nav{display:flex;gap:30px;font-size:15px;color:var(--mute);font-weight:500}
+.a-nav span.on{color:var(--ink);position:relative}
+.a-nav span.on::after{content:"";position:absolute;left:0;right:0;bottom:-26px;height:2px;background:var(--beam);box-shadow:0 0 12px var(--beam)}
+.acct{display:flex;align-items:center;gap:10px;font-size:14px}
+.acct .av{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#3A6B4A 0 50%,#6B4A2E 50%);image-rendering:pixelated;box-shadow:0 0 0 1px var(--line-2)}
+.acct .st{font-family:var(--f-mono);font-size:11px;color:#6EE7A8}
+.a-center{position:absolute;left:0;right:0;top:470px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.a-title{font-family:var(--f-display);font-weight:800;font-size:54px;letter-spacing:.32em;margin-right:-.32em;text-shadow:0 0 30px rgba(127,231,255,.35)}
+.a-ver{display:flex;align-items:center;gap:0;border:1px solid var(--line-2);border-radius:12px;background:rgba(17,26,54,.75);backdrop-filter:blur(6px);overflow:hidden}
+.a-ver .v{padding:14px 22px;display:flex;flex-direction:column;line-height:1.2}
+.a-ver .v small{font-family:var(--f-mono);font-size:11px;color:var(--mute);letter-spacing:.1em}
+.a-ver .v b{font-family:var(--f-display);font-size:22px}
+.a-ver .btn-play{border-radius:0;padding:0 46px;font-size:20px;height:68px}
+.a-ver .sep{width:1px;align-self:stretch;background:var(--line-2)}
+.a-alt{font-family:var(--f-mono);font-size:12px;color:var(--dim);letter-spacing:.06em}
+.a-card{position:absolute;bottom:28px;width:300px;border:1px solid var(--line);border-radius:12px;background:rgba(17,26,54,.6);padding:16px 18px}
+.a-card h4{margin:0 0 6px;font-family:var(--f-mono);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--beam);text-transform:uppercase}
+.a-card p{font-size:14px;color:var(--mute)}
+.a-card p b{color:var(--ink)}
+.a-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.a-stats div{font-family:var(--f-mono);font-size:11px;color:var(--mute)}
+.a-stats div b{display:block;font-size:20px;color:var(--ink);font-weight:600}
+
+/* ---------- Modelo B: Órbita ---------- */
+.b-rail{position:absolute;left:0;top:0;bottom:0;width:76px;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:22px;padding-top:24px;background:rgba(5,7,15,.6)}
+.b-rail i{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);display:grid;place-items:center;font-style:normal;font-family:var(--f-mono);font-size:12px;color:var(--mute)}
+.b-rail i.on{border-color:var(--beam);color:var(--beam);box-shadow:0 0 16px -4px var(--beam)}
+.b-head{position:absolute;left:112px;top:34px}
+.b-head h3{font-size:30px;font-weight:600}
+.b-head p{color:var(--mute);font-size:14px;margin-top:4px}
+.orbits{position:absolute;left:76px;top:0;width:724px;height:800px}
+.orbit-ring{position:absolute;border-radius:50%;border:1px dashed rgba(127,231,255,.22)}
+.onode{position:absolute;transform:translate(-50%,-50%);display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:5px 10px 5px 6px;border-radius:999px;background:rgba(10,15,33,.85);border:1px solid var(--line-2);white-space:nowrap}
+.onode::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--c,var(--beam));box-shadow:0 0 10px var(--c,var(--beam))}
+.onode.back{opacity:.5}
+.oleg{position:absolute;left:112px;bottom:32px;display:flex;gap:18px;font-family:var(--f-mono);font-size:12px;color:var(--mute)}
+.oleg span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:6px;vertical-align:1px}
+.b-side{position:absolute;right:0;top:0;bottom:0;width:440px;border-left:1px solid var(--line);background:linear-gradient(180deg,rgba(17,26,54,.85),rgba(10,15,33,.92));padding:30px 32px;display:flex;flex-direction:column;gap:18px}
+.b-side h4{margin:0;font-family:var(--f-mono);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--mute);text-transform:uppercase}
+.vbig{border:1px solid var(--beam);border-radius:14px;padding:20px;background:radial-gradient(120% 140% at 100% 0%,rgba(127,231,255,.18),transparent 60%),rgba(10,15,33,.6);position:relative}
+.vbig .badge{position:absolute;top:16px;right:16px;font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;color:#1A0B02;background:var(--ember);padding:3px 8px;border-radius:4px}
+.vbig b{font-family:var(--f-display);font-size:44px;display:block;line-height:1.1}
+.vbig p{font-size:13px;color:var(--mute);margin-top:6px}
+.vbig .feat{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.vrows{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.vrows div{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-family:var(--f-mono);font-size:13px;color:var(--mute)}
+.b-side .btn-play{height:64px;font-size:20px;width:100%}
+.srv{display:flex;flex-direction:column;gap:8px}
+.srv div{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px}
+.srv div span{font-family:var(--f-mono);font-size:12px;color:#6EE7A8}
+
+/* ---------- Modelo C: Painel ---------- */
+.c-side{position:absolute;left:0;top:0;bottom:0;width:230px;border-right:1px solid var(--line);background:rgba(5,7,15,.75);padding:26px 20px;display:flex;flex-direction:column;gap:26px}
+.c-menu{display:flex;flex-direction:column;gap:4px;font-size:15px;color:var(--mute)}
+.c-menu span{padding:9px 12px;border-radius:8px}
+.c-menu span.on{background:var(--beam-soft);color:var(--ink);box-shadow:inset 2px 0 0 var(--beam)}
+.c-launch{margin-top:auto;border:1px solid var(--line-2);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;background:rgba(17,26,54,.6)}
+.c-launch .row{display:flex;justify-content:space-between;align-items:center}
+.c-launch b{font-family:var(--f-display);font-size:24px}
+.c-launch .btn-play{height:50px;font-size:16px}
+.c-banner{position:absolute;left:230px;right:0;top:0;height:150px;overflow:hidden;border-bottom:1px solid var(--line)}
+.c-banner .beam{position:absolute;left:40px;top:75px;right:-40px;height:140px;transform:translateY(-50%);background:radial-gradient(60% 50% at 0% 50%,rgba(200,247,255,.55),rgba(127,231,255,.15) 40%,transparent 75%);filter:blur(2px)}
+.c-banner .txt{position:absolute;left:150px;top:34px}
+.c-banner h3{font-size:30px;font-weight:600}
+.c-banner p{color:var(--mute);font-size:14px;margin-top:4px}
+.c-tools{position:absolute;left:254px;top:168px;right:394px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.c-search{flex:1 1 180px;border:1px solid var(--line-2);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--dim);font-family:var(--f-mono)}
+.c-tools .chip.on{border-color:var(--beam);color:var(--beam)}
+.c-grid{position:absolute;left:254px;top:220px;right:394px;bottom:24px;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:min-content;gap:10px;align-content:start}
+.mcard{border:1px solid var(--line);border-radius:10px;padding:12px;background:rgba(17,26,54,.55);display:flex;flex-direction:column;gap:6px;min-height:104px}
+.mcard .top{display:flex;justify-content:space-between;align-items:start;gap:8px}
+.mcard b{font-size:15px;line-height:1.2}
+.mcard p{font-size:12px;color:var(--mute);line-height:1.35}
+.mcard small{font-family:var(--f-mono);font-size:10px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase;margin-top:auto}
+.tog{flex:none;width:34px;height:20px;border-radius:999px;background:#273152;border:0;position:relative;cursor:pointer;padding:0}
+.tog::after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#8D99BB;transition:transform .15s}
+.tog[aria-pressed="true"]{background:rgba(127,231,255,.35)}
+.tog[aria-pressed="true"]::after{transform:translateX(14px);background:var(--beam);box-shadow:0 0 8px var(--beam)}
+.c-prev{position:absolute;right:24px;top:168px;width:350px;bottom:24px;display:flex;flex-direction:column;gap:10px}
+.c-prev h4{margin:0;font-family:var(--f-mono);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--mute);text-transform:uppercase}
+.mc{position:relative;flex:1;border-radius:10px;overflow:hidden;border:1px solid var(--line-2);
+  background:linear-gradient(180deg,#7DB6FF 0%,#A9D2FF 52%,transparent 52%),
+  repeating-linear-gradient(90deg,#4F8A2C 0 22px,#5B9A34 22px 44px) 0 52%/100% 8% no-repeat,
+  repeating-linear-gradient(90deg,#7A5634 0 22px,#86603B 22px 44px,#6F4D2E 44px 66px);image-rendering:pixelated}
+.mc .xh{position:absolute;left:50%;top:44%;width:14px;height:14px;transform:translate(-50%,-50%)}
+.mc .xh::before,.mc .xh::after{content:"";position:absolute;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.mc .xh::before{left:6px;top:0;width:2px;height:14px}.mc .xh::after{top:6px;left:0;height:2px;width:14px}
+.hud{position:absolute;font-family:var(--f-mono);font-size:11px;color:#fff;text-shadow:1px 1px 0 #000}
+.keys{left:10px;top:10px;display:grid;grid-template-columns:repeat(3,26px);gap:3px}
+.keys span{height:26px;display:grid;place-items:center;background:rgba(0,0,0,.45);border-radius:3px}
+.keys span.on{background:rgba(127,231,255,.75);color:#04121A;text-shadow:none}
+.keys .w2{grid-column:span 3;height:18px;font-size:9px}
+.keys .h{grid-column:span 1}
+.hud.box{background:rgba(0,0,0,.45);padding:5px 8px;border-radius:3px;line-height:1.5}
+.hud.box b{color:var(--beam)}
+.hotbar{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);display:flex;gap:2px;padding:2px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.3)}
+.hotbar span{width:24px;height:24px;border:1px solid rgba(255,255,255,.18)}
+.hotbar span.sel{border:2px solid #fff}
+.hotbar span:nth-child(1){background:linear-gradient(135deg,transparent 40%,#6FE9F2 40% 55%,transparent 55%)}
+.hotbar span:nth-child(2){background:radial-gradient(circle,#C6413D 0 35%,transparent 36%)}
+.hotbar span:nth-child(3){background:radial-gradient(circle,#E8C547 0 30%,transparent 31%)}
+.c-prev .hint{font-size:12px;color:var(--mute)}
+
+/* ---------- Lista de mods ---------- */
+.mods{display:flex;flex-direction:column;gap:18px}
+.mods > p{color:var(--mute);max-width:70ch}
+.filters{display:flex;flex-wrap:wrap;gap:8px}
+.filters button{font-family:var(--f-mono);font-size:13px;color:var(--ink);background:transparent;border:1px solid var(--line-2);border-radius:999px;padding:6px 12px;cursor:pointer}
+.filters button[aria-pressed="true"]{border-color:var(--beam);color:var(--beam);background:var(--beam-soft)}
+.filters button span{color:var(--mute);margin-left:4px}
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:620px;font-size:15px}
+th,td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-weight:400;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);background:var(--deep)}
+tr:last-child td{border-bottom:0}
+td.n{font-weight:600;white-space:nowrap}
+td.d{color:var(--mute)}
+td.l{font-family:var(--f-mono);font-size:13px;color:var(--dim);white-space:nowrap}
+td.cat{font-family:var(--f-mono);font-size:12px;white-space:nowrap}
+.cat-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--c)}
+.foot{color:var(--dim);font-size:14px;max-width:70ch}
+</style>
+
+<div class="wrap">
+
+  <header class="intro">
+    <div class="mark"><div class="pulsar" style="inset:0"><div class="halo"></div><div class="tilt"><div class="beams"></div></div><div class="field"></div><div class="core"></div></div></div>
+    <div>
+      <div class="eyebrow">Pulsar Client · rascunho de interface</div>
+      <h1>Três telas iniciais para o Pulsar Client</h1>
+      <p>Todas seguem o mesmo tema: o espaço profundo como fundo e um pulsar girando como ponto de foco, com dois feixes de luz e um núcleo que pulsa. O botão de jogar é laranja quente para se destacar do azul frio. A versão 1.8.9 é sempre a escolha padrão, porque é a versão do PVP.</p>
+      <nav class="toc" aria-label="Seções">
+        <a href="#modelo-a">A · Núcleo</a><a href="#modelo-b">B · Órbita</a><a href="#modelo-c">C · Painel</a><a href="#mods">Lista de mods</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===================== MODELO A ===================== -->
+  <section class="model" id="modelo-a">
+    <div class="model-head">
+      <h2>Modelo A · Núcleo</h2>
+      <span class="tag">tela inicial · o pulsar no centro de tudo</span>
+    </div>
+    <div class="stage"><div class="screen" id="scrA">
+      <canvas class="stars" width="1280" height="800" data-seed="7"></canvas>
+      <div class="pulsar" style="width:430px;left:425px;top:62px"><div class="halo"></div><div class="tilt"><div class="beams"></div></div><div class="field"></div><div class="field f2"></div><div class="core"></div></div>
+      <div class="a-top">
+        <div class="logo"><span class="dot"></span>PULSAR <small>CLIENT</small></div>
+        <div class="a-nav"><span class="on">Início</span><span>Mods</span><span>Cosméticos</span><span>Servidores</span><span>Amigos</span><span>Ajustes</span></div>
+        <div class="acct"><span class="av"></span><div style="line-height:1.2">Rick<br><span class="st">● online</span></div></div>
+      </div>
+      <div class="a-center">
+        <div class="a-title">PULSAR</div>
+        <div class="a-ver">
+          <div class="v"><small>VERSÃO · PVP</small><b>1.8.9</b></div>
+          <div class="sep"></div>
+          <div class="v" style="padding-right:18px"><small>PERFIL</small><b style="font-family:var(--f-ui);font-size:18px">Ranqueada ▾</b></div>
+          <button class="btn-play" type="button">JOGAR</button>
+        </div>
+        <div class="a-alt">também disponível: 1.7.10 · 1.12.2 · 1.16.5 · 1.20.4 · 1.21</div>
+      </div>
+      <div class="a-card" style="left:36px">
+        <h4>Novidades</h4>
+        <p><b>Temporada Nebulosa:</b> 12 capas novas no Hangar e a mira de pulsar animada para todos os jogadores.</p>
+      </div>
+      <div class="a-card" style="right:36px">
+        <h4>Sua sessão</h4>
+        <div class="a-stats">
+          <div><b class="js-modcount">40</b>mods ativos</div>
+          <div><b>3 GB</b>RAM</div>
+          <div><b>14 ms</b>ping</div>
+        </div>
+      </div>
+    </div></div>
+    <div class="notes">
+      <p><b>Ideia</b>A tela é quase vazia de propósito. O pulsar ocupa o centro e o caminho até jogar é um clique só.</p>
+      <p><b>1.8.9 em destaque</b>A versão fica colada no botão JOGAR. As outras versões aparecem em letra pequena embaixo.</p>
+      <p><b>Bom para</b>Quem abre o client e quer entrar no servidor rápido. É o mais limpo e o mais fácil de reconhecer.</p>
+    </div>
+  </section>
+
+  <!-- ===================== MODELO B ===================== -->
+  <section class="model" id="modelo-b">
+    <div class="model-head">
+      <h2>Modelo B · Órbita</h2>
+      <span class="tag">os mods giram em órbita ao redor do pulsar</span>
+    </div>
+    <div class="stage"><div class="screen" id="scrB">
+      <canvas class="stars" width="1280" height="800" data-seed="21"></canvas>
+      <div class="b-rail"><span class="logo"><span class="dot"></span></span><i class="on">IN</i><i>MD</i><i>HD</i><i>CS</i><i>AM</i><i>AJ</i></div>
+      <div class="orbits" id="orbits">
+        <div class="pulsar" style="width:240px;left:234px;top:300px"><div class="halo"></div><div class="tilt"><div class="beams"></div></div><div class="core"></div></div>
+      </div>
+      <div class="b-head"><h3>Sistema Pulsar</h3><p>Cada órbita é uma categoria. Clique num mod para ajustar.</p></div>
+      <div class="oleg"><span style="--c:var(--ember)">Combate</span><span style="--c:var(--beam)">HUD</span><span style="--c:var(--nebula)">Visual</span></div>
+      <aside class="b-side">
+        <div class="logo"><span class="dot"></span>PULSAR <small>CLIENT</small></div>
+        <h4>Escolha a versão</h4>
+        <div class="vbig">
+          <span class="badge">RECOMENDADA PVP</span>
+          <b>1.8.9</b>
+          <p>Combate clássico, sem recarga de ataque. Otimizada para FPS alto e hit registration estável.</p>
+          <div class="feat"><span class="chip">Animações 1.7</span><span class="chip">Motor Pulsar</span><span class="chip">+ <span class="js-modcount">40</span> mods</span></div>
+        </div>
+        <div class="vrows"><div>1.7.10</div><div>1.12.2</div><div>1.16.5</div><div>1.20.4</div><div>1.21</div><div>+ mais</div></div>
+        <button class="btn-play" type="button">JOGAR 1.8.9</button>
+        <h4>Entrar direto</h4>
+        <div class="srv"><div>hypixel.net <span>● 41.2k</span></div><div>minemen.club <span>● 3.8k</span></div><div style="color:var(--mute)">+ adicionar servidor</div></div>
+      </aside>
+    </div></div>
+    <div class="notes">
+      <p><b>Ideia</b>O pulsar vira um sistema solar. Combate fica na órbita mais perto do centro, HUD no meio e Visual por fora.</p>
+      <p><b>1.8.9 em destaque</b>Um cartão grande com o selo "Recomendada PVP". As outras versões ficam em botões pequenos logo abaixo.</p>
+      <p><b>Bom para</b>Mostrar quantos mods o client tem logo de cara. É o modelo com mais personalidade e o que mais lembra o tema espacial.</p>
+    </div>
+  </section>
+
+  <!-- ===================== MODELO C ===================== -->
+  <section class="model" id="modelo-c">
+    <div class="model-head">
+      <h2>Modelo C · Painel</h2>
+      <span class="tag">central de mods com prévia da HUD ao vivo</span>
+    </div>
+    <div class="stage"><div class="screen" id="scrC">
+      <canvas class="stars" width="1280" height="800" data-seed="3"></canvas>
+      <div class="c-banner">
+        <div class="beam"></div>
+        <div class="pulsar" style="width:110px;left:20px;top:20px"><div class="halo"></div><div class="tilt"><div class="beams"></div></div><div class="core"></div></div>
+        <div class="txt"><h3>Mods · 1.8.9 PVP</h3><p><span class="js-modcount">40</span> de <span class="js-modtotal">55</span> mods ligados. Perfil: Ranqueada</p></div>
+      </div>
+      <aside class="c-side">
+        <div class="logo"><span class="dot"></span>PULSAR</div>
+        <nav class="c-menu"><span>Início</span><span class="on">Mods</span><span>Editor de HUD</span><span>Cosméticos</span><span>Amigos</span><span>Servidores</span><span>Ajustes</span></nav>
+        <div class="c-launch">
+          <div class="row"><span class="chip">versão</span><b>1.8.9</b></div>
+          <button class="btn-play" type="button">JOGAR</button>
+        </div>
+      </aside>
+      <div class="c-tools">
+        <div class="c-search">buscar mod…</div>
+        <span class="chip on">Combate</span><span class="chip">HUD</span><span class="chip">Visual</span><span class="chip">Servidores</span>
+      </div>
+      <div class="c-grid" id="cgrid"></div>
+      <div class="c-prev">
+        <h4>Prévia da HUD</h4>
+        <div class="mc">
+          <div class="hud keys"><span></span><span class="on">W</span><span></span><span class="on">A</span><span>S</span><span>D</span><span class="w2 on">LMB · 12 Hz</span></div>
+          <div class="hud box" style="right:10px;top:10px;text-align:right">FPS <b>412</b><br>Ping <b>14ms</b><br>Combo <b>4</b><br>Alcance <b>2.94</b></div>
+          <div class="hud box" style="left:10px;bottom:46px">Força II 1:24<br>Velocidade II 2:10</div>
+          <div class="hud box" style="right:10px;bottom:46px;text-align:right">Capacete 312<br>Peitoral 488<br>Calças 451<br>Botas 389</div>
+          <div class="xh"></div>
+          <div class="hotbar"><span class="sel"></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+        <p class="hint">Arraste cada elemento para mudar a posição na tela.</p>
+      </div>
+    </div></div>
+    <div class="notes">
+      <p><b>Ideia</b>Abre direto na lista de mods, com uma prévia da tela do jogo do lado. O pulsar fica no topo, soltando o feixe pela faixa.</p>
+      <p><b>1.8.9 em destaque</b>A versão aparece no título da página e no botão JOGAR, que fica sempre visível na barra lateral.</p>
+      <p><b>Bom para</b>Jogador de PVP que gosta de ajustar a HUD antes de jogar. É o mais completo e o mais perto de um produto pronto.</p>
+    </div>
+  </section>
+
+  <!-- ===================== LISTA DE MODS ===================== -->
+  <section class="mods" id="mods">
+    <div class="eyebrow">Rascunho</div>
+    <h2 style="font-size:clamp(22px,3vw,30px);font-weight:600">Lista de mods do Pulsar</h2>
+    <p>Cada mod tem um nome próprio do Pulsar. A última coluna mostra o mod do Lunar Client que faz a mesma coisa, só como referência. Nada da marca ou dos arquivos do Lunar é usado. Os nomes ainda podem mudar.</p>
+    <div class="filters" id="filters" role="group" aria-label="Filtrar por categoria"></div>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Mod no Pulsar</th><th>O que faz</th><th>Categoria</th><th>Equivale no Lunar</th></tr></thead>
+        <tbody id="modrows"></tbody>
+      </table>
+    </div>
+    <p class="foot">Esta lista cobre os mods principais do Lunar Client. O Lunar adiciona mods com frequência, então vale conferir a lista deles antes de fechar a versão final. Um detalhe do tema: o CPS aparece em Hz, a mesma unidade usada para medir a rotação de um pulsar real.</p>
+  </section>
+
+</div>
+
+<script>
+const CATS = {
+  "Combate":    "var(--ember)",
+  "HUD":        "var(--beam)",
+  "Visual":     "var(--nebula)",
+  "Servidores": "#6EE7A8",
+  "Social":     "#FF7AB6",
+  "Desempenho": "#E8C547"
+};
+const MODS = [
+  ["Teclas Pulse","Mostra WASD, cliques e pulo na tela","Combate","Keystrokes",1],
+  ["Frequência CPS","Cliques por segundo, mostrados em Hz","Combate","CPS",1],
+  ["Alcance","Distância de cada hit que você acerta","Combate","Reach Display",1],
+  ["Combo","Conta quantos hits seguidos você deu","Combate","Combo Counter",1],
+  ["Animações Clássicas","Bloqueio e swing no estilo da 1.7","Combate","1.7 Animations",1],
+  ["Mira de Pulsar","Editor de mira com formas, cores e animação","Combate","Crosshair",1],
+  ["Impacto","Muda a cor do inimigo quando ele leva dano","Combate","Hit Color",1],
+  ["Campo de Colisão","Mostra a hitbox de jogadores e projéteis","Combate","Hitbox",0],
+  ["Blindagem","Durabilidade da armadura e do item na mão","Combate","Armor Status",1],
+  ["Efeitos","Poções ativas com tempo restante","Combate","Potion Effects",1],
+  ["Contador de Itens","Flechas, pérolas, maçãs e poções no inventário","Combate","Item Counter",1],
+  ["Propulsão","Correr e agachar ficam ligados sem segurar","Combate","Toggle Sprint / Sneak",1],
+  ["Recargas","Tempo de recarga de pérolas e itens","Combate","Cooldowns",1],
+  ["Poções Brilhantes","Brilho de encantamento nas poções","Combate","Shiny Pots",0],
+  ["Tremor de Dano","Diminui ou tira o tremor da câmera ao levar dano","Combate","Hurt Cam",1],
+  ["Contador TNT","Tempo até a TNT explodir","Combate","TNT Timer",0],
+  ["FPS","Quadros por segundo","HUD","FPS",1],
+  ["Latência","Seu ping no servidor","HUD","Ping",1],
+  ["Coordenadas","Posição X, Y, Z e bioma","HUD","Coordinates",1],
+  ["Bússola","Direção para onde você está olhando","HUD","Direction HUD",0],
+  ["Relógio","Hora do seu computador","HUD","Clock",0],
+  ["Cronômetro","Marca tempo de partidas e treinos","HUD","Stopwatch",0],
+  ["Memória","Uso de RAM do jogo","HUD","Memory Usage",0],
+  ["Servidor","Endereço do servidor atual","HUD","Server Address",1],
+  ["Placar","Move, redimensiona ou esconde o scoreboard","HUD","Scoreboard",1],
+  ["Barra de Chefe","Ajusta a barra de boss","HUD","Boss Bar",0],
+  ["Pacote Ativo","Mostra o resource pack em uso","HUD","Pack Display",1],
+  ["Saturação","Mostra a saturação da fome","HUD","Saturation",0],
+  ["Lista Tab","Tab com ping em número e cabeças","HUD","Tab List",1],
+  ["Etiquetas","Ajusta nomes acima dos jogadores","HUD","Nametag",1],
+  ["Chat+","Chat com histórico, filtros e mensagens empilhadas","HUD","Chat",1],
+  ["Telescópio","Zoom suave com a roda do mouse","Visual","Zoom",1],
+  ["Órbita Livre","Olha em volta sem virar o personagem","Visual","Freelook",1],
+  ["Rastro de Cometa","Desfoque de movimento","Visual","Motion Blur",0],
+  ["Supernova","Brilho total, enxerga no escuro","Visual","Fullbright",1],
+  ["Contorno","Cor e espessura do contorno do bloco","Visual","Block Outline",1],
+  ["Aura de Encanto","Muda a cor do brilho de encantamento","Visual","Glint Colorizer",0],
+  ["Poeira Estelar","Multiplica ou esconde partículas de hit","Visual","Particle Changer",1],
+  ["Ciclo Solar","Fixa a hora do dia só para você","Visual","Time Changer",0],
+  ["Atmosfera","Liga ou desliga chuva e neve","Visual","Weather Changer",0],
+  ["Gravidade de Itens","Itens caem deitados no chão","Visual","Item Physics",0],
+  ["Nebulosa","Desfoque no fundo dos menus","Visual","Menu Blur",1],
+  ["Carta Estelar","Minimapa no canto da tela","Visual","Minimap",0],
+  ["Constelações","Marcadores de lugares no mundo","Visual","Waypoints",0],
+  ["GG Automático","Manda GG no fim da partida","Servidores","Auto GG",1],
+  ["Atalhos de Texto","Frases rápidas em teclas","Servidores","Auto Text",0],
+  ["Nível","Mostra o nível do jogador no nome","Servidores","Level Head",1],
+  ["Salto Rápido","Entra em modos de jogo com um clique","Servidores","Quickplay",1],
+  ["Modo Anônimo","Esconde seu nick para gravar ou fazer live","Servidores","Nick Hider",0],
+  ["Hangar","Capas, asas, chapéus e outros cosméticos","Social","Cosmetics",1],
+  ["Emotes","Animações para o personagem","Social","Emotes",0],
+  ["Amigos","Lista de amigos e chat dentro do client","Social","Friends",1],
+  ["Sinal Discord","Mostra no Discord o que você está jogando","Social","Discord Rich Presence",1],
+  ["Rádio Pulsar","Controle de música dentro do jogo","Social","Music Player",0],
+  ["Replay","Grava partidas para rever depois","Social","Replay Mod",0],
+  ["Capturas","Salva e envia prints com um clique","Social","Screenshot Uploader",0],
+  ["Motor Pulsar","Otimizações de FPS e carregamento de chunks","Desempenho","Otimizações internas",1],
+  ["Organizador de Packs","Pastas e busca para resource packs","Desempenho","Pack Organizer",0],
+];
+const on = MODS.filter(m=>m[4]).length;
+document.querySelectorAll(".js-modcount").forEach(e=>e.textContent=on);
+document.querySelectorAll(".js-modtotal").forEach(e=>e.textContent=MODS.length);
+
+/* estrelas */
+function rng(seed){let s=seed>>>0||1;return()=>(s=(s*1664525+1013904223)>>>0)/4294967296}
+document.querySelectorAll("canvas.stars").forEach(cv=>{
+  const r=rng(+cv.dataset.seed), g=cv.getContext("2d");
+  for(let i=0;i<420;i++){
+    const x=r()*1280,y=r()*800,s=r(),a=.25+r()*.7;
+    g.fillStyle=s>.96?`rgba(200,240,255,${a})`:s>.9?`rgba(190,170,255,${a*.8})`:`rgba(233,241,255,${a*.7})`;
+    g.fillRect(x,y,s>.97?2:1,s>.97?2:1);
+  }
+});
+
+/* órbitas do modelo B */
+(function(){
+  const box=document.getElementById("orbits"); const cx=354, cy=420;
+  const rings=[
+    {rx:150,c:"var(--ember)",mods:["Teclas Pulse","Frequência CPS","Alcance","Combo"],off:.4},
+    {rx:238,c:"var(--beam)",mods:["FPS","Latência","Blindagem","Efeitos","Placar"],off:1.1},
+    {rx:322,c:"var(--nebula)",mods:["Telescópio","Órbita Livre","Mira de Pulsar","Supernova","Hangar","Poeira Estelar"],off:.15}
+  ];
+  rings.forEach(R=>{
+    const ry=R.rx*.42, el=document.createElement("div");
+    el.className="orbit-ring";
+    Object.assign(el.style,{left:cx-R.rx+"px",top:cy-ry+"px",width:R.rx*2+"px",height:ry*2+"px"});
+    box.appendChild(el);
+    R.mods.forEach((m,i)=>{
+      const t=R.off+i*(Math.PI*2/R.mods.length), n=document.createElement("div");
+      n.className="onode"+(Math.sin(t)<-.2?" back":"");
+      n.textContent=m; n.style.setProperty("--c",R.c);
+      n.style.left=cx+R.rx*Math.cos(t)+"px"; n.style.top=cy+ry*Math.sin(t)+"px";
+      box.appendChild(n);
+    });
+  });
+})();
+
+/* cards do modelo C */
+(function(){
+  const g=document.getElementById("cgrid");
+  MODS.filter(m=>m[2]==="Combate").slice(0,12).forEach(m=>{
+    const c=document.createElement("div"); c.className="mcard";
+    c.innerHTML=`<div class="top"><b></b><button class="tog" type="button" aria-pressed="${m[4]?"true":"false"}"></button></div><p></p><small>${m[2]}</small>`;
+    c.querySelector("b").textContent=m[0]; c.querySelector("p").textContent=m[1];
+    const t=c.querySelector(".tog"); t.setAttribute("aria-label","Ligar "+m[0]);
+    t.addEventListener("click",()=>t.setAttribute("aria-pressed",t.getAttribute("aria-pressed")==="true"?"false":"true"));
+    g.appendChild(c);
+  });
+})();
+
+/* tabela de mods */
+(function(){
+  const f=document.getElementById("filters"), tb=document.getElementById("modrows");
+  let cur="Todos";
+  const names=["Todos",...Object.keys(CATS)];
+  function render(){
+    tb.innerHTML="";
+    MODS.filter(m=>cur==="Todos"||m[2]===cur).forEach(m=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML=`<td class="n"></td><td class="d"></td><td class="cat"><span class="cat-dot" style="--c:${CATS[m[2]]}"></span>${m[2]}</td><td class="l"></td>`;
+      tr.children[0].textContent=m[0]; tr.children[1].textContent=m[1]; tr.children[3].textContent=m[3];
+      tb.appendChild(tr);
+    });
+    f.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.c===cur?"true":"false"));
+  }
+  names.forEach(n=>{
+    const b=document.createElement("button"); b.type="button"; b.dataset.c=n;
+    const count=n==="Todos"?MODS.length:MODS.filter(m=>m[2]===n).length;
+    b.innerHTML=`${n}<span>${count}</span>`;
+    b.addEventListener("click",()=>{cur=n;render()});
+    f.appendChild(b);
+  });
+  render();
+})();
+
+/* escala das telas */
+function fit(st){st.querySelector(".screen").style.transform=`scale(${st.clientWidth/1280})`}
+document.querySelectorAll(".stage").forEach(st=>{fit(st); if(window.ResizeObserver) new ResizeObserver(()=>fit(st)).observe(st)});
+</script>
