@@ -25,8 +25,21 @@ const REQUIRED = [
   [/Motor: gancho de partículas instalado/, "gancho de partículas do Motor"],
   [/Conta trocada para PulsarTroca/, "troca de conta pela ponte do launcher"],
   [/selftest: mundo-pronto/, "mundo de teste"],
+  [/Fonte: ganchos instalados em FontRenderer/, "ganchos da Fonte do Pulsar"],
+  [/Fonte: espaçamento com fração instalado/, "espaçamento da Fonte do Pulsar"],
+  [/Fonte do Pulsar carregada/, "Fonte do Pulsar carregada"],
+  [/Animações: gancho do balanço instalado/, "gancho das Animações Clássicas"],
+  [/Impacto: gancho da cor do dano instalado/, "gancho do Impacto"],
+  [/Cores Vivas: shader carregado/, "shader do Cores Vivas"],
 ];
-const FORBIDDEN = [/selftest: mundo-falhou/, /\[Pulsar\] O mod .* deu erro/];
+const FORBIDDEN = [
+  /selftest: mundo-falhou/,
+  /\[Pulsar\] O mod .* deu erro/,
+  /\[Pulsar\] .*desligad[oa]s? por erro/,
+  /\[Pulsar\] .*não carregou/,
+  /\[Pulsar\] .*ganchos não instalados/,
+  /\[Pulsar\] Lista do TAB: textos do servidor indisponíveis/,
+];
 
 fs.mkdirSync(work, { recursive: true });
 const log = fs.createWriteStream(logFile);

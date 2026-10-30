@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  * Parte do Pulsar que carrega antes do Minecraft: troca a tela de carregamento do Forge pela do Pulsar
- * ({@link SplashTransformer}) e instala os ganchos do Motor Pulsar ({@link MotorTransformer}).
+ * ({@link SplashTransformer}) e instala os ganchos do Motor Pulsar ({@link MotorTransformer}) e dos mods ({@link GanchosTransformer}).
  */
 @IFMLLoadingPlugin.Name("Pulsar Client")
 @IFMLLoadingPlugin.MCVersion("1.8.9")
@@ -16,7 +16,7 @@ import java.util.Map;
 public class PulsarCore implements IFMLLoadingPlugin {
     @Override
     public String[] getASMTransformerClass() {
-        return new String[]{SplashTransformer.class.getName(), MotorTransformer.class.getName()};
+        return new String[]{SplashTransformer.class.getName(), MotorTransformer.class.getName(), GanchosTransformer.class.getName()};
     }
 
     @Override public String getModContainerClass() { return null; }

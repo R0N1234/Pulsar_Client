@@ -1,5 +1,6 @@
 package dev.pulsarclient.core;
 
+import net.minecraft.client.particle.EntityFX;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 
@@ -11,9 +12,11 @@ import net.minecraft.tileentity.TileEntity;
 public final class MotorHooks {
     public interface EntityFilter { boolean shouldRender(Entity entity); }
     public interface TileFilter { boolean shouldRender(TileEntity tile); }
+    public interface ParticleFilter { boolean allow(EntityFX particle); }
 
     public static volatile EntityFilter entities;
     public static volatile TileFilter tiles;
+    public static volatile ParticleFilter particles;
     public static volatile boolean animations = true;
     /** Partículas novas por tick; 0 = sem limite. */
     public static volatile int particleLimit;
@@ -50,7 +53,16 @@ public final class MotorHooks {
         return animations;
     }
 
-    public static boolean allowParticle() {
+    public static boolean allowParticle(EntityFX particle) {
+        ParticleFilter f = particles;
+        if (f != null && particle != null) {
+            try {
+                if (!f.allow(particle)) return false;
+            } catch (Throwable t) {
+                particles = null;
+                System.err.println("[Pulsar] Motor: filtro de partículas desligado por erro: " + t);
+            }
+        }
         int limit = particleLimit;
         return limit <= 0 || ++particlesThisTick <= limit;
     }

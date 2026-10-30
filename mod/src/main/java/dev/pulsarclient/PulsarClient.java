@@ -6,6 +6,8 @@ import dev.pulsarclient.gui.Janela;
 import dev.pulsarclient.gui.MenuButtons;
 import dev.pulsarclient.gui.SelfTest;
 import dev.pulsarclient.hud.GuiHudEditor;
+import dev.pulsarclient.mods.AnimacoesClassicas;
+import dev.pulsarclient.mods.AtalhosTexto;
 import dev.pulsarclient.mods.Atmosfera;
 import dev.pulsarclient.mods.Blindagem;
 import dev.pulsarclient.mods.CampoColisao;
@@ -15,10 +17,16 @@ import dev.pulsarclient.mods.CombatTracker;
 import dev.pulsarclient.mods.ContadorItens;
 import dev.pulsarclient.mods.ContadorTnt;
 import dev.pulsarclient.mods.Contorno;
+import dev.pulsarclient.mods.CoresVivas;
 import dev.pulsarclient.mods.Cronometro;
+import dev.pulsarclient.mods.FontePulsar;
+import dev.pulsarclient.mods.GgAutomatico;
+import dev.pulsarclient.mods.Impacto;
 import dev.pulsarclient.mods.Inventario;
+import dev.pulsarclient.mods.ListaTab;
 import dev.pulsarclient.mods.MeuNick;
 import dev.pulsarclient.mods.OrbitaLivre;
+import dev.pulsarclient.mods.Placar;
 import dev.pulsarclient.mods.PoeiraEstelar;
 import dev.pulsarclient.mods.Efeitos;
 import dev.pulsarclient.mods.HudMod;
@@ -26,6 +34,7 @@ import dev.pulsarclient.mods.MiraPulsar;
 import dev.pulsarclient.mods.MotorPulsar;
 import dev.pulsarclient.mods.Propulsao;
 import dev.pulsarclient.mods.PulsarMod;
+import dev.pulsarclient.mods.Recargas;
 import dev.pulsarclient.mods.SimpleHudMods;
 import dev.pulsarclient.mods.Supernova;
 import dev.pulsarclient.mods.TeclasPulse;
@@ -54,7 +63,7 @@ import java.util.Set;
 @Mod(modid = PulsarClient.MODID, name = "Pulsar Client", version = PulsarClient.VERSION, clientSideOnly = true, acceptedMinecraftVersions = "[1.8.9]")
 public class PulsarClient {
     public static final String MODID = "pulsar";
-    public static final String VERSION = "0.5.0";
+    public static final String VERSION = "0.6.0";
     private static PulsarClient instance;
 
     private final List<PulsarMod> mods = new ArrayList<PulsarMod>();
@@ -100,6 +109,9 @@ public class PulsarClient {
         add(new CampoColisao());
         add(new ContadorItens());
         add(new ContadorTnt());
+        add(new Recargas());
+        add(new AnimacoesClassicas());
+        add(new Impacto());
         add(inventario);
         add(telescopio);
         add(orbita);
@@ -108,6 +120,12 @@ public class PulsarClient {
         add(new Supernova());
         add(new Contorno());
         add(new Atmosfera());
+        add(new Placar());
+        add(new ListaTab());
+        add(new FontePulsar());
+        add(new CoresVivas());
+        add(new AtalhosTexto());
+        add(new GgAutomatico());
         add(motor);
 
         config = new PulsarConfig(Minecraft.getMinecraft().mcDataDir);
@@ -155,6 +173,12 @@ public class PulsarClient {
         return inventario;
     }
 
+    /** Mod pelo id (o mesmo do launcher), ou null. */
+    public PulsarMod mod(String id) {
+        for (PulsarMod m : mods) if (m.id().equals(id)) return m;
+        return null;
+    }
+
     public KeyBinding panelKey() {
         return keyPanel;
     }
@@ -194,6 +218,10 @@ public class PulsarClient {
         if (!broken.add(mod)) return;
         System.err.println("[Pulsar] O mod " + mod.name() + " deu erro e foi pausado até reiniciar o jogo:");
         t.printStackTrace();
+        try {
+            mod.onBroken();
+        } catch (Throwable ignored) {
+        }
     }
 
     /** Mantém o mod dentro da tela, mesmo depois de mudar o tamanho da janela ou a escala da interface. */

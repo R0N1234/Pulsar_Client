@@ -6,9 +6,11 @@ import dev.pulsarclient.mods.Category;
 import dev.pulsarclient.mods.PulsarMod;
 import dev.pulsarclient.settings.ActionSetting;
 import dev.pulsarclient.settings.BoolSetting;
+import dev.pulsarclient.settings.KeySetting;
 import dev.pulsarclient.settings.ModeSetting;
 import dev.pulsarclient.settings.Setting;
 import dev.pulsarclient.settings.SliderSetting;
+import dev.pulsarclient.settings.TextSetting;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
@@ -48,6 +50,9 @@ public class GuiPulsarPanel extends GuiScreen {
     private SliderSetting dragging;
     private ActionSetting flashed;
     private long flashUntil;
+    private KeySetting listening;
+    private TextSetting editing;
+    private GuiTextField field;
 
     // Painel calculado em initGui
     private int px, py, pw, ph;
@@ -79,11 +84,18 @@ public class GuiPulsarPanel extends GuiScreen {
         search.setEnableBackgroundDrawing(false);
         search.setMaxStringLength(24);
         search.setText(text);
+        String typing = field == null ? "" : field.getText();
+        field = new GuiTextField(1, fontRendererObj, 0, 0, 162, 10);
+        field.setEnableBackgroundDrawing(false);
+        field.setMaxStringLength(editing == null ? 100 : editing.maxLength());
+        field.setText(typing);
+        field.setFocused(editing != null);
     }
 
     @Override
     public void updateScreen() {
         search.updateCursorCounter();
+        field.updateCursorCounter();
     }
 
     // ---------- desenho ----------
@@ -126,16 +138,22 @@ public class GuiPulsarPanel extends GuiScreen {
         drawCenteredString(fontRendererObj, "Editar HUD", cx, by + 5, TEXT);
     }
 
+    /** Altura de cada item da barra lateral: menor em telas baixas, para caber tudo. */
+    private int sideStep() {
+        return ph >= 260 ? 17 : 15;
+    }
+
     private int sideItem(String label, boolean selected, int y, int mouseX, int mouseY) {
-        boolean hover = inside(mouseX, mouseY, px + 1, y, px + SIDE_W, y + 16);
+        int h = sideStep() - 1;
+        boolean hover = inside(mouseX, mouseY, px + 1, y, px + SIDE_W, y + h);
         if (selected) {
-            drawRect(px + 1, y, px + SIDE_W, y + 16, 0x227FE7FF);
-            drawRect(px + 1, y, px + 3, y + 16, BEAM);
+            drawRect(px + 1, y, px + SIDE_W, y + h, 0x227FE7FF);
+            drawRect(px + 1, y, px + 3, y + h, BEAM);
         } else if (hover) {
-            drawRect(px + 1, y, px + SIDE_W, y + 16, 0x11FFFFFF);
+            drawRect(px + 1, y, px + SIDE_W, y + h, 0x11FFFFFF);
         }
-        fontRendererObj.drawString(label, px + 10, y + 4, selected ? BEAM : hover ? TEXT : MUTED);
-        return y + 17;
+        fontRendererObj.drawString(label, px + 10, y + (h - 8) / 2, selected ? BEAM : hover ? TEXT : MUTED);
+        return y + sideStep();
     }
 
     private List<PulsarMod> visibleMods() {
@@ -239,7 +257,7 @@ public class GuiPulsarPanel extends GuiScreen {
             drawCenteredString(fontRendererObj, done ? "Feito!" : s.label(), mx + mw / 2, cy, done ? BEAM : TEXT);
             return;
         }
-        int room = s instanceof BoolSetting ? mw - 44 : mw - 130;
+        int room = s instanceof BoolSetting ? mw - 44 : s instanceof TextSetting ? mw - 186 : mw - 130;
         fontRendererObj.drawString(fontRendererObj.trimStringToWidth(s.label(), room), mx + 6, cy, TEXT);
         if (s instanceof BoolSetting) {
             toggle(mx + mw - 28, y + 6, ((BoolSetting) s).get());
@@ -257,6 +275,24 @@ public class GuiPulsarPanel extends GuiScreen {
             String v = "< " + ((ModeSetting) s).get() + " >";
             drawRect(cx, y + 4, cx + 110, y + ROW_H - 4, 0xFF0B1222);
             drawCenteredString(fontRendererObj, v, cx + 55, cy, BEAM);
+        } else if (s instanceof KeySetting) {
+            boolean waiting = listening == s;
+            drawRect(cx, y + 4, cx + 110, y + ROW_H - 4, 0xFF0B1222);
+            if (waiting) outline(cx, y + 4, cx + 110, y + ROW_H - 4, 0xFFFFD84A);
+            drawCenteredString(fontRendererObj, waiting ? "Aperte uma tecla" : ((KeySetting) s).display(), cx + 55, cy, waiting ? 0xFFFFD84A : BEAM);
+        } else if (s instanceof TextSetting) {
+            int fx = mx + mw - 176;
+            drawRect(fx, y + 4, mx + mw - 6, y + ROW_H - 4, 0xFF0B1222);
+            outline(fx, y + 4, mx + mw - 6, y + ROW_H - 4, editing == s ? BEAM : LINE);
+            if (editing == s) {
+                field.xPosition = fx + 4;
+                field.yPosition = cy;
+                field.drawTextBox();
+            } else {
+                String t = ((TextSetting) s).get();
+                if (t.isEmpty()) fontRendererObj.drawString("Clique para escrever", fx + 4, cy, MUTED);
+                else fontRendererObj.drawString(fontRendererObj.trimStringToWidth(t, 160), fx + 4, cy, TEXT);
+            }
         }
     }
 
@@ -278,6 +314,7 @@ public class GuiPulsarPanel extends GuiScreen {
             case COMBATE: return 0xFFFF8A3D;
             case VISUAL: return 0xFF9B7CFF;
             case MOTOR: return 0xFFE8C547;
+            case SERVIDORES: return 0xFF6EE7A8;
             default: return BEAM;
         }
     }
@@ -286,6 +323,13 @@ public class GuiPulsarPanel extends GuiScreen {
 
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int button) throws IOException {
+        if (listening != null) {
+            // Botão do meio ou laterais do mouse viram a tecla; clique esquerdo ou direito cancela.
+            if (button >= 2) listening.set(button - 100);
+            listening = null;
+            return;
+        }
+        if (editing != null) commitText();
         if (open == null) search.mouseClicked(mouseX, mouseY, button);
         if (clickSidebar(mouseX, mouseY)) return;
         if (mouseY < py + 26) {
@@ -303,10 +347,11 @@ public class GuiPulsarPanel extends GuiScreen {
     private boolean clickSidebar(int mouseX, int mouseY) {
         if (mouseX < px || mouseX >= px + SIDE_W || mouseY < py || mouseY >= py + ph) return false;
         int y = py + 74;
-        if (mouseY >= y && mouseY < y + 17) { select(null); return true; }
+        int step = sideStep();
+        if (mouseY >= y && mouseY < y + step) { select(null); return true; }
         for (Category c : Category.values()) {
-            y += 17;
-            if (mouseY >= y && mouseY < y + 17) { select(c); return true; }
+            y += step;
+            if (mouseY >= y && mouseY < y + step) { select(c); return true; }
         }
         int by = py + ph - 28;
         if (inside(mouseX, mouseY, px + 8, by, px + SIDE_W - 8, by + 18)) {
@@ -316,6 +361,8 @@ public class GuiPulsarPanel extends GuiScreen {
     }
 
     private void select(Category c) {
+        commitText();
+        listening = null;
         category = c;
         open = null;
         scroll = 0;
@@ -365,7 +412,21 @@ public class GuiPulsarPanel extends GuiScreen {
         } else if (s instanceof SliderSetting) {
             dragging = (SliderSetting) s;
             drag(mouseX);
+        } else if (s instanceof KeySetting) {
+            listening = (KeySetting) s;
+        } else if (s instanceof TextSetting) {
+            editing = (TextSetting) s;
+            field.setMaxStringLength(editing.maxLength());
+            field.setText(editing.get());
+            field.setFocused(true);
+            field.setCursorPositionEnd();
         }
+    }
+
+    private void commitText() {
+        if (editing != null) editing.set(field.getText());
+        editing = null;
+        field.setFocused(false);
     }
 
     private void drag(int mouseX) {
@@ -399,6 +460,23 @@ public class GuiPulsarPanel extends GuiScreen {
 
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        if (listening != null) {
+            if (keyCode == Keyboard.KEY_BACK || keyCode == Keyboard.KEY_DELETE) listening.set(0);
+            else if (keyCode != Keyboard.KEY_ESCAPE && keyCode != 0) listening.set(keyCode);
+            if (keyCode != 0) listening = null;
+            return;
+        }
+        if (editing != null) {
+            if (keyCode == Keyboard.KEY_ESCAPE) {
+                editing = null;
+                field.setFocused(false);
+            } else if (keyCode == Keyboard.KEY_RETURN || keyCode == Keyboard.KEY_NUMPADENTER) {
+                commitText();
+            } else {
+                field.textboxKeyTyped(typedChar, keyCode);
+            }
+            return;
+        }
         if (keyCode == Keyboard.KEY_ESCAPE) {
             if (open != null) back();
             else mc.displayGuiScreen(parent);
@@ -413,12 +491,15 @@ public class GuiPulsarPanel extends GuiScreen {
     }
 
     private void back() {
+        commitText();
+        listening = null;
         open = null;
         scroll = 0;
     }
 
     @Override
     public void onGuiClosed() {
+        commitText();
         Keyboard.enableRepeatEvents(false);
         PulsarClient.get().save();
     }

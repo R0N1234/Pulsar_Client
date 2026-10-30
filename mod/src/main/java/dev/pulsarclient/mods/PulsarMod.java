@@ -61,4 +61,7 @@ public abstract class PulsarMod {
 
     /** Chamado a cada tick do cliente, ligado ou não. */
     public void tick() {}
+
+    /** Chamado uma vez quando o mod dá erro e é pausado: desfaz o que ele mudou no jogo. */
+    public void onBroken() {}
 }

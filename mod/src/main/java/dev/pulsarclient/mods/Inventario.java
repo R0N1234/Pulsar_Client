@@ -10,10 +10,22 @@ import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.InventoryEffectRenderer;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemAxe;
+import net.minecraft.item.ItemBow;
+import net.minecraft.item.ItemFishingRod;
+import net.minecraft.item.ItemHoe;
+import net.minecraft.item.ItemPickaxe;
+import net.minecraft.item.ItemPotion;
+import net.minecraft.item.ItemSpade;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemSword;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.input.Keyboard;
@@ -24,7 +36,10 @@ import java.util.TreeSet;
 
 /**
  * Inventário: trava itens para não dropar nem tirar do lugar sem querer (passe o mouse no item e aperte L),
- * e ajustes da tela do inventário.
+ * impede de dropar os tipos de item escolhidos (espada, arco, picareta...) e ajusta a tela do inventário.
+ *
+ * Os tipos escolhidos continuam livres para mexer no inventário; só não saem dele: a tecla de dropar,
+ * clicar fora da janela com o item no mouse e fechar a janela com o item no mouse ficam bloqueados.
  */
 public class Inventario extends PulsarMod {
     private static final int LOCK_COLOR = 0xFFFF6B6B;
@@ -36,18 +51,32 @@ public class Inventario extends PulsarMod {
     private final BoolSetting hideEffects = add(new BoolSetting("sem_efeitos", "Esconder os efeitos ao lado do inventário", false));
     private final TextSetting lockedSlots = add(new TextSetting("slots", ""));
 
+    // Tipos de item que não podem ser dropados.
+    private final BoolSetting swords = add(new BoolSetting("nao_dropar_espadas", "Não dropar espadas", true));
+    private final BoolSetting bows = add(new BoolSetting("nao_dropar_arcos", "Não dropar arcos", false));
+    private final BoolSetting rods = add(new BoolSetting("nao_dropar_varas", "Não dropar varas de pesca", false));
+    private final BoolSetting axes = add(new BoolSetting("nao_dropar_machados", "Não dropar machados", false));
+    private final BoolSetting pickaxes = add(new BoolSetting("nao_dropar_picaretas", "Não dropar picaretas", false));
+    private final BoolSetting shovels = add(new BoolSetting("nao_dropar_pas", "Não dropar pás", false));
+    private final BoolSetting hoes = add(new BoolSetting("nao_dropar_enxadas", "Não dropar enxadas", false));
+    private final BoolSetting apples = add(new BoolSetting("nao_dropar_macas", "Não dropar maçãs douradas", false));
+    private final BoolSetting pearls = add(new BoolSetting("nao_dropar_perolas", "Não dropar pérolas do fim", false));
+    private final BoolSetting potions = add(new BoolSetting("nao_dropar_pocoes", "Não dropar poções", false));
+    private final BoolSetting buckets = add(new BoolSetting("nao_dropar_baldes", "Não dropar baldes de água e lava", false));
+
     private final TreeSet<Integer> locked = new TreeSet<Integer>();
     private String loadedFrom;
     private Field theSlot;
     private Field guiLeft;
     private Field guiTop;
     private Field xSize;
+    private Field ySize;
     private Field hasEffects;
     private boolean reflectionFailed;
     private long warnUntil;
 
     public Inventario() {
-        super("inventario", "Inventário", "Trava itens para não dropar (tecla L) e ajusta a tela do inventário", Category.COMBATE, true);
+        super("inventario", "Inventário", "Protege a espada e outros itens contra drop, trava slots (tecla L) e ajusta o inventário", Category.COMBATE, true);
     }
 
     // ---------- slots travados ----------
@@ -89,6 +118,7 @@ public class Inventario extends PulsarMod {
             guiLeft = ReflectionHelper.findField(GuiContainer.class, "guiLeft", "field_147003_i");
             guiTop = ReflectionHelper.findField(GuiContainer.class, "guiTop", "field_147009_r");
             xSize = ReflectionHelper.findField(GuiContainer.class, "xSize", "field_146999_f");
+            ySize = ReflectionHelper.findField(GuiContainer.class, "ySize", "field_147000_g");
         } catch (Throwable t) {
             theSlot = null;
             reflectionFailed = true;
@@ -105,31 +135,99 @@ public class Inventario extends PulsarMod {
     }
 
 
-    /** Índice no inventário do jogador do slot embaixo do mouse, ou -1. */
-    private int hoveredIndex(GuiContainer gui) {
+    private Slot hoveredSlot(GuiContainer gui) {
         try {
-            Slot slot = (Slot) theSlot.get(gui);
-            if (slot == null || mc.thePlayer == null || slot.inventory != mc.thePlayer.inventory) return -1;
-            return slot.getSlotIndex();
+            return (Slot) theSlot.get(gui);
         } catch (Exception e) {
-            return -1;
+            return null;
         }
     }
 
+    /** Índice no inventário do jogador do slot embaixo do mouse, ou -1. */
+    private int hoveredIndex(GuiContainer gui) {
+        Slot slot = hoveredSlot(gui);
+        if (slot == null || mc.thePlayer == null || slot.inventory != mc.thePlayer.inventory) return -1;
+        return slot.getSlotIndex();
+    }
+
+    /** Item de um tipo que o jogador escolheu não dropar. */
+    public boolean isProtectedType(ItemStack stack) {
+        if (!isEnabled() || stack == null || stack.getItem() == null) return false;
+        Item item = stack.getItem();
+        if (item instanceof ItemSword) return swords.get();
+        if (item instanceof ItemBow) return bows.get();
+        if (item instanceof ItemFishingRod) return rods.get();
+        if (item instanceof ItemAxe) return axes.get();
+        if (item instanceof ItemPickaxe) return pickaxes.get();
+        if (item instanceof ItemSpade) return shovels.get();
+        if (item instanceof ItemHoe) return hoes.get();
+        if (item instanceof ItemPotion) return potions.get();
+        if (item == Items.golden_apple) return apples.get();
+        if (item == Items.ender_pearl) return pearls.get();
+        if (item == Items.water_bucket || item == Items.lava_bucket) return buckets.get();
+        return false;
+    }
+
+    /** Item da mão que não pode ser dropado: slot travado com L ou tipo protegido. */
+    private boolean heldProtected() {
+        if (mc.thePlayer == null) return false;
+        ItemStack held = mc.thePlayer.inventory.getCurrentItem();
+        return held != null && (isLocked(mc.thePlayer.inventory.currentItem) || isProtectedType(held));
+    }
+
     private void warn() {
+        warn("Item travado (aperte L no inventário para destravar)");
+    }
+
+    private void warnType() {
+        warn("Esse item está protegido contra drop (mude no painel do Pulsar)");
+    }
+
+    private void warn(String message) {
         if (System.currentTimeMillis() < warnUntil) return;
         warnUntil = System.currentTimeMillis() + 1500;
-        mc.ingameGUI.setRecordPlaying("Item travado (aperte L no inventário para destravar)", false);
+        mc.ingameGUI.setRecordPlaying(message, false);
+    }
+
+    /** Item preso no mouse dentro de uma janela de inventário. */
+    private ItemStack cursorStack() {
+        return mc.thePlayer == null ? null : mc.thePlayer.inventory.getItemStack();
+    }
+
+    /** Mouse fora da janela: clicar ali com um item no mouse joga o item no chão. */
+    private boolean mouseOutside(GuiContainer gui) {
+        try {
+            int mx = Mouse.getEventX() * gui.width / mc.displayWidth;
+            int my = gui.height - Mouse.getEventY() * gui.height / mc.displayHeight - 1;
+            int left = guiLeft.getInt(gui);
+            int top = guiTop.getInt(gui);
+            return mx < left || my < top || mx >= left + xSize.getInt(gui) || my >= top + ySize.getInt(gui);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     // ---------- dentro do inventário ----------
 
     @SubscribeEvent
     public void onGuiKey(GuiScreenEvent.KeyboardInputEvent.Pre event) {
-        if (!isEnabled() || !locking.get() || !(event.gui instanceof GuiContainer) || !Keyboard.getEventKeyState() || !reflect()) return;
+        if (!isEnabled() || !(event.gui instanceof GuiContainer) || !Keyboard.getEventKeyState() || !reflect()) return;
         GuiContainer gui = (GuiContainer) event.gui;
         if (gui instanceof GuiContainerCreative) return;
         int key = Keyboard.getEventKey();
+        // Fechar a janela com um item protegido no mouse jogaria o item no chão.
+        if ((key == Keyboard.KEY_ESCAPE || key == mc.gameSettings.keyBindInventory.getKeyCode()) && isProtectedType(cursorStack())) {
+            event.setCanceled(true);
+            warn("Coloque o item protegido num espaço antes de fechar");
+            return;
+        }
+        Slot slot = hoveredSlot(gui);
+        if (key == mc.gameSettings.keyBindDrop.getKeyCode() && slot != null && slot.getHasStack() && isProtectedType(slot.getStack())) {
+            event.setCanceled(true);
+            warnType();
+            return;
+        }
+        if (!locking.get()) return;
         int hovered = hoveredIndex(gui);
         if (key == lockKey.getKeyCode() && key != 0) {
             if (hovered >= 0) toggleLock(hovered);
@@ -148,14 +246,27 @@ public class Inventario extends PulsarMod {
         }
     }
 
+    /**
+     * Clique e soltar do mouse. Os dois são barrados: com um item no mouse, é ao soltar o botão
+     * que o jogo coloca o item no slot (ou joga no chão, se for fora da janela).
+     */
     @SubscribeEvent
     public void onGuiMouse(GuiScreenEvent.MouseInputEvent.Pre event) {
-        if (!isEnabled() || !locking.get() || !(event.gui instanceof GuiContainer) || !reflect()) return;
-        if (event.gui instanceof GuiContainerCreative || !Mouse.getEventButtonState() || Mouse.getEventButton() < 0) return;
-        int hovered = hoveredIndex((GuiContainer) event.gui);
-        if (hovered >= 0 && isLocked(hovered)) {
+        if (!isEnabled() || !(event.gui instanceof GuiContainer) || !reflect()) return;
+        if (event.gui instanceof GuiContainerCreative || Mouse.getEventButton() < 0) return;
+        GuiContainer gui = (GuiContainer) event.gui;
+        boolean press = Mouse.getEventButtonState();
+        if (locking.get()) {
+            int hovered = hoveredIndex(gui);
+            if (hovered >= 0 && isLocked(hovered)) {
+                event.setCanceled(true);
+                if (press) warn();
+                return;
+            }
+        }
+        if (isProtectedType(cursorStack()) && hoveredSlot(gui) == null && mouseOutside(gui)) {
             event.setCanceled(true);
-            warn();
+            if (press) warnType();
         }
     }
 
@@ -206,12 +317,28 @@ public class Inventario extends PulsarMod {
             adjustEffects(mc.currentScreen);
             return;
         }
-        // Antes do jogo ler a tecla de dropar: com o item da mão travado, a tecla é consumida aqui.
-        if (mc.thePlayer == null || mc.currentScreen != null) return;
-        if (!isLocked(mc.thePlayer.inventory.currentItem) || mc.thePlayer.inventory.getCurrentItem() == null) return;
+        consumeDrop();
+    }
+
+    // O jogo lê a tecla de dropar logo depois destes eventos, no mesmo tick: com o item da mão protegido,
+    // o aperto é consumido aqui e o item fica.
+    @SubscribeEvent
+    public void onKeyInput(InputEvent.KeyInputEvent event) {
+        consumeDrop();
+    }
+
+    @SubscribeEvent
+    public void onMouseInput(InputEvent.MouseInputEvent event) {
+        consumeDrop();
+    }
+
+    private void consumeDrop() {
+        if (mc.thePlayer == null || mc.currentScreen != null || !heldProtected()) return;
         boolean consumed = false;
         while (mc.gameSettings.keyBindDrop.isPressed()) consumed = true;
-        if (consumed) warn();
+        if (!consumed) return;
+        if (isLocked(mc.thePlayer.inventory.currentItem)) warn();
+        else warnType();
     }
 
     @SubscribeEvent

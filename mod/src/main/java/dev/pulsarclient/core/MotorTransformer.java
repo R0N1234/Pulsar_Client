@@ -24,7 +24,7 @@ import java.util.List;
  * - RenderManager.shouldRender: entidades escondidas atrás de paredes ou longe não são desenhadas (nem sombra, nem nome).
  * - TileEntityRendererDispatcher.renderTileEntity: baús, placas, cabeças e banners longe não são desenhados.
  * - TextureMap.updateAnimations: animação de água, lava e fogo pode ser desligada.
- * - EffectRenderer.addEffect: limite de partículas novas por tick.
+ * - EffectRenderer.addEffect: limite de partículas novas por tick e partículas das suas poções na frente da câmera.
  *
  * Os nomes dos métodos no jogo publicado são os nomes SRG (func_...). Se algum não for encontrado,
  * o gancho simplesmente não é instalado e o log mostra os métodos que a classe tem.
@@ -67,8 +67,8 @@ public class MotorTransformer implements IClassTransformer {
                     new String[]{"func_94248_c", "updateAnimations"}, "()V", false, -1,
                     "animate", "()Z"),
             new Hook("net.minecraft.client.particle.EffectRenderer", "partículas",
-                    new String[]{"func_78873_a", "addEffect"}, "(Lnet/minecraft/client/particle/EntityFX;)V", false, -1,
-                    "allowParticle", "()Z"),
+                    new String[]{"func_78873_a", "addEffect"}, "(Lnet/minecraft/client/particle/EntityFX;)V", false, 1,
+                    "allowParticle", "(Lnet/minecraft/client/particle/EntityFX;)Z"),
     };
 
     @Override

@@ -64,7 +64,8 @@ def main():
     for c in chars:
         avanco = f.getlength(c) / R + ESPACAMENTO
         if c in (" ", " "):
-            glifos.append((c, None, 0, 0, max(avanco, 3.2)))
+            # O jogo desenha o espaço sempre com 4 pixels, sem passar pela fonte: a medida tem que bater.
+            glifos.append((c, None, 0, 0, 4.0))
             continue
         l, t, r, b = f.getbbox(c, anchor="ls")
         w, h = r - l + 2 * PAD, b - t + 2 * PAD
