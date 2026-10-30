@@ -43,6 +43,30 @@ jobs:
         with:
           name: pulsar-mod
           path: mod/build/libs/pulsar-client-*.jar
+      - name: Assinaturas da API do Minecraft para consulta (ramo ci-api)
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p /tmp/api
+          find ~/.gradle "$GITHUB_WORKSPACE/mod/.gradle" -name "*.jar" 2>/dev/null | grep -v sources > /tmp/api/jars.txt || true
+          CP=$(grep -iE "minecraft|forge" /tmp/api/jars.txt | paste -sd: -)
+          for c in $(cat mod/api-classes.txt 2>/dev/null); do
+            echo "=== $c" >> /tmp/api/api.txt
+            javap -p -classpath "$CP" "$c" >> /tmp/api/api.txt 2>&1 || true
+          done
+          find ~/.gradle "$GITHUB_WORKSPACE/mod/.gradle" \( -name "*.tiny" -o -name "*.srg" -o -name "*.tsrg" \) 2>/dev/null > /tmp/api/mappings.txt || true
+          for f in $(cat /tmp/api/mappings.txt); do
+            grep -E "$(paste -sd'|' mod/api-names.txt 2>/dev/null || echo NADA)" "$f" | head -400 | sed "s|^|$(basename $f): |" >> /tmp/api/nomes.txt || true
+          done
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git checkout -q --orphan ci-api
+          git rm -rfq --cached .
+          cp /tmp/api/*.txt .
+          git add api.txt jars.txt mappings.txt nomes.txt 2>/dev/null || git add jars.txt
+          git commit -qm "API ${GITHUB_SHA}"
+          git push -qf origin ci-api || true
 
   e2e:
     needs: mod
