@@ -22,7 +22,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class CoresVivas extends PulsarMod {
     private static final ResourceLocation GRUPO = new ResourceLocation("pulsar", "shaders/post/cores_vivas.json");
 
-    private final SliderSetting saturacao = add(new SliderSetting("saturacao", "Saturação", 130, 0, 200, 5, "%"));
+    private final SliderSetting saturacao = add(new SliderSetting("saturacao", "Saturação", 140, 0, 200, 5, "%"));
     private final SliderSetting contraste = add(new SliderSetting("contraste", "Contraste", 115, 50, 150, 5, "%"));
     private final SliderSetting brilho = add(new SliderSetting("brilho", "Brilho", 0, -20, 20, 1, ""));
 

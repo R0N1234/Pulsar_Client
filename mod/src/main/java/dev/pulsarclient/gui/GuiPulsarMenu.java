@@ -18,6 +18,7 @@ public class GuiPulsarMenu extends GuiScreen {
     private static final int LANGUAGE = 5;
     private static final int MODS = 6;
     private static final int QUIT = 7;
+    private static final int TEXTURES = 8;
     private static final int ACCOUNT_W = 132;
     private static final int ACCOUNT_H = 26;
 
@@ -36,9 +37,10 @@ public class GuiPulsarMenu extends GuiScreen {
         buttonList.add(new PulsarButton(MULTI, x, y + 24, 200, 20, "Multijogador"));
         buttonList.add(new PulsarButton(OPTIONS, x, y + 48, 98, 20, "Opções"));
         buttonList.add(new PulsarButton(PANEL, x + 102, y + 48, 98, 20, "Pulsar Client"));
-        buttonList.add(new PulsarButton(LANGUAGE, x, y + 72, 64, 20, "Idioma"));
-        buttonList.add(new PulsarButton(MODS, x + 68, y + 72, 64, 20, "Mods"));
-        buttonList.add(new PulsarButton(QUIT, x + 136, y + 72, 64, 20, "Sair"));
+        buttonList.add(new PulsarButton(LANGUAGE, x, y + 72, 47, 20, "Idioma"));
+        buttonList.add(new PulsarButton(TEXTURES, x + 51, y + 72, 47, 20, "Texturas"));
+        buttonList.add(new PulsarButton(MODS, x + 102, y + 72, 47, 20, "Mods"));
+        buttonList.add(new PulsarButton(QUIT, x + 153, y + 72, 47, 20, "Sair"));
     }
 
     @Override
@@ -79,6 +81,7 @@ public class GuiPulsarMenu extends GuiScreen {
             case PANEL: mc.displayGuiScreen(new GuiPulsarPanel(this)); break;
             case LANGUAGE: mc.displayGuiScreen(new GuiLanguage(this, mc.gameSettings, mc.getLanguageManager())); break;
             case MODS: mc.displayGuiScreen(new GuiModList(this)); break;
+            case TEXTURES: mc.displayGuiScreen(new GuiTexturas(this)); break;
             case QUIT: mc.shutdown(); break;
             default: break;
         }

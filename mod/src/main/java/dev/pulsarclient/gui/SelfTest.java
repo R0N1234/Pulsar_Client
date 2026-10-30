@@ -69,12 +69,13 @@ public class SelfTest {
             case 6: show("hud", new GuiHudEditor(menu)); break;
             case 7: show("atalhos", new GuiPulsarPanel(menu, Category.SERVIDORES, PulsarClient.get().mod("atalhos_texto"))); break;
             case 8: show("travas", new GuiPulsarPanel(menu, Category.COMBATE, PulsarClient.get().inventario())); break;
-            case 9:
+            case 9: show("texturas", new GuiTexturas(menu)); break;
+            case 10:
                 mc.displayGuiScreen(menu);
                 Conta.trocar();
                 break;
-            case 10: show("conta", menu); break;
-            case 11:
+            case 11: show("conta", menu); break;
+            case 12:
                 log("criando-mundo");
                 mc.launchIntegratedServer("pulsar-teste", "Pulsar Teste",
                         new WorldSettings(2026L, WorldSettings.GameType.SURVIVAL, false, false, WorldType.FLAT));
@@ -126,10 +127,35 @@ public class SelfTest {
                 log("fogo");
                 break;
             case 8:
+                // Baixa o pacote mais leve do catálogo de verdade (Modrinth) e liga no jogo.
+                Texturas.baixar(pacoteTeste());
+                log("baixando-textura");
+                break;
+            case 9:
+            case 10:
+                if (Texturas.baixado(pacoteTeste()) && pacoteTeste().progresso() < 0) {
+                    if (!Texturas.emUso(pacoteTeste())) Texturas.usar(pacoteTeste(), true);
+                } else if (t / STEP == 10) {
+                    log("textura-falhou");
+                }
+                break;
+            case 11:
+                log("textura");
+                break;
+            case 12:
+                show("texturasjogo", new GuiTexturas(null));
+                break;
+            case 13:
+                mc.displayGuiScreen(null);
                 finish(mc);
                 break;
             default: break;
         }
+    }
+
+    private static Texturas.Pacote pacoteTeste() {
+        for (Texturas.Pacote p : Texturas.catalogo()) if (p.id.equals("f8thful")) return p;
+        return Texturas.catalogo().get(0);
     }
 
     /** Fogo no jogador pelo servidor do mundo (no cliente o fogo é apagado a cada tick), com resistência ao fogo. */

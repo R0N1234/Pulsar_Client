@@ -127,6 +127,8 @@ public class GuiPulsarPanel extends GuiScreen {
         for (Category c : Category.values()) {
             y = sideItem(c.label, category == c && open == null, y, mouseX, mouseY);
         }
+        drawRect(px + 10, y + 1, px + SIDE_W - 10, y + 2, LINE);
+        sideItem("Texturas  >", false, y + 4, mouseX, mouseY);
 
         int on = 0;
         for (PulsarMod m : PulsarClient.get().mods()) if (m.isEnabled()) on++;
@@ -209,7 +211,7 @@ public class GuiPulsarPanel extends GuiScreen {
         drawRect(x, y, x + w, y + CARD_H, hover ? CARD_HOVER : CARD);
         drawRect(x, y, x + w, y + 1, categoryColor(mod.category()));
         fontRendererObj.drawString(fontRendererObj.trimStringToWidth(mod.name(), w - 12), x + 6, y + 6, TEXT);
-        fontRendererObj.drawString(fontRendererObj.trimStringToWidth(mod.description(), w - 12), x + 6, y + 18, MUTED);
+        fontRendererObj.drawString(caber(mod.description(), w - 12), x + 6, y + 18, MUTED);
         toggle(x + 6, y + 31, mod.isEnabled());
         fontRendererObj.drawString(mod.isEnabled() ? "Ligado" : "Desligado", x + 32, y + 32, mod.isEnabled() ? BEAM : MUTED);
         if (!mod.panelSettings().isEmpty()) {
@@ -233,7 +235,7 @@ public class GuiPulsarPanel extends GuiScreen {
         clampScroll();
         scissor(mx, top, mw, bottom - top);
         int y = top - scroll;
-        fontRendererObj.drawString(fontRendererObj.trimStringToWidth(open.description(), mw), mx, y, MUTED);
+        fontRendererObj.drawString(caber(open.description(), mw), mx, y, MUTED);
         y += 14;
         if (settings.isEmpty()) {
             fontRendererObj.drawString("Este mod não tem opções. Use o botão acima para ligar ou desligar.", mx, y + 6, MUTED);
@@ -352,6 +354,12 @@ public class GuiPulsarPanel extends GuiScreen {
         for (Category c : Category.values()) {
             y += step;
             if (mouseY >= y && mouseY < y + step) { select(c); return true; }
+        }
+        y += step + 4;
+        if (mouseY >= y && mouseY < y + step) {
+            commitText();
+            mc.displayGuiScreen(new GuiTexturas(this));
+            return true;
         }
         int by = py + ph - 28;
         if (inside(mouseX, mouseY, px + 8, by, px + SIDE_W - 8, by + 18)) {
@@ -515,6 +523,12 @@ public class GuiPulsarPanel extends GuiScreen {
         int f = new ScaledResolution(mc).getScaleFactor();
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GL11.glScissor(x * f, mc.displayHeight - (y + h) * f, w * f, h * f);
+    }
+
+    /** Corta o texto com "..." quando não cabe. */
+    private String caber(String s, int w) {
+        if (fontRendererObj.getStringWidth(s) <= w) return s;
+        return fontRendererObj.trimStringToWidth(s, w - fontRendererObj.getStringWidth("...")).trim() + "...";
     }
 
     private static boolean inside(int mouseX, int mouseY, int l, int t, int r, int b) {

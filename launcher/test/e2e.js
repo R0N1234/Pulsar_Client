@@ -31,9 +31,13 @@ const REQUIRED = [
   [/Animações: gancho do balanço instalado/, "gancho das Animações Clássicas"],
   [/Impacto: gancho da cor do dano instalado/, "gancho do Impacto"],
   [/Cores Vivas: shader carregado/, "shader do Cores Vivas"],
+  [/Texturas: F8thful baixado/, "download de textura do catálogo"],
+  [/Texturas: usando F8thful/, "textura ligada dentro do jogo"],
 ];
 const FORBIDDEN = [
   /selftest: mundo-falhou/,
+  /selftest: textura-falhou/,
+  /\[Pulsar\] Texturas: .*(não carregou|Não deu)/,
   /\[Pulsar\] O mod .* deu erro/,
   /\[Pulsar\] .*desligad[oa]s? por erro/,
   /\[Pulsar\] .*não carregou/,

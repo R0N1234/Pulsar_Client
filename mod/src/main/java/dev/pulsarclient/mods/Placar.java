@@ -46,7 +46,7 @@ public class Placar extends HudMod {
     private int largura;
 
     public Placar() {
-        super("placar", "Placar", "Placar lateral do servidor: mover, mudar o tamanho e tirar os números", Category.HUD, 10000, 60, false);
+        super("placar", "Placar", "Placar lateral do servidor: mover, mudar o tamanho e tirar os números", Category.HUD, 10000, 90, false);
         color.set(5);
     }
 

@@ -197,7 +197,9 @@ public class ListaTab extends PulsarMod {
     }
 
     private static int pontos(Scoreboard placar, ScoreObjective objetivo, NetworkPlayerInfo j) {
-        return placar.getValueFromObjective(j.getGameProfile().getName(), objetivo).getScorePoints();
+        // Só lê: getValueFromObjective sozinho criaria uma linha nova no placar para quem não tem pontos.
+        String nome = j.getGameProfile().getName();
+        return placar.entityHasObjective(nome, objetivo) ? placar.getValueFromObjective(nome, objetivo).getScorePoints() : 0;
     }
 
     /** Textos de cima e de baixo da lista, que o servidor manda (ficam guardados na lista do jogo). */

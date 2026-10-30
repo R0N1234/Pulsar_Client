@@ -96,22 +96,29 @@ public class GanchosTransformer implements IClassTransformer {
         Ganchos.ganchoFonte = true;
         System.out.println("[Pulsar] Fonte: ganchos instalados em FontRenderer (" + def.name + ", " + uni.name + ", " + charW.name + ", " + textW.name + ")");
 
-        // renderStringAtPos: "posX += (float)(int) largura" vira "posX += Ganchos.avanco(largura)".
-        if (atPos != null) {
-            List<AbstractInsnNode> casts = new ArrayList<AbstractInsnNode>();
-            for (AbstractInsnNode in = atPos.instructions.getFirst(); in != null; in = in.getNext()) {
-                if (in.getOpcode() == Opcodes.F2I && next(in) != null && next(in).getOpcode() == Opcodes.I2F) casts.add(in);
+        // "posX += (float)(int) largura" vira "posX += Ganchos.avanco(largura)". No Forge essa conta fica em doDraw,
+        // chamado por renderStringAtPos; no jogo puro fica no próprio renderStringAtPos.
+        MethodNode doDraw = method(node, "(F)V", "doDraw");
+        List<AbstractInsnNode> casts = new ArrayList<AbstractInsnNode>();
+        MethodNode alvo = null;
+        for (MethodNode m : new MethodNode[]{doDraw, atPos}) {
+            if (m == null) continue;
+            for (AbstractInsnNode in = m.instructions.getFirst(); in != null; in = in.getNext()) {
+                if (in.getOpcode() == Opcodes.F2I && next(in) != null && next(in).getOpcode() == Opcodes.I2F) {
+                    casts.add(in);
+                    alvo = m;
+                }
             }
-            if (casts.size() == 1) {
-                AbstractInsnNode f2i = casts.get(0);
-                AbstractInsnNode i2f = next(f2i);
-                atPos.instructions.set(f2i, new MethodInsnNode(Opcodes.INVOKESTATIC, G, "avanco", "(F)F", false));
-                atPos.instructions.remove(i2f);
-                Ganchos.ganchoAvanco = true;
-                System.out.println("[Pulsar] Fonte: espaçamento com fração instalado (" + atPos.name + ")");
-            } else {
-                System.err.println("[Pulsar] Fonte: espaçamento com fração não instalado (" + casts.size() + " conversões)");
-            }
+        }
+        if (casts.size() == 1) {
+            AbstractInsnNode f2i = casts.get(0);
+            AbstractInsnNode i2f = next(f2i);
+            alvo.instructions.set(f2i, new MethodInsnNode(Opcodes.INVOKESTATIC, G, "avanco", "(F)F", false));
+            alvo.instructions.remove(i2f);
+            Ganchos.ganchoAvanco = true;
+            System.out.println("[Pulsar] Fonte: espaçamento com fração instalado (" + alvo.name + ")");
+        } else {
+            System.err.println("[Pulsar] Fonte: espaçamento com fração não instalado (" + casts.size() + " conversões)");
         }
         return true;
     }

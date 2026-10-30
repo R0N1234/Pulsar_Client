@@ -25,7 +25,7 @@ public class AtalhosTexto extends PulsarMod {
         String[] exemplos = {"/lobby", "gg", "", "", "", ""};
         for (int i = 0; i < QUANTOS; i++) {
             teclas[i] = add(new KeySetting("tecla_" + (i + 1), "Atalho " + (i + 1) + ": tecla", 0));
-            textos[i] = add(new TextSetting("texto_" + (i + 1), "Atalho " + (i + 1) + ": mensagem ou comando", exemplos[i], 100));
+            textos[i] = add(new TextSetting("texto_" + (i + 1), "Atalho " + (i + 1) + ": texto", exemplos[i], 100));
         }
     }
 
