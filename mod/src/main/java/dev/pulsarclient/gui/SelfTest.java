@@ -174,8 +174,26 @@ public class SelfTest {
         });
     }
 
+    /** Mundo do teste sem monstros e sem dano: um slime matava o jogador no meio dos prints. */
+    private void protegerJogador(Minecraft mc) {
+        final IntegratedServer server = mc.getIntegratedServer();
+        final UUID id = mc.thePlayer.getUniqueID();
+        if (server == null) return;
+        server.addScheduledTask(new Runnable() {
+            @Override
+            public void run() {
+                server.setDifficultyForAllWorlds(EnumDifficulty.PEACEFUL);
+                EntityPlayerMP p = server.getConfigurationManager().getPlayerByUUID(id);
+                if (p == null) return;
+                p.capabilities.disableDamage = true;
+                p.sendPlayerAbilities();
+            }
+        });
+    }
+
     /** Liga todos os mods de HUD, dá itens e efeitos (só no cliente) para os prints mostrarem tudo. */
     private void prepareWorld(Minecraft mc) {
+        protegerJogador(mc);
         for (HudMod m : PulsarClient.get().hudMods()) m.setEnabled(true);
         mc.thePlayer.inventory.setInventorySlotContents(0, new ItemStack(Items.diamond_sword));
         mc.thePlayer.inventory.setInventorySlotContents(1, new ItemStack(Items.ender_pearl, 16));

@@ -19,7 +19,7 @@ public class Efeitos extends HudMod {
     private final Gui gui = new Gui();
 
     public Efeitos() {
-        super("efeitos", "Efeitos", "Poções ativas com tempo restante", Category.COMBATE, 10000, 100, false);
+        super("efeitos", "Efeitos", "Poções ativas com tempo restante", Category.COMBATE, 5, 245, false);
     }
 
     private List<PotionEffect> effects(boolean preview) {

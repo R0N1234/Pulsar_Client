@@ -5,6 +5,8 @@ const { Config } = require("./lib/config");
 const { Accounts, describeError } = require("./lib/auth");
 const { launch } = require("./lib/launch");
 const { startBridge } = require("./lib/ponte");
+const texturas = require("./lib/texturas");
+const usermods = require("./lib/usermods");
 
 // Janelas (inclusive o login da Microsoft) em português.
 app.commandLine.appendSwitch("lang", "pt-BR");
@@ -180,10 +182,62 @@ app.whenReady().then(() => {
     return publicConfig();
   });
   ipcMain.handle("link:open", (_e, url) => {
-    if (/^https:\/\/(optifine\.net|adoptium\.net)\//.test(String(url))) shell.openExternal(url);
+    if (/^https:\/\/(optifine\.net|adoptium\.net|modrinth\.com)\//.test(String(url))) shell.openExternal(url);
   });
   ipcMain.handle("mods:get", () => config.getEnabledMods());
   ipcMain.handle("mods:set", (_e, id, enabled) => config.setModEnabled(String(id), !!enabled));
+
+  // Aba Texturas: com o jogo aberto, a troca é feita pela aba Texturas dentro do jogo (ele regrava o options.txt ao fechar).
+  const gameDir = () => config.get().gameDir;
+  const semJogo = (texto) => {
+    if (game || launching) throw new Error(texto);
+  };
+  ipcMain.handle("texturas:list", () => texturas.listar(gameDir()));
+  ipcMain.handle("texturas:baixar", async (_e, id) => {
+    await texturas.baixar(gameDir(), String(id), (pct) => send("texturas:progresso", { id: String(id), pct }));
+    return texturas.listar(gameDir());
+  });
+  ipcMain.handle("texturas:usar", (_e, id, ligar) => {
+    semJogo("O jogo está aberto: troque a textura pela aba Texturas dentro do jogo.");
+    texturas.usar(gameDir(), String(id), !!ligar);
+    return texturas.listar(gameDir());
+  });
+  ipcMain.handle("texturas:remover", (_e, id) => {
+    semJogo("Feche o Minecraft antes de apagar uma textura.");
+    texturas.remover(gameDir(), String(id));
+    return texturas.listar(gameDir());
+  });
+  ipcMain.handle("texturas:pasta", () => shell.openPath(texturas.pastaPacotes(gameDir())));
+
+  // Seus mods: mods Forge 1.8.9 do jogador, na pasta mods da instância do Pulsar.
+  ipcMain.handle("usermods:list", () => usermods.listar(gameDir()));
+  ipcMain.handle("usermods:adicionar", async (_e, caminhos) => {
+    semJogo("Feche o Minecraft antes de mudar os mods.");
+    let arquivos = Array.isArray(caminhos) ? caminhos.map(String).filter(Boolean) : [];
+    if (!arquivos.length) {
+      const r = await dialog.showOpenDialog(win, {
+        title: "Escolha mods Forge para o Minecraft 1.8.9",
+        filters: [{ name: "Mods (.jar)", extensions: ["jar"] }],
+        properties: ["openFile", "multiSelections"],
+      });
+      if (r.canceled) return { mods: usermods.listar(gameDir()), recusados: [] };
+      arquivos = r.filePaths;
+    }
+    const recusados = usermods.adicionar(gameDir(), arquivos);
+    return { mods: usermods.listar(gameDir()), recusados };
+  });
+  ipcMain.handle("usermods:alternar", (_e, arquivo, ligar) => {
+    semJogo("Feche o Minecraft antes de mudar os mods.");
+    usermods.alternar(gameDir(), String(arquivo), !!ligar);
+    return usermods.listar(gameDir());
+  });
+  ipcMain.handle("usermods:remover", async (_e, arquivo) => {
+    semJogo("Feche o Minecraft antes de mudar os mods.");
+    // Vai para a Lixeira, para o jogador poder recuperar.
+    await shell.trashItem(usermods.seguro(gameDir(), String(arquivo)));
+    return usermods.listar(gameDir());
+  });
+  ipcMain.handle("usermods:pasta", () => shell.openPath(usermods.pasta(gameDir())));
 
   ipcMain.handle("account:restore", () => accounts.restore());
   ipcMain.handle("account:login", () => accounts.login({ icon: ICON }).catch((e) => Promise.reject(new Error(describeError(e)))));

@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer, webUtils } = require("electron");
 
 contextBridge.exposeInMainWorld("pulsar", {
   getConfig: () => ipcRenderer.invoke("config:get"),
@@ -7,6 +7,19 @@ contextBridge.exposeInMainWorld("pulsar", {
   openLink: (url) => ipcRenderer.invoke("link:open", url),
   getMods: () => ipcRenderer.invoke("mods:get"),
   setMod: (id, enabled) => ipcRenderer.invoke("mods:set", id, enabled),
+  listTexturas: () => ipcRenderer.invoke("texturas:list"),
+  baixarTextura: (id) => ipcRenderer.invoke("texturas:baixar", id),
+  usarTextura: (id, ligar) => ipcRenderer.invoke("texturas:usar", id, ligar),
+  removerTextura: (id) => ipcRenderer.invoke("texturas:remover", id),
+  abrirPastaTexturas: () => ipcRenderer.invoke("texturas:pasta"),
+  onTexturaProgresso: (fn) => ipcRenderer.on("texturas:progresso", (_e, p) => fn(p)),
+  listUserMods: () => ipcRenderer.invoke("usermods:list"),
+  adicionarMods: (caminhos) => ipcRenderer.invoke("usermods:adicionar", caminhos),
+  alternarMod: (arquivo, ligar) => ipcRenderer.invoke("usermods:alternar", arquivo, ligar),
+  removerMod: (arquivo) => ipcRenderer.invoke("usermods:remover", arquivo),
+  abrirPastaMods: () => ipcRenderer.invoke("usermods:pasta"),
+  // Caminho de um arquivo arrastado para a janela (para soltar mods na lista).
+  caminhoDe: (file) => (webUtils ? webUtils.getPathForFile(file) : ""),
   restoreAccount: () => ipcRenderer.invoke("account:restore"),
   login: () => ipcRenderer.invoke("account:login"),
   logout: () => ipcRenderer.invoke("account:logout"),

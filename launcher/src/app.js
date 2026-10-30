@@ -31,6 +31,8 @@ $("nav").addEventListener("click", (e) => {
   if (!b) return;
   document.querySelectorAll("#nav button").forEach((x) => x.classList.toggle("on", x === b));
   document.querySelectorAll(".view").forEach((v) => v.classList.toggle("on", v.id === "view-" + b.dataset.view));
+  if (b.dataset.view === "texturas") loadTexturas();
+  if (b.dataset.view === "mods" && aba === "seus") loadUserMods();
 });
 $("btnMin").onclick = () => api.minimize();
 $("btnClose").onclick = () => api.close();
@@ -100,6 +102,8 @@ api.onStatus((s) => {
     bar.hidden = true;
   }
   if (s.step === "closed") {
+    // A textura pode ter sido trocada dentro do jogo.
+    if ($("view-texturas").classList.contains("on")) loadTexturas();
     $("btnPlay").disabled = false;
     document.body.classList.remove("playing");
     if (!/erro/.test(s.text)) setStatus(s.text);
@@ -201,6 +205,195 @@ function renderGrid() {
 $("search").addEventListener("input", renderGrid);
 $("onlyReady").addEventListener("change", renderGrid);
 
+/* ---------- seus mods ---------- */
+let aba = "pulsar";
+$("modsSeg").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-aba]");
+  if (!b) return;
+  aba = b.dataset.aba;
+  document.querySelectorAll("#modsSeg button").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+  const seus = aba === "seus";
+  $("userMods").hidden = !seus;
+  document.querySelector(".mods-tools").hidden = seus;
+  document.querySelector(".mods-body").hidden = seus;
+  if (seus) loadUserMods();
+});
+
+function umMsg(text, isError = false) {
+  $("umMsg").textContent = text;
+  $("umMsg").classList.toggle("err", isError);
+}
+
+function renderUserMods(lista) {
+  const box = $("umList");
+  box.textContent = "";
+  $("userModCount").textContent = lista.length ? String(lista.length) : "";
+  if (!lista.length) {
+    const vazio = document.createElement("div");
+    vazio.className = "um-empty";
+    vazio.innerHTML = "<b>Nenhum mod seu ainda.</b><span>Clique em Adicionar mods ou arraste os arquivos .jar para cá.</span>";
+    box.append(vazio);
+    return;
+  }
+  for (const m of lista) {
+    const row = document.createElement("div");
+    row.className = "um-row" + (m.ligado ? "" : " off");
+    row.innerHTML = `<button class="tog" type="button"></button><div class="um-info"><b></b><small></small></div><button type="button" class="linkbtn um-del">remover</button>`;
+    row.querySelector("b").textContent = m.nome;
+    const det = [m.versao && "versão " + m.versao, m.mc && "Minecraft " + m.mc, m.arquivo].filter(Boolean).join("  ·  ");
+    row.querySelector("small").textContent = m.aviso || det;
+    if (m.aviso) row.querySelector("small").className = "warn";
+    const t = row.querySelector(".tog");
+    t.setAttribute("aria-pressed", String(m.ligado));
+    t.setAttribute("aria-label", (m.ligado ? "Desligar " : "Ligar ") + m.nome);
+    t.onclick = () => umAcao(() => api.alternarMod(m.arquivo, !m.ligado));
+    row.querySelector(".um-del").onclick = () => umAcao(() => api.removerMod(m.arquivo), m.nome + " foi para a Lixeira.");
+    box.append(row);
+  }
+}
+
+async function umAcao(fn, ok = "") {
+  try {
+    renderUserMods(await fn());
+    umMsg(ok);
+  } catch (err) {
+    umMsg(cleanErr(err), true);
+  }
+}
+
+async function loadUserMods() {
+  await umAcao(() => api.listUserMods());
+}
+
+async function adicionarMods(caminhos) {
+  try {
+    const r = await api.adicionarMods(caminhos);
+    renderUserMods(r.mods);
+    if (r.recusados.length) umMsg("Não entraram: " + r.recusados.join(" · "), true);
+    else umMsg(caminhos && caminhos.length ? "Mods adicionados. Eles carregam na próxima vez que o jogo abrir." : "");
+  } catch (err) {
+    umMsg(cleanErr(err), true);
+  }
+}
+$("btnAddMods").onclick = () => adicionarMods([]);
+$("btnModsFolder").onclick = () => api.abrirPastaMods();
+$("userMods").addEventListener("dragover", (e) => {
+  e.preventDefault();
+  $("userMods").classList.add("drop");
+});
+$("userMods").addEventListener("dragleave", () => $("userMods").classList.remove("drop"));
+$("userMods").addEventListener("drop", (e) => {
+  e.preventDefault();
+  $("userMods").classList.remove("drop");
+  const caminhos = [...e.dataTransfer.files].map((f) => api.caminhoDe(f)).filter(Boolean);
+  if (caminhos.length) adicionarMods(caminhos);
+});
+// Arquivo solto fora da lista não abre no lugar do launcher.
+addEventListener("dragover", (e) => e.preventDefault());
+addEventListener("drop", (e) => e.preventDefault());
+
+/* ---------- texturas ---------- */
+const progresso = {};
+
+function txMsg(text, isError = false) {
+  $("txMsg").textContent = text;
+  $("txMsg").classList.toggle("err", isError);
+}
+
+function tamanho(bytes) {
+  const mb = bytes / (1024 * 1024);
+  return mb < 10 ? mb.toFixed(1).replace(".", ",") + " MB" : Math.round(mb) + " MB";
+}
+
+function renderTexturas(lista) {
+  $("txPvp").textContent = "";
+  $("txQual").textContent = "";
+  for (const p of lista) {
+    const c = document.createElement("div");
+    c.className = "tx-card" + (p.emUso ? " on" : "");
+    c.dataset.id = p.id;
+    c.innerHTML = `<div class="tx-ico"><img alt="" loading="lazy"><span></span></div>
+      <div class="tx-info"><b></b><p></p><small></small></div>
+      <div class="tx-act"><button type="button" class="tx-btn"></button><button type="button" class="linkbtn tx-sub"></button></div>`;
+    const img = c.querySelector("img");
+    img.src = p.icone;
+    img.onerror = () => img.remove();
+    c.querySelector(".tx-ico span").textContent = p.resolucao;
+    c.querySelector("b").textContent = p.nome;
+    c.querySelector("p").textContent = p.desc;
+    c.querySelector("small").textContent = `${p.resolucao}  ·  ${tamanho(p.tamanho)}`;
+    const btn = c.querySelector(".tx-btn");
+    const sub = c.querySelector(".tx-sub");
+    const pct = progresso[p.id];
+    if (pct !== undefined) {
+      btn.className = "tx-btn busy";
+      btn.style.setProperty("--p", pct + "%");
+      btn.textContent = pct + "%";
+      btn.disabled = true;
+      sub.hidden = true;
+    } else if (p.emUso) {
+      btn.className = "tx-btn using";
+      btn.textContent = "Em uso";
+      btn.title = "Clique para desligar";
+      btn.onclick = () => txAcao(() => api.usarTextura(p.id, false), p.nome + " desligada.");
+      sub.textContent = "página";
+      sub.onclick = () => api.openLink(p.pagina);
+    } else if (p.baixado) {
+      btn.textContent = "Usar";
+      btn.onclick = () => txAcao(() => api.usarTextura(p.id, true), `Usando ${p.nome}. Ela aparece na próxima vez que o jogo abrir.`);
+      sub.textContent = "apagar";
+      sub.onclick = () => txAcao(() => api.removerTextura(p.id), p.nome + " apagada.");
+    } else {
+      btn.className = "tx-btn get";
+      btn.textContent = "Baixar";
+      btn.onclick = () => baixarTextura(p);
+      sub.textContent = "página";
+      sub.onclick = () => api.openLink(p.pagina);
+    }
+    (p.tipo === "pvp" ? $("txPvp") : $("txQual")).append(c);
+  }
+}
+
+let ultimaLista = [];
+async function txAcao(fn, ok = "") {
+  try {
+    renderTexturas((ultimaLista = await fn()));
+    txMsg(ok);
+  } catch (err) {
+    txMsg(cleanErr(err), true);
+  }
+}
+
+async function loadTexturas() {
+  await txAcao(() => api.listTexturas());
+}
+
+async function baixarTextura(p) {
+  progresso[p.id] = 0;
+  renderTexturas(ultimaLista);
+  txMsg("");
+  try {
+    ultimaLista = await api.baixarTextura(p.id);
+    txMsg(p.nome + " baixada. Clique em Usar.");
+  } catch (err) {
+    txMsg(`Não deu para baixar ${p.nome}: ${cleanErr(err)}`, true);
+  } finally {
+    delete progresso[p.id];
+    renderTexturas(ultimaLista);
+  }
+}
+
+// Durante o download só o botão do pacote muda (a lista não é redesenhada a cada pedaço).
+api.onTexturaProgresso(({ id, pct }) => {
+  if (!(id in progresso)) return;
+  progresso[id] = pct;
+  const btn = document.querySelector(`.tx-card[data-id="${CSS.escape(id)}"] .tx-btn`);
+  if (!btn) return;
+  btn.style.setProperty("--p", pct + "%");
+  btn.textContent = pct + "%";
+});
+$("btnTexFolder").onclick = () => api.abrirPastaTexturas();
+
 /* ---------- ajustes ---------- */
 function renderOptifine(cfg) {
   const el = $("ofFile");
@@ -251,6 +444,7 @@ $("settingsForm").addEventListener("submit", async (e) => {
   enabled = await api.getMods();
   updateCounts();
   renderGrid();
+  loadUserMods();
   $("saved").textContent = "Salvo.";
   setTimeout(() => ($("saved").textContent = ""), 2000);
 });
@@ -288,6 +482,7 @@ $("update").onclick = async () => {
   renderChips();
   renderGrid();
   await loadSettings();
+  api.listUserMods().then(renderUserMods).catch(() => {});
   api.appVersion().then((v) => ($("appVersion").textContent = "CLIENT " + v)).catch(() => {});
   renderAccount(null);
   setStatus("Conectando sua conta…");

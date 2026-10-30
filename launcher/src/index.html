@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://cdn.modrinth.com">
   <title>Pulsar Client</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
   <link rel="stylesheet" href="styles.css">
@@ -15,6 +15,7 @@
     <nav class="nav" id="nav">
       <button type="button" data-view="home" class="on">Início</button>
       <button type="button" data-view="mods">Mods</button>
+      <button type="button" data-view="texturas">Texturas</button>
       <button type="button" data-view="settings">Ajustes</button>
     </nav>
     <div class="right">
@@ -52,7 +53,7 @@
     </div>
     <section class="card news">
       <h4>Novidades</h4>
-      <p><b>Versão 0.5:</b> logo novo, Console do Pulsar, troca de conta no menu do jogo, Órbita Livre (Alt para girar a câmera 360°), Meu Nick, Inventário com itens travados (L), Motor Pulsar com perfis e mais mods.</p>
+      <p><b>Versão 0.6:</b> Fonte do Pulsar, Cores Vivas, aba Texturas com 10 pacotes, seus próprios mods, cabeças no TAB, Multiplayer no Esc, Atalhos de Texto e mais 5 mods de PvP.</p>
     </section>
     <section class="card log">
       <h4>Registro do jogo <button type="button" class="linkbtn" id="btnConsole">abrir console</button> <button type="button" class="linkbtn" id="btnCopyLog">copiar</button></h4>
@@ -68,7 +69,20 @@
         <h2>Mods · 1.8.9 PVP</h2>
         <p id="modsSummary"></p>
       </div>
+      <div class="seg" id="modsSeg" role="tablist">
+        <button type="button" role="tab" data-aba="pulsar" aria-selected="true">Mods do Pulsar</button>
+        <button type="button" role="tab" data-aba="seus" aria-selected="false">Seus mods <span id="userModCount"></span></button>
+      </div>
     </div>
+    <section class="usermods" id="userMods" hidden>
+      <div class="um-tools">
+        <button class="btn-ghost" type="button" id="btnAddMods">+ Adicionar mods</button>
+        <button class="btn-ghost" type="button" id="btnModsFolder">Abrir pasta</button>
+        <p class="help">Mods <b>Forge 1.8.9</b> rodam junto com o Pulsar, para jogar solo ou com amigos em servidor privado. Em servidores grandes, use só mods permitidos.</p>
+      </div>
+      <div class="um-list" id="umList"></div>
+      <p class="um-msg" id="umMsg" role="status"></p>
+    </section>
     <div class="mods-tools">
       <input id="search" type="search" placeholder="Buscar mod…" autocomplete="off">
       <div class="chips" id="chips"></div>
@@ -89,6 +103,29 @@
         <p class="hint">No jogo, aperte Shift direito para arrastar cada elemento.</p>
       </aside>
     </div>
+  </main>
+
+  <!-- Texturas -->
+  <main class="view" id="view-texturas">
+    <div class="mods-head">
+      <div class="pulsar mini"><div class="halo"></div><div class="tilt"><div class="beams"></div></div><div class="core"></div></div>
+      <div>
+        <h2>Texturas · 1.8.9</h2>
+        <p>Escolhidas pelo Pulsar. Baixe uma vez e troque quando quiser, aqui ou na aba Texturas dentro do jogo.</p>
+      </div>
+      <button class="btn-ghost tx-pasta" type="button" id="btnTexFolder">Abrir pasta de texturas</button>
+    </div>
+    <div class="tx-cols">
+      <section class="tx-col pvp">
+        <h3>PvP <small>mais FPS</small></h3>
+        <div class="tx-list" id="txPvp"></div>
+      </section>
+      <section class="tx-col qual">
+        <h3>Qualidade <small>mais bonito</small></h3>
+        <div class="tx-list" id="txQual"></div>
+      </section>
+    </div>
+    <p class="tx-msg" id="txMsg" role="status"></p>
   </main>
 
   <!-- Ajustes -->
