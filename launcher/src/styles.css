@@ -22,7 +22,8 @@ button,input{font:inherit;color:inherit}
 .topbar{height:64px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);-webkit-app-region:drag}
 .topbar button,.topbar input{-webkit-app-region:no-drag}
 .logo{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;letter-spacing:.18em;font-size:17px}
-.logo .dot{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle,#fff 0 22%,var(--beam) 45%,transparent 72%);box-shadow:0 0 18px var(--beam)}
+.logo img{display:block;filter:drop-shadow(0 0 8px rgba(127,231,255,.45))}
+.settings label.check{display:flex;align-items:center;justify-content:flex-start;gap:8px;cursor:pointer}
 .logo small{font-family:var(--f-mono);font-weight:400;letter-spacing:.1em;font-size:11px;color:var(--mute)}
 .nav{display:flex;gap:6px}
 .nav button{background:none;border:0;padding:8px 14px;color:var(--mute);font-weight:500;cursor:pointer;border-radius:8px;position:relative}

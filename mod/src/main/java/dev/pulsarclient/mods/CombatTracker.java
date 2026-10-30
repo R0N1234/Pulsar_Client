@@ -26,6 +26,9 @@ public final class CombatTracker {
     private static int combo;
     private static int lastHitTick = -1000;
     private static double reach = -1;
+    private static PoeiraEstelar onHit;
+
+    public static void listen(PoeiraEstelar mod) { onHit = mod; }
 
     public static int combo() { return ticks - lastHitTick > COMBO_TIMEOUT ? 0 : combo; }
     public static double reach() { return ticks - lastHitTick > REACH_TIMEOUT ? -1 : reach; }
@@ -59,6 +62,7 @@ public final class CombatTracker {
             combo = ticks - lastHitTick > COMBO_TIMEOUT ? 1 : combo + 1;
             lastHitTick = ticks;
             if (pendingReach > 0) reach = pendingReach;
+            if (onHit != null) onHit.onHit(target);
             target = null;
             return;
         }

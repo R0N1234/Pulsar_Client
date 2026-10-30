@@ -18,6 +18,8 @@ public class GuiPulsarMenu extends GuiScreen {
     private static final int LANGUAGE = 5;
     private static final int MODS = 6;
     private static final int QUIT = 7;
+    private static final int ACCOUNT_W = 132;
+    private static final int ACCOUNT_H = 26;
 
     private int logoSize;
     private int logoY;
@@ -40,6 +42,35 @@ public class GuiPulsarMenu extends GuiScreen {
     }
 
     @Override
+    protected void mouseClicked(int mouseX, int mouseY, int button) throws java.io.IOException {
+        if (button == 0 && mouseX >= 4 && mouseX < 4 + ACCOUNT_W && mouseY >= 4 && mouseY < 4 + ACCOUNT_H) {
+            mc.getSoundHandler().playSound(net.minecraft.client.audio.PositionedSoundRecord.create(new net.minecraft.util.ResourceLocation("gui.button.press"), 1f));
+            Conta.trocar();
+            return;
+        }
+        super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    /** Caixinha da conta no canto de cima: cabeça, nick e o botão de trocar de conta Microsoft. */
+    private void drawAccount(int mouseX, int mouseY) {
+        boolean hover = mouseX >= 4 && mouseX < 4 + ACCOUNT_W && mouseY >= 4 && mouseY < 4 + ACCOUNT_H;
+        drawRect(4, 4, 4 + ACCOUNT_W, 4 + ACCOUNT_H, hover ? 0xD0142540 : 0xB00A0F1E);
+        int line = hover ? 0xFF7FE7FF : 0x557FE7FF;
+        drawRect(4, 4, 4 + ACCOUNT_W, 5, line);
+        drawRect(4, 3 + ACCOUNT_H, 4 + ACCOUNT_W, 4 + ACCOUNT_H, line);
+        drawRect(4, 4, 5, 4 + ACCOUNT_H, line);
+        drawRect(3 + ACCOUNT_W, 4, 4 + ACCOUNT_W, 4 + ACCOUNT_H, line);
+        Conta.drawHead(8, 9, 16);
+        String name = fontRendererObj.trimStringToWidth(mc.getSession().getUsername(), ACCOUNT_W - 34);
+        fontRendererObj.drawStringWithShadow(name, 29, 8, 0xFFE6ECFF);
+        fontRendererObj.drawString(Conta.busy() ? "Fazendo login..." : "Trocar conta  >", 29, 18, hover ? 0xFF7FE7FF : 0xFF8892B0);
+        String status = Conta.status();
+        if (status.isEmpty()) return;
+        java.util.List<String> lines = fontRendererObj.listFormattedStringToWidth(status, 200);
+        for (int i = 0; i < lines.size(); i++) fontRendererObj.drawStringWithShadow(lines.get(i), 6, 34 + 10 * i, 0xFFB0BCD8);
+    }
+
+    @Override
     protected void actionPerformed(GuiButton button) {
         switch (button.id) {
             case SINGLE: mc.displayGuiScreen(new GuiSelectWorld(this)); break;
@@ -57,6 +88,7 @@ public class GuiPulsarMenu extends GuiScreen {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         Universo.draw(width, height);
         Universo.logo(width / 2 - logoSize / 2, logoY, logoSize);
+        drawAccount(mouseX, mouseY);
         drawCenteredString(fontRendererObj, "P U L S A R   C L I E N T", width / 2, logoY + logoSize + 2, 0xFF7FE7FF);
         fontRendererObj.drawStringWithShadow("Pulsar Client " + PulsarClient.VERSION, 4, height - 20, 0xFFE6ECFF);
         fontRendererObj.drawStringWithShadow("Minecraft 1.8.9", 4, height - 10, 0xFF8892B0);

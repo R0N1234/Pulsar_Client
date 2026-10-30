@@ -107,14 +107,23 @@ api.onStatus((s) => {
   }
 });
 
+// O registro completo fica no Console do Pulsar; aqui só as últimas linhas, redesenhadas no máximo uma vez por quadro.
 const logLines = [];
-api.onLog((line) => {
-  logLines.push(line.trimEnd());
-  if (logLines.length > 2000) logLines.splice(0, logLines.length - 2000);
-  const pre = $("log");
-  pre.textContent = logLines.join("\n");
-  pre.scrollTop = pre.scrollHeight;
+let logFrame = 0;
+api.onLog((lines) => {
+  logLines.push(...lines);
+  if (logLines.length > 400) logLines.splice(0, logLines.length - 400);
+  if (logFrame) return;
+  logFrame = requestAnimationFrame(() => {
+    logFrame = 0;
+    const pre = $("log");
+    pre.textContent = logLines.join("\n");
+    pre.scrollTop = pre.scrollHeight;
+  });
 });
+api.onLogReset(() => (logLines.length = 0));
+api.onAccount((profile) => renderAccount(profile));
+$("btnConsole").onclick = () => api.openConsole();
 
 $("btnCopyLog").onclick = async () => {
   try {
@@ -206,6 +215,7 @@ async function loadSettings() {
   $("java").value = cfg.javaPath;
   $("dir").value = cfg.gameDir;
   $("loader").value = cfg.loader;
+  $("openConsole").checked = cfg.openConsole !== false;
   renderUpdateToken(cfg);
   renderOptifine(cfg);
   updateCounts();
@@ -231,7 +241,13 @@ $("loader").addEventListener("change", async () => {
 });
 $("settingsForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  await api.setConfig({ memoryMaxGb: Number($("mem").value), javaPath: $("java").value.trim(), gameDir: $("dir").value.trim() });
+  const cfg = await api.setConfig({
+    memoryMaxGb: Number($("mem").value),
+    javaPath: $("java").value.trim(),
+    gameDir: $("dir").value.trim(),
+    openConsole: $("openConsole").checked,
+  });
+  $("dir").value = cfg.gameDir;
   enabled = await api.getMods();
   updateCounts();
   renderGrid();

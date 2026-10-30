@@ -15,6 +15,7 @@ public class ModeSetting extends Setting {
     }
 
     public int index() { return index; }
+    public void set(int i) { if (i >= 0 && i < options.length) index = i; }
     public String get() { return options[index]; }
     public void next() { index = (index + 1) % options.length; }
     public void previous() { index = (index + options.length - 1) % options.length; }

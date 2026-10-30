@@ -2,16 +2,22 @@ const { app, BrowserWindow, dialog, ipcMain, safeStorage, shell } = require("ele
 const path = require("path");
 const { autoUpdater } = require("electron-updater");
 const { Config } = require("./lib/config");
-const { Accounts } = require("./lib/auth");
+const { Accounts, describeError } = require("./lib/auth");
 const { launch } = require("./lib/launch");
+const { startBridge } = require("./lib/ponte");
 
 // Janelas (inclusive o login da Microsoft) em português.
 app.commandLine.appendSwitch("lang", "pt-BR");
 
+const ICON = path.join(__dirname, "src", "logo.png");
+
 let win;
+let consoleWin = null;
 let config;
 let accounts;
 let game = null;
+let launching = false;
+let bridge = null;
 
 // Segredos (token da Microsoft, chave de atualização) ficam criptografados pelo sistema quando possível.
 function encrypt(text) {
@@ -60,6 +66,7 @@ function createWindow() {
     backgroundColor: "#05070F",
     frame: false,
     title: "Pulsar Client",
+    icon: ICON,
     webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, sandbox: true },
   });
   win.loadFile(path.join(__dirname, "src", "index.html"));
@@ -95,12 +102,62 @@ function setupUpdates() {
   autoUpdater.on("update-not-available", () => send("update:status", { state: "none" }));
   autoUpdater.on("download-progress", (p) => send("update:status", { state: "downloading", percent: Math.round(p.percent) }));
   autoUpdater.on("update-downloaded", (i) => send("update:status", { state: "ready", version: i.version }));
-  autoUpdater.on("error", (e) => console.error("[updater]", e));
+  autoUpdater.on("error", (e) => {
+    console.error("[updater]", e);
+    send("update:status", { state: "error", text: "A atualização falhou. O launcher tenta de novo daqui a pouco." });
+  });
   checkUpdates();
   updateTimer = setInterval(checkUpdates, 30 * 60 * 1000);
 }
 
 const send = (channel, payload) => win && !win.isDestroyed() && win.webContents.send(channel, payload);
+
+// ---------- console do jogo ----------
+// Os logs do Minecraft chegam aos milhares na abertura. Eles são juntados e enviados em lotes,
+// para o launcher não travar desenhando linha por linha.
+const LOG_LIMIT = 5000;
+const logLines = [];
+let pendingLines = [];
+let flushTimer = null;
+
+function pushLog(text) {
+  const lines = String(text).replace(/\r/g, "").split("\n");
+  if (lines[lines.length - 1] === "") lines.pop();
+  for (const l of lines) logLines.push(l);
+  if (logLines.length > LOG_LIMIT) logLines.splice(0, logLines.length - LOG_LIMIT);
+  pendingLines.push(...lines);
+  if (!flushTimer) flushTimer = setTimeout(flushLogs, 100);
+}
+
+function flushLogs() {
+  flushTimer = null;
+  if (pendingLines.length === 0) return;
+  const batch = pendingLines;
+  pendingLines = [];
+  send("game:log", batch);
+  if (consoleWin && !consoleWin.isDestroyed()) consoleWin.webContents.send("console:lines", batch);
+}
+
+function openConsole() {
+  if (consoleWin && !consoleWin.isDestroyed()) {
+    consoleWin.show();
+    consoleWin.focus();
+    return;
+  }
+  consoleWin = new BrowserWindow({
+    width: 960,
+    height: 580,
+    minWidth: 560,
+    minHeight: 320,
+    backgroundColor: "#05070F",
+    title: "Console do Pulsar",
+    icon: ICON,
+    autoHideMenuBar: true,
+    webPreferences: { preload: path.join(__dirname, "console-preload.js"), contextIsolation: true, sandbox: true },
+  });
+  consoleWin.loadFile(path.join(__dirname, "src", "console.html"));
+  consoleWin.on("closed", () => (consoleWin = null));
+}
 
 app.whenReady().then(() => {
   config = new Config(app.getPath("userData"));
@@ -129,28 +186,47 @@ app.whenReady().then(() => {
   ipcMain.handle("mods:set", (_e, id, enabled) => config.setModEnabled(String(id), !!enabled));
 
   ipcMain.handle("account:restore", () => accounts.restore());
-  ipcMain.handle("account:login", () => accounts.login());
+  ipcMain.handle("account:login", () => accounts.login({ icon: ICON }).catch((e) => Promise.reject(new Error(describeError(e)))));
   ipcMain.handle("account:logout", () => accounts.logout());
 
   ipcMain.handle("game:launch", async () => {
-    if (game) throw new Error("O Minecraft já está aberto.");
-    game = await launch({
-      config: config.get(),
-      authorization: accounts.mclc(),
-      modSourceDir: modSourceDir(),
-      runtimeDir: path.join(app.getPath("userData"), "runtime"),
-      onStatus: (s) => send("game:status", s),
-      onLog: (l) => send("game:log", String(l)),
-      onClose: (code) => {
-        game = null;
-        send("game:status", { step: "closed", text: code === 0 ? "Pronto para jogar" : `O jogo fechou com erro (código ${code})` });
-      },
-    }).catch((err) => {
+    if (game || launching) throw new Error("O Minecraft já está aberto.");
+    launching = true;
+    try {
+      await accounts.fresh();
+      const cfg = config.get();
+      logLines.length = 0;
+      send("game:log-reset");
+      pushLog("──────── Abrindo o Minecraft ────────");
+      if (cfg.openConsole) openConsole();
+      bridge = await startBridge({ onSwitchAccount: switchAccountFromGame });
+      game = await launch({
+        config: cfg,
+        authorization: accounts.mclc(),
+        modSourceDir: modSourceDir(),
+        runtimeDir: path.join(app.getPath("userData"), "runtime"),
+        extraJvmArgs: [`-Dpulsar.ponte=${bridge.port}`, `-Dpulsar.chave=${bridge.key}`],
+        onStatus: (s) => send("game:status", s),
+        onLog: pushLog,
+        onClose: (code) => {
+          game = null;
+          closeBridge();
+          flushLogs();
+          send("game:status", { step: "closed", text: code === 0 ? "Pronto para jogar" : `O jogo fechou com erro (código ${code})` });
+        },
+      });
+      return true;
+    } catch (err) {
       game = null;
+      closeBridge();
       throw err;
-    });
-    return true;
+    } finally {
+      launching = false;
+    }
   });
+
+  ipcMain.handle("console:open", () => openConsole());
+  ipcMain.handle("console:lines", () => logLines.slice());
 
   ipcMain.handle("app:version", () => app.getVersion());
   ipcMain.handle("update:token", (_e, token) => {
@@ -165,10 +241,30 @@ app.whenReady().then(() => {
   });
 
   ipcMain.on("window:minimize", () => win.minimize());
-  ipcMain.on("window:close", () => win.close());
+  ipcMain.on("window:close", () => {
+    if (consoleWin && !consoleWin.isDestroyed()) consoleWin.close();
+    win.close();
+  });
 
   createWindow();
   win.webContents.once("did-finish-load", setupUpdates);
 });
+
+function closeBridge() {
+  if (bridge) bridge.close();
+  bridge = null;
+}
+
+// Pedido do botão "Trocar conta" no menu do jogo: abre o login da Microsoft por cima do Minecraft
+// e devolve a sessão nova para o jogo usar sem fechar.
+async function switchAccountFromGame() {
+  try {
+    const profile = await accounts.login({ onTop: true, icon: ICON });
+    send("account:changed", profile);
+    return accounts.session();
+  } catch (err) {
+    throw new Error(describeError(err));
+  }
+}
 
 app.on("window-all-closed", () => app.quit());

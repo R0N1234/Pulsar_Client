@@ -1,0 +1,19 @@
+:root{--bg:#05070F;--panel:#0A0F1E;--line:rgba(127,231,255,.18);--text:#D6DEF5;--mute:#7C86A6;--beam:#7FE7FF;--err:#FF6B6B;--warn:#FFD84A;--ok:#6EE7A8}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:13px/1.45 Consolas,"JetBrains Mono",ui-monospace,monospace}
+body{display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;background:var(--panel);border-bottom:1px solid var(--line);font-family:system-ui,sans-serif}
+header b{letter-spacing:.06em}
+.mute{color:var(--mute);font-size:12px}
+.tools{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tools input[type=search]{background:#05070F;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:5px 8px;width:240px;font:inherit;font-size:12px}
+.tools label{font-size:12px;color:var(--mute);display:flex;align-items:center;gap:4px;cursor:pointer}
+button{background:transparent;color:var(--beam);border:1px solid var(--line);border-radius:6px;padding:5px 10px;font:12px system-ui,sans-serif;cursor:pointer}
+button:hover{border-color:var(--beam)}
+#log{flex:1;overflow:auto;padding:8px 12px;white-space:pre-wrap;word-break:break-word}
+#log div{padding:0 2px}
+#log .e{color:var(--err)}
+#log .w{color:var(--warn)}
+#log .p{color:var(--beam)}
+#log .c{color:var(--ok)}
+#log .h{display:none}

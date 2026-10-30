@@ -11,7 +11,7 @@
   <canvas id="stars"></canvas>
 
   <header class="topbar">
-    <div class="logo"><span class="dot"></span>PULSAR <small id="appVersion">CLIENT</small></div>
+    <div class="logo"><img src="logo.png" alt="" width="30" height="30">PULSAR <small id="appVersion">CLIENT</small></div>
     <nav class="nav" id="nav">
       <button type="button" data-view="home" class="on">Início</button>
       <button type="button" data-view="mods">Mods</button>
@@ -52,10 +52,10 @@
     </div>
     <section class="card news">
       <h4>Novidades</h4>
-      <p><b>Versão 0.4:</b> tela de carregamento e menu com o universo do Pulsar, Motor Pulsar que não desenha o que está atrás das paredes e 12 mods novos: Blindagem, Efeitos, Combo, Alcance, Tremor de Dano, Campo de Colisão, Atmosfera, Relógio, Memória, Bússola, Servidor e Saturação.</p>
+      <p><b>Versão 0.5:</b> logo novo, Console do Pulsar, troca de conta no menu do jogo, Órbita Livre (Alt para girar a câmera 360°), Meu Nick, Inventário com itens travados (L), Motor Pulsar com perfis e mais mods.</p>
     </section>
     <section class="card log">
-      <h4>Registro do jogo <button type="button" class="linkbtn" id="btnCopyLog">copiar</button></h4>
+      <h4>Registro do jogo <button type="button" class="linkbtn" id="btnConsole">abrir console</button> <button type="button" class="linkbtn" id="btnCopyLog">copiar</button></h4>
       <pre id="log">Os logs do Minecraft aparecem aqui quando o jogo abrir.</pre>
     </section>
   </main>
@@ -112,6 +112,9 @@
       <label for="dir">Pasta do Minecraft</label>
       <input id="dir" type="text">
       <p class="help">A mesma .minecraft do launcher oficial: seus mundos, packs, servidores e opções aparecem no Pulsar. O Pulsar tem uma pasta de mods só dele, então mods de outras versões não atrapalham.</p>
+
+      <label class="check"><input id="openConsole" type="checkbox" checked> Abrir o Console do Pulsar ao clicar em Jogar</label>
+      <p class="help">Uma janela própria com o registro do Minecraft, com cores, filtro e botão de copiar. Ajuda a ver o que aconteceu se o jogo der erro.</p>
 
       <label for="updToken">Chave de atualização</label>
       <div class="pick">

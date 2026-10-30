@@ -74,7 +74,9 @@ function installPulsarMod(modsDir, modSourceDir) {
   }
   fs.mkdirSync(modsDir, { recursive: true });
   for (const f of fs.readdirSync(modsDir)) if (isPulsarJar(f)) fs.rmSync(path.join(modsDir, f));
-  const newest = jars.sort().at(-1);
+  // O mais novo pela data do arquivo: em ordem alfabética, 0.10.0 viria antes de 0.9.0.
+  const mtime = (f) => fs.statSync(path.join(modSourceDir, f)).mtimeMs;
+  const newest = jars.sort((a, b) => mtime(a) - mtime(b)).at(-1);
   fs.copyFileSync(path.join(modSourceDir, newest), path.join(modsDir, newest));
 }
 
