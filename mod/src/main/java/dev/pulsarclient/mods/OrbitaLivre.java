@@ -2,9 +2,12 @@ package dev.pulsarclient.mods;
 
 import dev.pulsarclient.settings.BoolSetting;
 import dev.pulsarclient.settings.ModeSetting;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
+import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -117,5 +120,14 @@ public class OrbitaLivre extends PulsarMod {
         }
         event.yaw = camYaw + 180f;
         event.pitch = camPitch;
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void onLiving(RenderLivingEvent.Pre event) {
+        // O jogo vira os nomes (e o Meu Nick) para onde o personagem olha; na órbita eles têm que virar para a câmera.
+        if (!active) return;
+        RenderManager rm = mc.getRenderManager();
+        rm.playerViewY = camYaw;
+        rm.playerViewX = camPitch;
     }
 }

@@ -161,10 +161,15 @@ public class Inventario extends PulsarMod {
 
     @SubscribeEvent
     public void onGuiInit(GuiScreenEvent.InitGuiEvent.Post event) {
-        if (!isEnabled() || !(event.gui instanceof GuiInventory) || !reflect() || hasEffects == null) return;
+        adjustEffects(event.gui);
+    }
+
+    /** Tira o empurrão para a direita que o jogo dá no inventário quando há efeitos, e/ou esconde os efeitos. */
+    private void adjustEffects(GuiScreen screen) {
+        if (!isEnabled() || !(screen instanceof GuiInventory) || !reflect() || hasEffects == null) return;
         try {
-            GuiContainer gui = (GuiContainer) event.gui;
-            if (noShift.get() && hasEffects.getBoolean(gui)) {
+            GuiContainer gui = (GuiContainer) screen;
+            if (hasEffects.getBoolean(gui) && (noShift.get() || hideEffects.get())) {
                 guiLeft.setInt(gui, (gui.width - xSize.getInt(gui)) / 2);
             }
             if (hideEffects.get()) hasEffects.setBoolean(gui, false);
@@ -196,8 +201,13 @@ public class Inventario extends PulsarMod {
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            // O inventário recalcula a posição a cada tick por causa dos efeitos, então o ajuste é refeito aqui.
+            adjustEffects(mc.currentScreen);
+            return;
+        }
         // Antes do jogo ler a tecla de dropar: com o item da mão travado, a tecla é consumida aqui.
-        if (event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.currentScreen != null) return;
+        if (mc.thePlayer == null || mc.currentScreen != null) return;
         if (!isLocked(mc.thePlayer.inventory.currentItem) || mc.thePlayer.inventory.getCurrentItem() == null) return;
         boolean consumed = false;
         while (mc.gameSettings.keyBindDrop.isPressed()) consumed = true;
