@@ -38,28 +38,141 @@ $("btnMin").onclick = () => api.minimize();
 $("btnClose").onclick = () => api.close();
 
 /* ---------- conta ---------- */
-function renderAccount(profile) {
+// estado: { microsoft: {name, uuid} | null, offline: [nicks], ativa: "microsoft" | nick, liberado }
+let contas = { microsoft: null, offline: [], ativa: "microsoft", liberado: false };
+
+const prontaParaJogar = () => contas.ativa !== "microsoft" || !!contas.microsoft;
+
+function el(tag, cls, texto) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (texto !== undefined) e.textContent = texto;
+  return e;
+}
+
+function avatar(nome, offline) {
+  return el("span", "ava" + (offline ? " off" : ""), (nome || "?").slice(0, 1).toUpperCase());
+}
+
+function renderAccount(estado) {
+  if (estado) contas = estado;
   const box = $("acct");
   box.textContent = "";
-  if (!profile) {
-    const b = document.createElement("button");
+  const offline = contas.ativa !== "microsoft";
+  const nome = offline ? contas.ativa : contas.microsoft && contas.microsoft.name;
+  if (!nome && !contas.offline.length && !contas.liberado) {
+    const b = el("button", "btn-ghost", "Entrar com Microsoft");
     b.type = "button";
-    b.className = "btn-ghost";
-    b.textContent = "Entrar com Microsoft";
     b.onclick = doLogin;
     box.append(b);
     return;
   }
-  const info = document.createElement("div");
-  info.style.lineHeight = "1.2";
-  info.innerHTML = `<span class="name"></span><br><span class="st">● conectado</span> <button type="button" class="link">sair</button>`;
-  info.querySelector(".name").textContent = profile.name;
-  info.querySelector(".link").onclick = async () => {
-    await api.logout();
-    renderAccount(null);
+  const atual = el("button", "acct-now");
+  atual.type = "button";
+  atual.setAttribute("aria-haspopup", "true");
+  atual.setAttribute("aria-expanded", String(!$("acctMenu").hidden));
+  atual.append(avatar(nome || "?", offline));
+  const info = el("span", "acct-info");
+  info.append(el("span", "name", nome || "Sem conta"), el("span", "st" + (offline ? " off" : ""), offline ? "● offline" : nome ? "● original" : "entre para jogar"));
+  atual.append(info, el("span", "caret", "▾"));
+  atual.onclick = (e) => {
+    e.stopPropagation();
+    $("acctMenu").hidden ? abrirContas() : fecharContas();
   };
-  box.append(info);
+  box.append(atual);
+  renderMenuContas();
 }
+
+function renderMenuContas() {
+  const m = $("acctMenu");
+  m.textContent = "";
+  m.append(el("h5", "", "Conta original"));
+  if (contas.microsoft) {
+    const linha = el("div", "conta" + (contas.ativa === "microsoft" ? " on" : ""));
+    const usar = el("button", "conta-usar");
+    usar.type = "button";
+    usar.append(avatar(contas.microsoft.name, false), el("span", "", contas.microsoft.name), el("small", "", contas.ativa === "microsoft" ? "em uso" : "usar"));
+    usar.onclick = () => acaoConta(() => api.useAccount("microsoft"));
+    const sair = el("button", "linkbtn conta-x", "sair");
+    sair.type = "button";
+    sair.onclick = () => acaoConta(() => api.logout());
+    linha.append(usar, sair);
+    m.append(linha);
+  } else {
+    const b = el("button", "btn-ghost conta-ms", "Entrar com Microsoft");
+    b.type = "button";
+    b.onclick = doLogin;
+    m.append(b);
+  }
+
+  m.append(el("h5", "", "Contas offline"));
+  if (!contas.liberado) {
+    m.append(el("p", "help", "Entre uma vez com uma conta Microsoft que tenha o Minecraft para liberar os nicks offline."));
+    return;
+  }
+  for (const nick of contas.offline) {
+    const linha = el("div", "conta" + (contas.ativa === nick ? " on" : ""));
+    const usar = el("button", "conta-usar");
+    usar.type = "button";
+    usar.append(avatar(nick, true), el("span", "", nick), el("small", "", contas.ativa === nick ? "em uso" : "usar"));
+    usar.onclick = () => acaoConta(() => api.useAccount(nick));
+    const x = el("button", "linkbtn conta-x", "×");
+    x.type = "button";
+    x.setAttribute("aria-label", "Apagar " + nick);
+    x.onclick = () => acaoConta(() => api.removeOffline(nick));
+    linha.append(usar, x);
+    m.append(linha);
+  }
+  const form = el("form", "conta-nova");
+  const input = el("input");
+  input.id = "novoNick";
+  input.placeholder = "Novo nick";
+  input.maxLength = 16;
+  input.autocomplete = "off";
+  input.spellcheck = false;
+  const add = el("button", "btn-ghost", "Adicionar");
+  add.type = "submit";
+  form.append(input, add);
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    acaoConta(() => api.addOffline(input.value), true);
+  };
+  m.append(form, el("p", "help", "Para servidores que aceitam conta offline (pirata), LAN e jogar sem internet. Dentro do jogo dá para trocar pelo botão da conta no menu."));
+  const erro = el("p", "help err");
+  erro.id = "contaErro";
+  m.append(erro);
+}
+
+async function acaoConta(fn, focarNick = false) {
+  try {
+    renderAccount(await fn());
+    setStatus(prontaParaJogar() ? "Pronto para jogar" : "Entre com sua conta Microsoft para jogar");
+    if (focarNick && $("novoNick")) $("novoNick").focus();
+  } catch (err) {
+    const e = $("contaErro");
+    if (e) e.textContent = cleanErr(err);
+    else setStatus(cleanErr(err), true);
+  }
+}
+
+function abrirContas() {
+  renderMenuContas();
+  $("acctMenu").hidden = false;
+  const b = document.querySelector(".acct-now");
+  if (b) b.setAttribute("aria-expanded", "true");
+}
+
+function fecharContas() {
+  $("acctMenu").hidden = true;
+  const b = document.querySelector(".acct-now");
+  if (b) b.setAttribute("aria-expanded", "false");
+}
+document.addEventListener("click", (e) => {
+  if (!$("acctMenu").hidden && !e.target.closest("#acctMenu") && !e.target.closest("#acct")) fecharContas();
+});
+addEventListener("keydown", (e) => {
+  if (e.key === "Escape") fecharContas();
+});
 
 async function doLogin() {
   setStatus("Abrindo o login da Microsoft…");
@@ -126,7 +239,7 @@ api.onLog((lines) => {
   });
 });
 api.onLogReset(() => (logLines.length = 0));
-api.onAccount((profile) => renderAccount(profile));
+api.onAccount((estado) => renderAccount(estado));
 $("btnConsole").onclick = () => api.openConsole();
 
 $("btnCopyLog").onclick = async () => {
@@ -514,7 +627,7 @@ $("updModal").addEventListener("click", (e) => {
   api.appVersion().then((v) => ($("appVersion").textContent = "CLIENT " + v)).catch(() => {});
   renderAccount(null);
   setStatus("Conectando sua conta…");
-  const profile = await api.restoreAccount().catch(() => null);
-  renderAccount(profile);
-  setStatus(profile ? "Pronto para jogar" : "Entre com sua conta Microsoft para jogar");
+  const estado = await api.restoreAccount().catch(() => null);
+  renderAccount(estado);
+  setStatus(prontaParaJogar() ? "Pronto para jogar" : "Entre com sua conta Microsoft para jogar");
 })();

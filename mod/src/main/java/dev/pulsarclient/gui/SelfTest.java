@@ -75,7 +75,10 @@ public class SelfTest {
                 Conta.trocar();
                 break;
             case 11: show("conta", menu); break;
-            case 12:
+            case 12: mc.displayGuiScreen(new GuiContas(menu)); break;
+            case 13: Conta.adicionarOffline("NickTeste"); break;
+            case 14: log("contas"); break;
+            case 15:
                 log("criando-mundo");
                 mc.launchIntegratedServer("pulsar-teste", "Pulsar Teste",
                         new WorldSettings(2026L, WorldSettings.GameType.SURVIVAL, false, false, WorldType.FLAT));

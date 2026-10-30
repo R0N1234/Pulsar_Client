@@ -47,13 +47,13 @@ public class GuiPulsarMenu extends GuiScreen {
     protected void mouseClicked(int mouseX, int mouseY, int button) throws java.io.IOException {
         if (button == 0 && mouseX >= 4 && mouseX < 4 + ACCOUNT_W && mouseY >= 4 && mouseY < 4 + ACCOUNT_H) {
             mc.getSoundHandler().playSound(net.minecraft.client.audio.PositionedSoundRecord.create(new net.minecraft.util.ResourceLocation("gui.button.press"), 1f));
-            Conta.trocar();
+            mc.displayGuiScreen(new GuiContas(this));
             return;
         }
         super.mouseClicked(mouseX, mouseY, button);
     }
 
-    /** Caixinha da conta no canto de cima: cabeça, nick e o botão de trocar de conta Microsoft. */
+    /** Caixinha da conta no canto de cima: cabeça, nick e o botão que abre as contas (original e offline). */
     private void drawAccount(int mouseX, int mouseY) {
         boolean hover = mouseX >= 4 && mouseX < 4 + ACCOUNT_W && mouseY >= 4 && mouseY < 4 + ACCOUNT_H;
         drawRect(4, 4, 4 + ACCOUNT_W, 4 + ACCOUNT_H, hover ? 0xD0142540 : 0xB00A0F1E);
