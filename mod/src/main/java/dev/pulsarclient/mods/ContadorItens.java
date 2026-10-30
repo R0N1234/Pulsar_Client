@@ -19,7 +19,7 @@ public class ContadorItens extends HudMod {
     private static final ItemStack[] ICONS = {ARROW, PEARL, APPLE, POTION};
 
     public ContadorItens() {
-        super("contador_itens", "Contador de Itens", "Flechas, pérolas, maçãs e poções no inventário", Category.COMBATE, 10000, 230, false);
+        super("contador_itens", "Contador de Itens", "Flechas, pérolas, maçãs e poções no inventário", Category.COMBATE, 10000, 10000, false);
     }
 
     private int[] counts() {
