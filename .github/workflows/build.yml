@@ -99,6 +99,9 @@ jobs:
         run: |
           npm install
           npm run dist
+      - name: Conferir se nada ficou fora do instalador
+        working-directory: launcher
+        run: node test/pacote.js
       - uses: actions/upload-artifact@v5
         with:
           name: pulsar-launcher-windows

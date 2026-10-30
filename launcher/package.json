@@ -28,6 +28,7 @@
     "files": [
       "main.js",
       "preload.js",
+      "console-preload.js",
       "lib/**",
       "src/**"
     ],
