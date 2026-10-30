@@ -167,6 +167,24 @@
     </form>
   </main>
 
+  <!-- Atualização pronta -->
+  <div class="upd-modal" id="updModal" hidden>
+    <div class="upd-card" role="dialog" aria-labelledby="updTitle">
+      <div class="upd-logo">
+        <div class="pulsar"><div class="halo"></div><div class="tilt"><div class="beams"></div></div></div>
+        <img src="logo.png" alt="" width="84" height="84">
+      </div>
+      <small>ATUALIZAÇÃO PRONTA</small>
+      <h3 id="updTitle">Pulsar Client <span id="updVer"></span></h3>
+      <p class="upd-notes" id="updNotes"></p>
+      <div class="upd-actions">
+        <button class="btn-play" type="button" id="updNow">ATUALIZAR AGORA</button>
+        <button class="btn-ghost" type="button" id="updLater">Depois</button>
+      </div>
+      <p class="help" id="updHelp2">O Pulsar fecha, atualiza e abre de novo sozinho em alguns segundos.</p>
+    </div>
+  </div>
+
   <script src="mods.js"></script>
   <script src="app.js"></script>
 </body>

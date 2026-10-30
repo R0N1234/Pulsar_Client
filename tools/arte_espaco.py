@@ -192,16 +192,73 @@ def emblem(size, beams_out=True):
     return img
 
 
+def app_emblem(s):
+    """Ícone de aplicativo: o mesmo pulsar com "PC", mas ocupando o quadro todo, como os ícones do Discord e do Chrome."""
+    c = s / 2
+    r = s * 0.475
+    img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    angle = math.radians(-32)
+
+    disc = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    dd = ImageDraw.Draw(disc)
+    # Fundo do disco: azul do espaço, mais claro no meio.
+    for i in range(48, 0, -1):
+        k = i / 48
+        col = tuple(int(BG_EDGE[j] + (BG_MID[j] + 18 - BG_EDGE[j]) * (1 - k) ** 1.5) for j in range(3))
+        dd.ellipse([c - r * k, c - r * k, c + r * k, c + r * k], fill=col + (255,))
+    field = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    fd = ImageDraw.Draw(field)
+    for k in (0.5, 0.78):
+        fd.ellipse([c - r * k, c - r * k * 0.4, c + r * k, c + r * k * 0.4], outline=(165, 135, 255, 140), width=max(1, int(s * 0.007)))
+    field = field.rotate(math.degrees(-angle) + 90, center=(c, c))
+    disc.alpha_composite(field)
+
+    def beam_layer(alpha, half_width, length):
+        layer = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+        d = ImageDraw.Draw(layer)
+        for sign in (1, -1):
+            steps = 40
+            for i in range(steps):
+                t0, t1 = i / steps, (i + 1) / steps
+                a = int(alpha * (1 - t0) ** 1.2)
+                w0, w1 = half_width * (0.25 + t0), half_width * (0.25 + t1)
+                pts = []
+                for t, w in ((t0, w0), (t1, w1), (t1, -w1), (t0, -w0)):
+                    dist = t * length * sign
+                    pts.append((c + math.cos(angle) * dist - math.sin(angle) * w, c + math.sin(angle) * dist + math.cos(angle) * w))
+                d.polygon(pts, fill=BEAM + (a,))
+        return layer
+
+    disc.alpha_composite(beam_layer(230, s * 0.08, r * 1.02).filter(ImageFilter.GaussianBlur(s * 0.008)))
+    disc.alpha_composite(beam_layer(255, s * 0.03, r).filter(ImageFilter.GaussianBlur(s * 0.003)))
+    disc.alpha_composite(glow_layer((s, s), lambda g: g.ellipse([c - r * 0.42, c - r * 0.42, c + r * 0.42, c + r * 0.42], fill=(127, 231, 255, 190)), s * 0.05))
+    mask = Image.new("L", (s, s), 0)
+    ImageDraw.Draw(mask).ellipse([c - r, c - r, c + r, c + r], fill=255)
+    img.paste(disc, (0, 0), mask)
+    ImageDraw.Draw(img).ellipse([c - r, c - r, c + r, c + r], outline=BEAM + (255,), width=max(2, int(s * 0.03)))
+
+    font = ImageFont.truetype(FONT.replace("Bold", "Black"), int(s * 0.42))
+    text = "PC"
+    d = ImageDraw.Draw(img)
+    box = d.textbbox((0, 0), text, font=font)
+    tx = c - (box[0] + box[2]) / 2
+    ty = c - (box[1] + box[3]) / 2
+    # Sombra escura em volta das letras: o "PC" continua legível em 16 px, por cima do brilho do núcleo.
+    img.alpha_composite(glow_layer((s, s), lambda g: g.text((tx, ty), text, font=font, fill=(2, 6, 18, 255)), s * 0.035))
+    img.alpha_composite(glow_layer((s, s), lambda g: g.text((tx, ty), text, font=font, fill=(2, 6, 18, 200)), s * 0.012))
+    ImageDraw.Draw(img).text((tx, ty), text, font=font, fill=(255, 255, 255, 255))
+    return img
+
+
 def app_icons():
-    """Ícone do launcher, do instalador e da janela do jogo."""
-    big = emblem(1024, beams_out=False)
-    ico = big.resize((256, 256), Image.LANCZOS)
+    """Ícone do launcher, do instalador e da tela de atualização. O jogo usa o ícone do próprio Minecraft."""
+    big = app_emblem(1024)
     os.makedirs(LAUNCHER_BUILD, exist_ok=True)
-    ico.save(os.path.join(LAUNCHER_BUILD, "icon.ico"), sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
-    ico.save(os.path.join(LAUNCHER_BUILD, "icon.png"))
+    sizes = [16, 20, 24, 32, 40, 48, 64, 128, 256]
+    frames = [big.resize((n, n), Image.LANCZOS) for n in sizes]
+    frames[-1].save(os.path.join(LAUNCHER_BUILD, "icon.ico"), sizes=[(n, n) for n in sizes], append_images=frames[:-1])
+    big.resize((512, 512), Image.LANCZOS).save(os.path.join(LAUNCHER_BUILD, "icon.png"), optimize=True)
     big.resize((512, 512), Image.LANCZOS).save(os.path.join(LAUNCHER_SRC, "logo.png"), optimize=True)
-    for n in (16, 32, 64):
-        big.resize((n, n), Image.LANCZOS).save(os.path.join(MOD_TEX, "icone_%d.png" % n))
 
 
 def menu_background():

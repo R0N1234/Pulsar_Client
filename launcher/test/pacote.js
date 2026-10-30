@@ -19,4 +19,10 @@ if (missing.length) {
   console.error(`Faltando no instalador: ${missing.join(", ")}`);
   process.exit(1);
 }
+// A tela de atualização vai fora do app.asar, em resources/atualizador.
+const atualizador = path.join(root, "dist", "win-unpacked", "resources", "atualizador", "PulsarAtualizador.exe");
+if (!fs.existsSync(atualizador)) {
+  console.error("Faltando no instalador: resources/atualizador/PulsarAtualizador.exe");
+  process.exit(1);
+}
 console.log("Todos os arquivos estão no instalador.");

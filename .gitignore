@@ -6,3 +6,4 @@ mod/run/
 mod/.idea/
 *.iml
 .DS_Store
+launcher/build/atualizador/

@@ -1,5 +1,7 @@
 const { app, BrowserWindow, dialog, ipcMain, safeStorage, shell } = require("electron");
+const fs = require("fs");
 const path = require("path");
+const { spawn } = require("child_process");
 const { autoUpdater } = require("electron-updater");
 const { Config } = require("./lib/config");
 const { Accounts, describeError } = require("./lib/auth");
@@ -95,15 +97,34 @@ function checkUpdates() {
   });
 }
 
+// Texto das novidades da versão (o GitHub manda em HTML).
+function notasDaVersao(info) {
+  const bruto = Array.isArray(info.releaseNotes) ? info.releaseNotes.map((n) => n.note || "").join("\n") : String(info.releaseNotes || "");
+  const texto = bruto
+    .replace(/<br\s*\/?>|<\/(p|li|h\d)>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  return texto.length > 600 ? texto.slice(0, 597) + "..." : texto;
+}
+
+// Atualização baixada, esperando o jogador clicar em Atualizar.
+let atualizacao = null;
+
 function setupUpdates() {
   if (!app.isPackaged || updatesWired) return;
   updatesWired = true;
   autoUpdater.autoDownload = true;
-  autoUpdater.autoInstallOnAppQuit = true;
+  // Quem instala é a tela de atualização do Pulsar (PulsarAtualizador.exe), quando o jogador escolher.
+  autoUpdater.autoInstallOnAppQuit = false;
   autoUpdater.on("update-available", (i) => send("update:status", { state: "downloading", version: i.version, percent: 0 }));
   autoUpdater.on("update-not-available", () => send("update:status", { state: "none" }));
   autoUpdater.on("download-progress", (p) => send("update:status", { state: "downloading", percent: Math.round(p.percent) }));
-  autoUpdater.on("update-downloaded", (i) => send("update:status", { state: "ready", version: i.version }));
+  autoUpdater.on("update-downloaded", (i) => {
+    atualizacao = { version: i.version, arquivo: i.downloadedFile, notas: notasDaVersao(i) };
+    send("update:status", { state: "ready", version: i.version, notas: atualizacao.notas });
+  });
   autoUpdater.on("error", (e) => {
     console.error("[updater]", e);
     send("update:status", { state: "error", text: "A atualização falhou. O launcher tenta de novo daqui a pouco." });
@@ -290,8 +311,8 @@ app.whenReady().then(() => {
   });
   ipcMain.handle("update:check", () => checkUpdates());
   ipcMain.handle("update:install", () => {
-    if (game) throw new Error("Feche o Minecraft antes de atualizar.");
-    autoUpdater.quitAndInstall();
+    if (game || launching) throw new Error("Feche o Minecraft antes de atualizar.");
+    if (!abrirAtualizador()) autoUpdater.quitAndInstall();
   });
 
   ipcMain.on("window:minimize", () => win.minimize());
@@ -302,7 +323,82 @@ app.whenReady().then(() => {
 
   createWindow();
   win.webContents.once("did-finish-load", setupUpdates);
+  if (process.env.PULSAR_PRINTS) win.webContents.once("did-finish-load", () => tirarPrints(process.env.PULSAR_PRINTS));
 });
+
+function tamanhoPasta(dir) {
+  let total = 0;
+  try {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, e.name);
+      total += e.isDirectory() ? tamanhoPasta(p) : fs.statSync(p).size;
+    }
+  } catch {}
+  return total;
+}
+
+// Abre a tela de atualização do Pulsar e fecha o launcher; ela instala a versão nova e abre o Pulsar de novo.
+// Ela roda de uma cópia na pasta temporária, porque a pasta do Pulsar vai ser trocada durante a atualização.
+function abrirAtualizador() {
+  const origem = path.join(process.resourcesPath, "atualizador", "PulsarAtualizador.exe");
+  if (process.platform !== "win32" || !atualizacao || !fs.existsSync(origem) || !fs.existsSync(atualizacao.arquivo || "")) return false;
+  try {
+    const copia = path.join(app.getPath("temp"), `PulsarAtualizador-${Date.now()}.exe`);
+    fs.copyFileSync(origem, copia);
+    const args = ["--atualizar", atualizacao.arquivo, "--versao", atualizacao.version, "--pid", String(process.pid),
+      "--app", process.execPath, "--tamanho", String(tamanhoPasta(path.dirname(process.execPath)))];
+    spawn(copia, args, { detached: true, stdio: "ignore" }).unref();
+  } catch (e) {
+    console.error("[updater]", e);
+    return false;
+  }
+  if (updateTimer) clearInterval(updateTimer);
+  if (consoleWin && !consoleWin.isDestroyed()) consoleWin.close();
+  app.quit();
+  return true;
+}
+
+// Teste no Windows do CI (PULSAR_PRINTS=pasta): abre cada aba, salva um print e fecha o launcher.
+async function tirarPrints(dir) {
+  const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+  const js = (code) => win.webContents.executeJavaScript(code);
+  const print = async (nome) => {
+    fs.writeFileSync(path.join(dir, `launcher-${nome}.png`), (await win.webContents.capturePage()).toPNG());
+    console.log(`[prints] ${nome}`);
+  };
+  const aba = (v) => js(`document.querySelector('#nav button[data-view="${v}"]').click()`);
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+    await espera(4000);
+    await print("inicio");
+    await aba("mods");
+    await espera(800);
+    await print("mods");
+    await js(`document.querySelector('#modsSeg button[data-aba="seus"]').click()`);
+    await espera(800);
+    await print("seus-mods");
+    await aba("texturas");
+    await espera(4000);
+    await print("texturas");
+    // Baixa e liga o pacote mais leve pelo launcher, como o jogador faria.
+    await js(`document.querySelector('.tx-card[data-id="f8thful"] .tx-btn').click()`);
+    for (let i = 0; i < 60 && !(await js(`!!document.querySelector('.tx-card[data-id="f8thful"] .tx-sub')?.textContent.includes("apagar")`)); i++) await espera(500);
+    await js(`document.querySelector('.tx-card[data-id="f8thful"] .tx-btn').click()`);
+    await espera(1000);
+    await print("texturas-usando");
+    console.log(`[prints] options: ${(fs.readFileSync(path.join(config.get().gameDir, "pulsar", "instancia-1.8.9", "options.txt"), "utf8").match(/resourcePacks:.*/) || ["?"])[0]}`);
+    await aba("settings");
+    await espera(800);
+    await print("ajustes");
+    await aba("home");
+    send("update:status", { state: "ready", version: "0.6.1", notas: "Exemplo de novidades da versão nova.\nCorreções e mods novos." });
+    await espera(1200);
+    await print("atualizacao");
+  } catch (e) {
+    console.error("[prints] erro:", e);
+  }
+  app.quit();
+}
 
 function closeBridge() {
   if (bridge) bridge.close();

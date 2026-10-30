@@ -1,13 +1,13 @@
 {
   "name": "pulsar-launcher",
   "productName": "Pulsar Client",
-  "version": "0.2.0",
+  "version": "0.6.0",
   "description": "Launcher do Pulsar Client, focado em PVP no Minecraft 1.8.9",
   "main": "main.js",
   "private": true,
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win --x64 --publish never",
+    "dist": "node ../instalador/compilar.js atualizador && electron-builder --win --x64 --publish never",
     "dist:linux": "electron-builder --linux AppImage",
     "dist:mac": "electron-builder --mac",
     "test:e2e": "node test/e2e.js"
@@ -44,7 +44,16 @@
       }
     ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "extraResources": [
+        {
+          "from": "build/atualizador",
+          "to": "atualizador",
+          "filter": [
+            "PulsarAtualizador.exe"
+          ]
+        }
+      ]
     },
     "nsis": {
       "oneClick": false,
