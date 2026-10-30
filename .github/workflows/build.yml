@@ -64,7 +64,8 @@ jobs:
           git checkout -q --orphan ci-api
           git rm -rfq --cached .
           cp /tmp/api/*.txt .
-          git add api.txt jars.txt mappings.txt nomes.txt 2>/dev/null || git add jars.txt
+          cp "$(grep -m1 'mappings-srg-named.srg' /tmp/api/mappings.txt)" srg-nomes.srg 2>/dev/null || true
+          git add api.txt jars.txt mappings.txt nomes.txt srg-nomes.srg 2>/dev/null || git add jars.txt
           git commit -qm "API ${GITHUB_SHA}"
           git push -qf origin ci-api || true
 

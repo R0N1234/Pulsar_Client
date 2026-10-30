@@ -1,0 +1,39 @@
+name: Consulta
+
+# Roda scripts de consulta que precisam de internet (o ambiente de desenvolvimento não alcança alguns sites).
+# O resultado vai para o ramo ci-consulta.
+on:
+  workflow_dispatch:
+    inputs:
+      script:
+        description: "Script em tools/ para rodar com node"
+        required: true
+        default: "texturas_modrinth.js"
+
+permissions:
+  contents: write
+
+jobs:
+  consulta:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Rodar a consulta
+        env:
+          SCRIPT: ${{ inputs.script }}
+        run: |
+          case "$SCRIPT" in *[!A-Za-z0-9_.-]*) echo "nome inválido"; exit 1;; esac
+          node "tools/$SCRIPT" 2>&1 | tee /tmp/consulta.log || true
+          mkdir -p /tmp/saida && cp -r tools/saida/. /tmp/saida/ 2>/dev/null || true
+          cp /tmp/consulta.log /tmp/saida/
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git checkout -q --orphan ci-consulta
+          git rm -rfq --cached .
+          cp -r /tmp/saida/. .
+          git add -A . ':!mod' ':!launcher' ':!tools' ':!README.md' ':!.github' 2>/dev/null || git add consulta.log
+          git commit -qm "Consulta ${GITHUB_SHA}"
+          git push -qf origin ci-consulta
