@@ -48,7 +48,9 @@ public class GuiContas extends GuiScreen {
         listTop = py + 40;
         // Embaixo da lista: campo do nick novo, aviso e os botões.
         visiveis = Math.max(2, (py + ph - 84 - listTop) / ROW);
-        nick = new GuiTextField(0, fontRendererObj, px + 10, py + ph - 76, pw - 82, 18);
+        // Campo sem o fundo do Minecraft: a caixa é desenhada no estilo do Pulsar.
+        nick = new GuiTextField(0, fontRendererObj, px + 15, py + ph - 71, pw - 92, 10);
+        nick.setEnableBackgroundDrawing(false);
         nick.setMaxStringLength(16);
         buttonList.clear();
         buttonList.add(new PulsarButton(ADD, px + pw - 68, py + ph - 77, 58, 20, "Adicionar"));
@@ -128,8 +130,11 @@ public class GuiContas extends GuiScreen {
         if (l != null && !l.liberado) {
             texto("Entre uma vez com a conta original no launcher para liberar os nicks offline.", py + ph - 72, MUTED);
         } else {
+            int fx = px + 10, fy = py + ph - 77, fr = px + pw - 74, fb = py + ph - 57;
+            drawRect(fx, fy, fr, fb, CARD);
+            GuiPulsarPanel.outline(fx, fy, fr, fb, nick.isFocused() ? BEAM : LINE);
             nick.drawTextBox();
-            if (nick.getText().isEmpty() && !nick.isFocused()) fontRendererObj.drawString("Novo nick offline", px + 14, py + ph - 71, MUTED);
+            if (nick.getText().isEmpty() && !nick.isFocused()) fontRendererObj.drawString("Novo nick offline", px + 15, py + ph - 71, MUTED);
         }
         String status = Conta.status();
         if (!status.isEmpty()) texto(status, py + ph - 50, Conta.busy() ? BEAM : 0xFFB0BCD8);
@@ -159,6 +164,8 @@ public class GuiContas extends GuiScreen {
     protected void mouseClicked(int mouseX, int mouseY, int button) throws IOException {
         super.mouseClicked(mouseX, mouseY, button);
         nick.mouseClicked(mouseX, mouseY, button);
+        // A caixa inteira do campo (e não só a linha do texto) dá foco.
+        if (nick.getVisible() && inside(mouseX, mouseY, px + 10, py + ph - 77, px + pw - 74, py + ph - 57)) nick.setFocused(true);
         if (button != 0 || Conta.busy()) return;
         List<String[]> linhas = linhas(Conta.lista());
         String atual = mc.getSession().getUsername();
