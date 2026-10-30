@@ -127,7 +127,75 @@ jobs:
       - name: Conferir se nada ficou fora do instalador
         working-directory: launcher
         run: node test/pacote.js
+      - name: Gerar o instalador com a tela do Pulsar
+        working-directory: launcher
+        run: node ../instalador/compilar.js instalador
+      - name: Testar no Windows (instalar, abrir o launcher e atualizar)
+        shell: pwsh
+        timeout-minutes: 20
+        run: |
+          $prints = Join-Path $env:RUNNER_TEMP "prints-windows"
+          New-Item -ItemType Directory -Force -Path $prints | Out-Null
+          $log = Join-Path $prints "windows.log"
+          $inst = (Get-ChildItem launcher/dist/Pulsar-Client-Instalador-*.exe | Select-Object -First 1).FullName
+          $setup = (Get-ChildItem "launcher/dist/Pulsar Client Setup *.exe" | Select-Object -First 1).FullName
+          $falhas = @()
+          function Anotar($texto) { $texto | Tee-Object -FilePath $log -Append }
+
+          # 1. Telas do instalador e do atualizador
+          $p = Start-Process -FilePath $inst -ArgumentList "--prints", $prints -Wait -PassThru
+          Anotar "prints do instalador: código $($p.ExitCode)"
+
+          # 2. Instalação de verdade, sem cliques
+          $t = [Diagnostics.Stopwatch]::StartNew()
+          $p = Start-Process -FilePath $inst -ArgumentList "--auto", "--sem-abrir" -Wait -PassThru
+          $exe = Join-Path $env:LOCALAPPDATA "Programs\Pulsar Client\Pulsar Client.exe"
+          Anotar "instalação: código $($p.ExitCode) em $([int]$t.Elapsed.TotalSeconds) s; launcher em $exe existe: $(Test-Path $exe)"
+          if ($p.ExitCode -ne 0 -or -not (Test-Path $exe)) { $falhas += "instalação" }
+
+          if (Test-Path $exe) {
+            $atualizador = Join-Path (Split-Path $exe) "resources\atualizador\PulsarAtualizador.exe"
+            Anotar "atualizador junto do launcher: $(Test-Path $atualizador)"
+            if (-not (Test-Path $atualizador)) { $falhas += "atualizador fora do launcher" }
+
+            # 3. Launcher instalado: print de cada aba, baixando e ligando uma textura
+            $env:PULSAR_PRINTS = $prints
+            $p = Start-Process -FilePath $exe -Wait -PassThru -RedirectStandardOutput (Join-Path $prints "launcher.log") -RedirectStandardError (Join-Path $prints "launcher-erros.log")
+            Remove-Item Env:PULSAR_PRINTS
+            Anotar "launcher: código $($p.ExitCode)"
+            foreach ($aba in "inicio", "mods", "seus-mods", "texturas", "texturas-usando", "ajustes", "atualizacao") {
+              if (-not (Test-Path (Join-Path $prints "launcher-$aba.png"))) { $falhas += "print $aba" }
+            }
+
+            # 4. Atualização pela tela do Pulsar (o launcher copia o atualizador para a pasta temporária antes)
+            if (Test-Path $atualizador) {
+              $copia = Join-Path $env:TEMP "PulsarAtualizador-teste.exe"
+              Copy-Item $atualizador $copia
+              $t = [Diagnostics.Stopwatch]::StartNew()
+              $p = Start-Process -FilePath $copia -ArgumentList "--atualizar", "`"$setup`"", "--versao", "teste", "--app", "`"$exe`"", "--auto", "--sem-abrir" -Wait -PassThru
+              Anotar "atualização: código $($p.ExitCode) em $([int]$t.Elapsed.TotalSeconds) s; launcher existe: $(Test-Path $exe)"
+              if ($p.ExitCode -ne 0 -or -not (Test-Path $exe)) { $falhas += "atualização" }
+            }
+          }
+          Get-Content (Join-Path $env:TEMP "PulsarClient-instalador.log") -ErrorAction SilentlyContinue | Add-Content $log
+          if ($falhas.Count -gt 0) { Write-Error ("Falhou no Windows: " + ($falhas -join ", ")); exit 1 }
+      - name: Publicar prints do Windows (ramo ci-windows)
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p /tmp/ci-windows
+          cp "$RUNNER_TEMP"/prints-windows/* /tmp/ci-windows/ 2>/dev/null || echo "sem prints" > /tmp/ci-windows/windows.log
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git checkout -q --orphan ci-windows
+          git rm -rfq --cached .
+          cp /tmp/ci-windows/* .
+          git add *.png *.log 2>/dev/null || git add windows.log
+          git commit -qm "Prints do Windows ${GITHUB_SHA}"
+          git push -qf origin ci-windows || true
       - uses: actions/upload-artifact@v5
         with:
           name: pulsar-launcher-windows
-          path: launcher/dist/*.exe
+          path: |
+            launcher/dist/Pulsar-Client-Instalador-*.exe
+            launcher/dist/Pulsar Client Setup *.exe

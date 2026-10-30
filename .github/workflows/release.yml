@@ -58,4 +58,8 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npm version "$VERSAO" --no-git-tag-version --allow-same-version
+          # A tela de atualização vai junto com o launcher; o instalador com a tela do Pulsar sai depois.
+          node ../instalador/compilar.js atualizador
           npx electron-builder --win --x64 --publish always -c.releaseInfo.releaseNotes="${NOTAS:-Versão $VERSAO}"
+          node ../instalador/compilar.js instalador
+          gh release upload "v$VERSAO" "dist/Pulsar-Client-Instalador-$VERSAO.exe" --clobber

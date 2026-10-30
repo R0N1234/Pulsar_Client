@@ -464,17 +464,45 @@ api.onUpdate((u) => {
     b.textContent = u.text;
   } else if (u.state === "ready") {
     b.className = "update ready";
-    b.textContent = `Atualizar para ${u.version} e reiniciar`;
+    b.textContent = `Atualizar para ${u.version}`;
+    // A janela aparece uma vez por versão; depois fica o botão no topo.
+    if (avisada !== u.version) {
+      avisada = u.version;
+      abrirAtualizacao(u);
+    }
   }
 });
-$("update").onclick = async () => {
-  if (!$("update").classList.contains("ready")) return;
+
+let avisada = "";
+function abrirAtualizacao(u) {
+  $("updVer").textContent = u.version || "";
+  $("updNotes").textContent = u.notas || "Melhorias e correções para o seu PvP.";
+  $("updHelp2").textContent = "O Pulsar fecha, atualiza e abre de novo sozinho em alguns segundos.";
+  $("updHelp2").classList.remove("err");
+  $("updModal").hidden = false;
+}
+
+async function instalarAtualizacao() {
   try {
+    $("updNow").disabled = true;
     await api.installUpdate();
   } catch (err) {
+    $("updHelp2").textContent = cleanErr(err);
+    $("updHelp2").classList.add("err");
     setStatus(cleanErr(err), true);
+  } finally {
+    $("updNow").disabled = false;
   }
+}
+$("update").onclick = () => {
+  if (!$("update").classList.contains("ready")) return;
+  $("updModal").hidden = false;
 };
+$("updNow").onclick = instalarAtualizacao;
+$("updLater").onclick = () => ($("updModal").hidden = true);
+$("updModal").addEventListener("click", (e) => {
+  if (e.target === $("updModal")) $("updModal").hidden = true;
+});
 
 /* ---------- início ---------- */
 (async function init() {

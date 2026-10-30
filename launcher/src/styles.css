@@ -217,3 +217,22 @@ body.playing .pulsar .beams{animation-duration:1.2s}
 .tx-sub:hover{color:var(--ink)}
 @media (max-width:1150px){.tx-card{gap:10px;padding:8px 10px}.tx-ico{width:46px;height:46px}.tx-act{width:80px}}
 @media (max-height:700px){.tx-info p{display:none}.tx-card{padding:7px 10px}}
+
+/* 0.6: janela de atualização pronta */
+.upd-modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(3,5,12,.72);backdrop-filter:blur(6px);animation:fade .2s ease-out}
+.upd-card{position:relative;overflow:hidden;width:min(460px,calc(100% - 48px));border:1px solid var(--line-2);border-radius:16px;background:linear-gradient(180deg,rgba(22,33,74,.95),rgba(10,15,33,.97));box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px rgba(127,231,255,.06) inset;padding:30px 30px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;animation:subir .25s ease-out}
+.upd-logo{position:relative;width:84px;height:84px;margin-bottom:6px}
+.upd-logo .pulsar{inset:-30px;width:auto;opacity:.8}
+.upd-card>*:not(.upd-logo){position:relative}
+.upd-logo img{position:relative;display:block;filter:drop-shadow(0 0 14px rgba(127,231,255,.45))}
+.upd-card small{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;color:var(--beam)}
+.upd-card h3{margin:0;font-family:var(--f-display);font-weight:600;font-size:22px}
+.upd-card h3 span{color:var(--beam)}
+.upd-notes{margin:4px 0 8px;max-height:140px;overflow:auto;white-space:pre-line;font-size:13px;color:var(--mute);line-height:1.45;user-select:text}
+.upd-actions{display:flex;gap:10px;align-items:stretch}
+.upd-actions .btn-play{min-height:48px;padding:0 26px;font-size:14px;letter-spacing:.14em;border-radius:10px;white-space:nowrap}
+.upd-actions .btn-ghost{padding:0 18px}
+.upd-card .help{margin-top:6px}
+.upd-card .help.err{color:var(--bad)}
+@keyframes fade{from{opacity:0}}
+@keyframes subir{from{opacity:0;transform:translateY(12px) scale(.98)}}
