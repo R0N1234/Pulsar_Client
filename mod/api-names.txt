@@ -1,0 +1,15 @@
+renderItemInFirstPerson
+transformFirstPersonItem
+getSwingProgress
+setBrightness
+listShaders
+renderDefaultChar
+renderUnicodeChar
+renderStringAtPos
+renderScoreboard
+renderPlayerlist
+loadShader
+renderFireInFirstPerson
+func_78440_a
+func_178096_b
+func_177092_a
