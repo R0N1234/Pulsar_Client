@@ -24,6 +24,7 @@ const DEFAULTS = {
   loader: "forge",
   optifinePath: "",
   version: "1.8.9",
+  openConsole: true,
 };
 
 function readJson(file, fallback) {
@@ -54,6 +55,8 @@ class Config {
 
   set(patch) {
     this.data = { ...this.data, ...patch };
+    // Pasta vazia faria o jogo ser instalado na pasta do launcher.
+    if (!String(this.data.gameDir || "").trim()) this.data.gameDir = minecraftDir();
     writeJson(this.file, this.data);
     return this.get();
   }

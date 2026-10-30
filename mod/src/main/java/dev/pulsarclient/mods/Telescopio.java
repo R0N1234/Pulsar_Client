@@ -20,7 +20,8 @@ public class Telescopio extends PulsarMod {
 
     private double target = 1;
     private double current = 1;
-    private float savedSensitivity = -1;
+    private long lastNanos;
+    private float realSensitivity = -1;
     private boolean savedSmooth;
     private boolean zooming;
 
@@ -34,24 +35,33 @@ public class Telescopio extends PulsarMod {
 
     @SubscribeEvent
     public void onRender(TickEvent.RenderTickEvent event) {
-        if (event.phase != TickEvent.Phase.START) return;
+        if (event.phase == TickEvent.Phase.END) {
+            // Devolve a sensibilidade de verdade antes de qualquer coisa salvar as opções.
+            if (realSensitivity >= 0) mc.gameSettings.mouseSensitivity = realSensitivity;
+            realSensitivity = -1;
+            return;
+        }
         boolean nowZooming = held();
         if (nowZooming && !zooming) {
             target = amount.get();
-            savedSensitivity = mc.gameSettings.mouseSensitivity;
             savedSmooth = mc.gameSettings.smoothCamera;
             if (cinematic.get()) mc.gameSettings.smoothCamera = true;
         } else if (!nowZooming && zooming) {
             target = 1;
-            if (savedSensitivity >= 0) mc.gameSettings.mouseSensitivity = savedSensitivity;
             mc.gameSettings.smoothCamera = savedSmooth;
-            savedSensitivity = -1;
         }
         zooming = nowZooming;
-        current = smooth.get() ? current + (target - current) * 0.25 : target;
+        // Suavização pelo tempo, para o zoom ter a mesma velocidade com 30 ou 300 FPS.
+        long now = System.nanoTime();
+        double dt = lastNanos == 0 ? 0 : Math.min(0.1, (now - lastNanos) / 1e9);
+        lastNanos = now;
+        current = smooth.get() ? current + (target - current) * (1 - Math.exp(-dt * 14)) : target;
         if (Math.abs(current - target) < 0.01) current = target;
         // Mira mais lenta quanto maior o zoom, para não perder o alvo.
-        if (zooming && savedSensitivity >= 0) mc.gameSettings.mouseSensitivity = (float) (savedSensitivity / Math.sqrt(current));
+        if (current > 1.001) {
+            realSensitivity = mc.gameSettings.mouseSensitivity;
+            mc.gameSettings.mouseSensitivity = (float) (realSensitivity / Math.sqrt(current));
+        }
     }
 
     @SubscribeEvent

@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "dev.pulsarclient"
-version = "0.4.1"
+version = "0.5.0"
 
 base {
     archivesName.set("pulsar-client")

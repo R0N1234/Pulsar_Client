@@ -194,7 +194,7 @@ public class GuiPulsarPanel extends GuiScreen {
         fontRendererObj.drawString(fontRendererObj.trimStringToWidth(mod.description(), w - 12), x + 6, y + 18, MUTED);
         toggle(x + 6, y + 31, mod.isEnabled());
         fontRendererObj.drawString(mod.isEnabled() ? "Ligado" : "Desligado", x + 32, y + 32, mod.isEnabled() ? BEAM : MUTED);
-        if (!mod.settings().isEmpty()) {
+        if (!mod.panelSettings().isEmpty()) {
             boolean gear = hover && inside(mouseX, mouseY, x + w - 20, y + 28, x + w - 4, y + 42);
             int c = gear ? BEAM : MUTED;
             // Ícone de opções: três barras.
@@ -210,7 +210,7 @@ public class GuiPulsarPanel extends GuiScreen {
         fontRendererObj.drawString(open.name(), mx + 56, py + 11, TEXT);
         toggle(px + pw - 36, py + 10, open.isEnabled());
 
-        List<Setting> settings = open.settings();
+        List<Setting> settings = open.panelSettings();
         contentHeight = 14 + settings.size() * (ROW_H + 4);
         clampScroll();
         scissor(mx, top, mw, bottom - top);
@@ -331,7 +331,7 @@ public class GuiPulsarPanel extends GuiScreen {
             if (!inside(mouseX, mouseY, x, y, x + cw, y + CARD_H)) continue;
             PulsarMod mod = mods.get(i);
             boolean gear = inside(mouseX, mouseY, x + cw - 20, y + 28, x + cw, y + CARD_H);
-            if ((button == 1 || gear) && !mod.settings().isEmpty()) {
+            if ((button == 1 || gear) && !mod.panelSettings().isEmpty()) {
                 open = mod;
                 scroll = 0;
             } else if (button == 0) {
@@ -343,7 +343,7 @@ public class GuiPulsarPanel extends GuiScreen {
 
     private void clickSettings(int mouseX, int mouseY, int button) {
         int y = top - scroll + 14;
-        for (Setting s : open.settings()) {
+        for (Setting s : open.panelSettings()) {
             if (mouseY >= y && mouseY < y + ROW_H) {
                 clickSetting(s, mouseX, button);
                 return;
@@ -408,7 +408,8 @@ public class GuiPulsarPanel extends GuiScreen {
             scroll = 0;
             return;
         }
-        if (keyCode == PulsarClient.get().panelKey().getKeyCode()) mc.displayGuiScreen(parent);
+        int panelKey = PulsarClient.get().panelKey().getKeyCode();
+        if (keyCode != 0 && keyCode == panelKey) mc.displayGuiScreen(parent);
     }
 
     private void back() {

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'">
+  <title>Console do Pulsar</title>
+  <link rel="stylesheet" href="console.css">
+</head>
+<body>
+  <header>
+    <img src="logo.png" alt="" width="28" height="28">
+    <b>Console do Pulsar</b>
+    <span id="count" class="mute">0 linhas</span>
+    <div class="tools">
+      <input id="filter" type="search" placeholder="Filtrar (ex.: erro, Pulsar, CHAT)" autocomplete="off">
+      <label><input id="onlyErr" type="checkbox"> só erros</label>
+      <label><input id="follow" type="checkbox" checked> rolar sozinho</label>
+      <button type="button" id="copy">Copiar tudo</button>
+      <button type="button" id="clear">Limpar</button>
+    </div>
+  </header>
+  <main id="log" aria-live="off"></main>
+  <script src="console.js"></script>
+</body>
+</html>

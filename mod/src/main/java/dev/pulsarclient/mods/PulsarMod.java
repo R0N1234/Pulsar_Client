@@ -33,6 +33,13 @@ public abstract class PulsarMod {
     public String description() { return description; }
     public Category category() { return category; }
     public List<Setting> settings() { return Collections.unmodifiableList(settings); }
+
+    /** Só as opções que aparecem no painel. */
+    public List<Setting> panelSettings() {
+        List<Setting> out = new ArrayList<Setting>();
+        for (Setting s : settings) if (s.visible()) out.add(s);
+        return out;
+    }
     public boolean isEnabled() { return enabled; }
 
     public void setEnabled(boolean enabled) {

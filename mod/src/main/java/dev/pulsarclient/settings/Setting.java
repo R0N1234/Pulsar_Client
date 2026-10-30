@@ -15,6 +15,9 @@ public abstract class Setting {
     public String key() { return key; }
     public String label() { return label; }
 
+    /** false para dados guardados pelo mod que não aparecem no painel (ex.: slots travados). */
+    public boolean visible() { return true; }
+
     /** null para opções que não são salvas (botões de ação). */
     public abstract JsonElement save();
     public abstract void load(JsonElement value);

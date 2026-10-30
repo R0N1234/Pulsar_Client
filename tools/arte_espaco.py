@@ -12,6 +12,8 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MOD_TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "pulsar", "textures", "gui")
 SPLASH = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "pulsar", "textures", "splash")
+LAUNCHER_BUILD = os.path.join(ROOT, "launcher", "build")
+LAUNCHER_SRC = os.path.join(ROOT, "launcher", "src")
 FONT = "/usr/share/fonts/opentype/inter/InterDisplay-Bold.otf"
 
 BG_EDGE = (5, 7, 15)
@@ -123,34 +125,83 @@ def space(w, h, seed, fade_edges=False, center=None):
     return img, rnd
 
 
-def emblem(size):
-    """Logo do Pulsar Client: "PC" dentro de um círculo, com os dois feixes do pulsar."""
+def emblem(size, beams_out=True):
+    """Logo do Pulsar Client: "PC" na frente de um pulsar (estrela de nêutrons com os dois feixes de luz)."""
     s = size
     c = s / 2
-    r = s * 0.30
+    r = s * 0.34
     img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
-    # Feixes do pulsar, saindo do círculo para cima e para baixo.
-    beams = Image.new("RGBA", (s, s), (0, 0, 0, 0))
-    bd = ImageDraw.Draw(beams)
-    for i in range(int(s * 0.2)):
-        t = i / (s * 0.2)
-        a = int(200 * (1 - t))
-        wdt = s * 0.012 * (1 - t * 0.6)
-        bd.rectangle([c - wdt, c - r - i, c + wdt, c - r - i + 1], fill=BEAM + (a,))
-        bd.rectangle([c - wdt, c + r + i - 1, c + wdt, c + r + i], fill=BEAM + (a,))
-    img.alpha_composite(beams.filter(ImageFilter.GaussianBlur(s * 0.006)))
-    img.alpha_composite(glow_layer((s, s), lambda g: g.ellipse([c - r * 1.12, c - r * 1.12, c + r * 1.12, c + r * 1.12], outline=BEAM + (170,), width=int(s * 0.04)), s * 0.03))
+    angle = math.radians(-32)
+    reach = s * (0.5 if beams_out else 0.36)
+
+    def beam_layer(alpha, half_width, length):
+        layer = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+        d = ImageDraw.Draw(layer)
+        for sign in (1, -1):
+            # Cone saindo do centro: estreito no núcleo, mais largo e mais fraco na ponta.
+            steps = 40
+            for i in range(steps):
+                t0, t1 = i / steps, (i + 1) / steps
+                a = int(alpha * (1 - t0) ** 1.4)
+                w0, w1 = half_width * (0.25 + t0), half_width * (0.25 + t1)
+                pts = []
+                for t, w in ((t0, w0), (t1, w1), (t1, -w1), (t0, -w0)):
+                    dist = t * length * sign
+                    px = c + math.cos(angle) * dist - math.sin(angle) * w
+                    py = c + math.sin(angle) * dist + math.cos(angle) * w
+                    pts.append((px, py))
+                d.polygon(pts, fill=BEAM + (a,))
+        return layer
+
+    # Feixes por fora do círculo (o brilho que "vaza") e por dentro.
+    if beams_out:
+        img.alpha_composite(beam_layer(200, s * 0.06, reach).filter(ImageFilter.GaussianBlur(s * 0.01)))
+    img.alpha_composite(glow_layer((s, s), lambda g: g.ellipse([c - r * 1.1, c - r * 1.1, c + r * 1.1, c + r * 1.1], outline=BEAM + (150,), width=int(s * 0.035)), s * 0.03))
+
+    disc = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    dd = ImageDraw.Draw(disc)
+    dd.ellipse([c - r, c - r, c + r, c + r], fill=(7, 12, 30, 245))
+    # Dentro do círculo: campo magnético, feixes fortes e o núcleo brilhante.
+    field = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    fd = ImageDraw.Draw(field)
+    for k in (0.55, 0.8):
+        fd.ellipse([c - r * k, c - r * k * 0.42, c + r * k, c + r * k * 0.42], outline=(165, 135, 255, 150), width=max(1, int(s * 0.006)))
+    field = field.rotate(math.degrees(-angle) + 90, center=(c, c))
+    disc.alpha_composite(field)
+    disc.alpha_composite(beam_layer(255, s * 0.075, r * 1.05).filter(ImageFilter.GaussianBlur(s * 0.006)))
+    disc.alpha_composite(beam_layer(255, s * 0.03, r).filter(ImageFilter.GaussianBlur(s * 0.003)))
+    disc.alpha_composite(glow_layer((s, s), lambda g: g.ellipse([c - r * 0.5, c - r * 0.5, c + r * 0.5, c + r * 0.5], fill=(127, 231, 255, 210)), s * 0.045))
+    disc.alpha_composite(glow_layer((s, s), lambda g: g.ellipse([c - r * 0.2, c - r * 0.2, c + r * 0.2, c + r * 0.2], fill=(255, 255, 255, 255)), s * 0.015))
+    mask = Image.new("L", (s, s), 0)
+    ImageDraw.Draw(mask).ellipse([c - r, c - r, c + r, c + r], fill=255)
+    clipped = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    clipped.paste(disc, (0, 0), mask)
+    img.alpha_composite(clipped)
     d = ImageDraw.Draw(img)
-    d.ellipse([c - r, c - r, c + r, c + r], fill=(8, 14, 32, 235), outline=BEAM + (255,), width=max(2, int(s * 0.018)))
-    d.ellipse([c - r * 0.88, c - r * 0.88, c + r * 0.88, c + r * 0.88], outline=BEAM + (70,), width=max(1, int(s * 0.006)))
-    font = ImageFont.truetype(FONT, int(s * 0.25))
+    d.ellipse([c - r, c - r, c + r, c + r], outline=BEAM + (255,), width=max(2, int(s * 0.02)))
+
+    font = ImageFont.truetype(FONT, int(s * 0.27))
     text = "PC"
     box = d.textbbox((0, 0), text, font=font)
     tx = c - (box[0] + box[2]) / 2
     ty = c - (box[1] + box[3]) / 2
-    img.alpha_composite(glow_layer((s, s), lambda g: g.text((tx, ty), text, font=font, fill=BEAM + (200,)), s * 0.02))
+    # Sombra escura para o "PC" ler bem por cima do núcleo claro.
+    img.alpha_composite(glow_layer((s, s), lambda g: g.text((tx, ty), text, font=font, fill=(2, 6, 18, 230)), s * 0.03))
+    img.alpha_composite(glow_layer((s, s), lambda g: g.text((tx, ty), text, font=font, fill=BEAM + (160,)), s * 0.015))
     ImageDraw.Draw(img).text((tx, ty), text, font=font, fill=(255, 255, 255, 255))
     return img
+
+
+def app_icons():
+    """Ícone do launcher, do instalador e da janela do jogo."""
+    big = emblem(1024, beams_out=False)
+    ico = big.resize((256, 256), Image.LANCZOS)
+    os.makedirs(LAUNCHER_BUILD, exist_ok=True)
+    ico.save(os.path.join(LAUNCHER_BUILD, "icon.ico"), sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
+    ico.save(os.path.join(LAUNCHER_BUILD, "icon.png"))
+    big.resize((512, 512), Image.LANCZOS).save(os.path.join(LAUNCHER_SRC, "logo.png"), optimize=True)
+    for n in (16, 32, 64):
+        big.resize((n, n), Image.LANCZOS).save(os.path.join(MOD_TEX, "icone_%d.png" % n))
 
 
 def menu_background():
@@ -180,9 +231,10 @@ def main():
     os.makedirs(MOD_TEX, exist_ok=True)
     os.makedirs(SPLASH, exist_ok=True)
     menu_background().save(os.path.join(MOD_TEX, "fundo.png"), optimize=True)
-    emblem(256).save(os.path.join(MOD_TEX, "logo.png"), optimize=True)
+    emblem(1024).resize((256, 256), Image.LANCZOS).save(os.path.join(MOD_TEX, "logo.png"), optimize=True)
     splash_background().save(os.path.join(SPLASH, "fundo.png"), optimize=True)
-    emblem(512).save(os.path.join(SPLASH, "logo.png"), optimize=True)
+    emblem(1024).resize((512, 512), Image.LANCZOS).save(os.path.join(SPLASH, "logo.png"), optimize=True)
+    app_icons()
     print("ok")
 
 

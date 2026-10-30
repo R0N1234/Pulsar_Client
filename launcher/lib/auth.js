@@ -16,6 +16,13 @@ Object.assign(lexicon.lexicon, {
   "error.gui.closed": "A janela de login foi fechada",
 });
 
+// Os erros do msmc chegam como chaves do lexicon ("error.gui.closed"); vira a frase em português.
+function describeError(err) {
+  const raw = err && err.message ? err.message : err;
+  const key = typeof raw === "string" ? raw : raw && raw.ts;
+  return (key && lexicon.lexicon[key]) || String(raw || "Erro desconhecido");
+}
+
 class Accounts {
   constructor(store) {
     // store: objeto com get()/set() para guardar o refresh token entre aberturas do launcher
@@ -28,12 +35,29 @@ class Accounts {
     return { name: this.mc.profile.name, uuid: this.mc.profile.id };
   }
 
-  async login() {
+  // onTop: pedido de dentro do jogo, então a janela de login precisa aparecer por cima do Minecraft.
+  async login({ onTop = false, icon } = {}) {
     const auth = new Auth("select_account");
-    const xbox = await auth.launch("electron", { width: 520, height: 680, title: "Entrar com Microsoft" });
+    const xbox = await auth.launch("electron", { width: 520, height: 680, title: "Entrar com Microsoft", alwaysOnTop: onTop, icon });
     this.mc = await xbox.getMinecraft();
     this.store.set({ msRefreshToken: xbox.save() });
     return this.profile();
+  }
+
+  // O token do Minecraft vale cerca de 24 horas. Com o launcher aberto há muito tempo, renova antes de jogar.
+  async fresh() {
+    if (!this.mc) throw new Error("Entre com sua conta Microsoft antes de jogar.");
+    if (!this.mc.validate()) {
+      await this.mc.refresh(true);
+      if (this.mc.parent && typeof this.mc.parent.save === "function") this.store.set({ msRefreshToken: this.mc.parent.save() });
+    }
+    return this.mc;
+  }
+
+  // Sessão para o jogo trocar de conta sem fechar.
+  session() {
+    if (!this.mc) return null;
+    return { name: this.mc.profile.name, uuid: this.mc.profile.id, token: this.mc.mcToken };
   }
 
   // Tenta entrar sozinho com o token salvo da última vez.
@@ -64,4 +88,4 @@ class Accounts {
   }
 }
 
-module.exports = { Accounts };
+module.exports = { Accounts, describeError };
