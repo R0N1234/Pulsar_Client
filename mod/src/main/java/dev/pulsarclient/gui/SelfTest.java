@@ -9,15 +9,23 @@ import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiVideoSettings;
 import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.scoreboard.IScoreObjectiveCriteria;
+import net.minecraft.scoreboard.ScoreObjective;
+import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+
+import java.util.UUID;
 
 /**
  * Só roda com -Dpulsar.selftest=true (teste do GitHub Actions).
@@ -59,12 +67,14 @@ public class SelfTest {
             case 4: show("video", new GuiVideoSettings(menu, mc.gameSettings)); break;
             case 5: show("esc", new GuiIngameMenu()); break;
             case 6: show("hud", new GuiHudEditor(menu)); break;
-            case 7:
+            case 7: show("atalhos", new GuiPulsarPanel(menu, Category.SERVIDORES, PulsarClient.get().mod("atalhos_texto"))); break;
+            case 8: show("travas", new GuiPulsarPanel(menu, Category.COMBATE, PulsarClient.get().inventario())); break;
+            case 9:
                 mc.displayGuiScreen(menu);
                 Conta.trocar();
                 break;
-            case 8: show("conta", menu); break;
-            case 9:
+            case 10: show("conta", menu); break;
+            case 11:
                 log("criando-mundo");
                 mc.launchIntegratedServer("pulsar-teste", "Pulsar Teste",
                         new WorldSettings(2026L, WorldSettings.GameType.SURVIVAL, false, false, WorldType.FLAT));
@@ -100,11 +110,42 @@ public class SelfTest {
                 show("inventario", new GuiInventory(mc.thePlayer));
                 break;
             case 5:
+                // TAB: no singleplayer a lista só aparece com um placar na lista (criado em prepareWorld).
                 mc.displayGuiScreen(null);
+                KeyBinding.setKeyBindState(mc.gameSettings.keyBindPlayerList.getKeyCode(), true);
+                log("tab");
+                break;
+            case 6:
+                KeyBinding.setKeyBindState(mc.gameSettings.keyBindPlayerList.getKeyCode(), false);
+                PulsarClient.get().mod("cores_vivas").setEnabled(true);
+                log("cores");
+                break;
+            case 7:
+                PulsarClient.get().mod("cores_vivas").setEnabled(false);
+                setOnFire(mc);
+                log("fogo");
+                break;
+            case 8:
                 finish(mc);
                 break;
             default: break;
         }
+    }
+
+    /** Fogo no jogador pelo servidor do mundo (no cliente o fogo é apagado a cada tick), com resistência ao fogo. */
+    private void setOnFire(Minecraft mc) {
+        final IntegratedServer server = mc.getIntegratedServer();
+        final UUID id = mc.thePlayer.getUniqueID();
+        if (server == null) return;
+        server.addScheduledTask(new Runnable() {
+            @Override
+            public void run() {
+                EntityPlayerMP p = server.getConfigurationManager().getPlayerByUUID(id);
+                if (p == null) return;
+                p.addPotionEffect(new PotionEffect(Potion.fireResistance.id, 600, 0));
+                p.setFire(10);
+            }
+        });
     }
 
     /** Liga todos os mods de HUD, dá itens e efeitos (só no cliente) para os prints mostrarem tudo. */
@@ -119,6 +160,15 @@ public class SelfTest {
         mc.thePlayer.addPotionEffect(new PotionEffect(Potion.moveSpeed.id, 6000, 1));
         // Nível 255 chega como -1: era o que fechava o jogo na 0.4.0.
         mc.thePlayer.addPotionEffect(new PotionEffect(Potion.jump.id, 6000, -1));
+        // Placar de servidor de mentira (só no cliente), para o Placar e a lista do TAB aparecerem.
+        Scoreboard sb = mc.theWorld.getScoreboard();
+        ScoreObjective o = sb.getObjective("pulsar");
+        if (o == null) o = sb.addScoreObjective("pulsar", IScoreObjectiveCriteria.DUMMY);
+        o.setDisplayName("§d§lPULSAR");
+        sb.setObjectiveInDisplaySlot(0, o);
+        sb.setObjectiveInDisplaySlot(1, o);
+        String[] linhas = {"§7Mapa: §fÓrbita", "§7Abates: §a12", "§7Jogadores: §f8", "§bpulsarclient"};
+        for (int i = 0; i < linhas.length; i++) sb.getValueFromObjective(linhas[i], o).setScorePoints(linhas.length - i);
         log("mundo-pronto");
     }
 
