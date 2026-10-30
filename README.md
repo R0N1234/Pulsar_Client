@@ -9,21 +9,25 @@ Client de PVP para Minecraft 1.8.9 com tema espacial. O projeto tem duas partes:
 
 O launcher instala o Forge 1.8.9 e o jar do mod numa pasta própria (`%APPDATA%\.pulsar` no Windows), separada da sua `.minecraft`.
 
-## O que já funciona (versão 0.4)
+## O que já funciona (versão 0.5)
 
 Launcher:
-- Tela inicial no estilo Núcleo (pulsar no centro, 1.8.9 e botão JOGAR)
-- Aba Mods no estilo Painel, com os 58 mods do catálogo, busca, filtros e prévia da HUD
-- Login com conta Microsoft em português (o token fica salvo criptografado pelo sistema)
+- Tela inicial no estilo Núcleo (pulsar no centro, 1.8.9 e botão JOGAR) e o logo PC com um pulsar atrás
+- Aba Mods no estilo Painel, com o catálogo, busca, filtros e prévia da HUD
+- Login com conta Microsoft em português (o token fica salvo criptografado pelo sistema e é renovado antes de jogar)
 - Usa a `.minecraft` com uma instância própria (`.minecraft/pulsar/instancia-1.8.9`), baixa o Java 8 sozinho
 - Modos Forge + Pulsar, OptiFine + Forge + Pulsar e Só OptiFine (o jar do OptiFine é escolhido pelo jogador)
+- **Console do Pulsar**: janela própria com o registro do jogo, cores, filtro e copiar (abre ao clicar em Jogar; dá para desligar em Ajustes)
+- Ponte local (`lib/ponte.js`, só 127.0.0.1 e com chave nova a cada jogo) para trocar de conta Microsoft pelo menu do Minecraft
 - Atualização automática pelos Releases
 
-Mod (23 prontos):
-- HUD: **Teclas Pulse**, **Frequência CPS**, **FPS**, **Latência**, **Coordenadas**, **Relógio**, **Memória**, **Bússola**, **Servidor**, **Saturação**
-- Combate: **Propulsão** (correr fixo, tecla R), **Mira de Pulsar**, **Blindagem** (armadura e item na mão), **Efeitos** (poções), **Combo**, **Alcance**, **Tremor de Dano** (sem balanço da câmera), **Campo de Colisão** (hitbox)
-- Visual: **Telescópio** (zoom segurando C), **Supernova** (brilho total), **Contorno** do bloco, **Atmosfera** (sem chuva e hora do dia fixa só para você)
-- **Motor Pulsar**: otimizador próprio. Não desenha entidades escondidas atrás de paredes nem mobs longe, esconde suportes de armadura (mantém hologramas), pode limitar a distância dos nomes, controla partículas, segura o FPS com a janela em segundo plano e tem o botão "Aplicar modo desempenho"
+Mod (30 prontos):
+- HUD: **Teclas Pulse**, **Frequência CPS**, **FPS**, **Latência**, **Coordenadas**, **Relógio**, **Memória**, **Bússola**, **Servidor**, **Saturação**, **Cronômetro** (tecla P)
+- Combate: **Propulsão** (correr fixo, tecla R), **Mira de Pulsar**, **Blindagem**, **Efeitos**, **Combo**, **Alcance**, **Tremor de Dano**, **Campo de Colisão**, **Contador de Itens**, **Contador TNT**, **Inventário** (trava itens com L para não dropar nem tirar do lugar; inventário centralizado com efeitos)
+- Visual: **Telescópio** (zoom no C), **Órbita Livre** (segurando Alt, a câmera gira 360° em volta do personagem), **Meu Nick** (seu nick no F5), **Supernova**, **Contorno**, **Atmosfera**, **Poeira Estelar**
+- **Motor Pulsar**: otimizador próprio com perfis **Desempenho**, **Desempenho + Qualidade** e **Qualidade+**. Tem ganchos dentro do jogo (`core/MotorTransformer`): não desenha entidades escondidas atrás de paredes ou longe (nem a sombra e o nome delas), baús/placas/cabeças longe, pode desligar a animação de água/lava/fogo e limitar partículas novas. Também segura o FPS em segundo plano e esconde suportes de armadura (mantém hologramas)
+
+Menu principal: caixinha no canto de cima com a sua conta. Clicar nela abre o login da Microsoft por cima do jogo e troca de conta sem fechar o Minecraft.
 
 Tela de carregamento e menu: o jar também é um coremod (`dev.pulsarclient.core`) que troca a tela de carregamento do Forge pela do Pulsar (universo de fundo, "PC" no círculo e uma barra). Se der qualquer erro, a tela normal do Forge aparece. O menu principal do jogo é trocado pelo do Pulsar, com o mesmo fundo. A arte sai de `tools/arte_espaco.py`.
 
@@ -72,9 +76,8 @@ GitHub > foto > Settings > Developer settings > Personal access tokens > **Fine-
 
 ## Próximos passos sugeridos
 
-- Mods de combate que faltam: Blindagem, Efeitos, Alcance, Combo, Animações Clássicas
-- Órbita Livre (freelook)
-- Motor Pulsar mais fundo (culling de entidades atrás de paredes, carregamento de chunks), que precisa de Mixins
+- Animações Clássicas (bloqueio estilo 1.7), que precisa de mais ganchos no jogo
+- Motor Pulsar: carregamento de chunks mais rápido e culling de partículas fora da tela
 - Cosméticos (Hangar), que precisam de um servidor próprio
 
 ## Observações
