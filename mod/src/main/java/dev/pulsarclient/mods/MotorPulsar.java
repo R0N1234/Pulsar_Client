@@ -172,7 +172,7 @@ public class MotorPulsar extends PulsarMod {
     public void onBlockOverlay(RenderBlockOverlayEvent event) {
         if (event.overlayType != RenderBlockOverlayEvent.OverlayType.FIRE || !isEnabled() || fire.index() == 0) return;
         event.setCanceled(true);
-        drawFire(fire.index() == 1 ? 0.25f : 0.42f);
+        drawFire(fire.index() == 1 ? 0.15f : 0.3f);
     }
 
     /** Mesmo desenho do Minecraft (ItemRenderer.renderFireInFirstPerson), descido um pouco. */
