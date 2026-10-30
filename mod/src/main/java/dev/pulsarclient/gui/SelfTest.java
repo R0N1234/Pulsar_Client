@@ -174,19 +174,14 @@ public class SelfTest {
         });
     }
 
-    /** Mundo do teste sem monstros e sem dano: um slime matava o jogador no meio dos prints. */
+    /** Mundo do teste sem monstros: um slime matava o jogador no meio dos prints. (Sem dano não dá: o jogo apaga o fogo.) */
     private void protegerJogador(Minecraft mc) {
         final IntegratedServer server = mc.getIntegratedServer();
-        final UUID id = mc.thePlayer.getUniqueID();
         if (server == null) return;
         server.addScheduledTask(new Runnable() {
             @Override
             public void run() {
                 server.setDifficultyForAllWorlds(EnumDifficulty.PEACEFUL);
-                EntityPlayerMP p = server.getConfigurationManager().getPlayerByUUID(id);
-                if (p == null) return;
-                p.capabilities.disableDamage = true;
-                p.sendPlayerAbilities();
             }
         });
     }

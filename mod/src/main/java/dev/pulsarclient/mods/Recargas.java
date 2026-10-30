@@ -34,7 +34,7 @@ public class Recargas extends HudMod {
     private final long[] usouAte = new long[3];
 
     public Recargas() {
-        super("recargas", "Recargas", "Tempo de espera da pérola e das maçãs douradas", Category.COMBATE, 10000, 150, false);
+        super("recargas", "Recargas", "Tempo de espera da pérola e das maçãs douradas", Category.COMBATE, 10000, 140, false);
     }
 
     @Override

@@ -5,7 +5,7 @@ public final class CombatHud {
     private CombatHud() {}
 
     public static class Combo extends HudMod {
-        public Combo() { super("combo", "Combo", "Conta quantos hits seguidos você deu", Category.COMBATE, 10000, 190, false); }
+        public Combo() { super("combo", "Combo", "Conta quantos hits seguidos você deu", Category.COMBATE, 10000, 176, false); }
 
         private String value() {
             int c = CombatTracker.combo();
@@ -18,7 +18,7 @@ public final class CombatHud {
     }
 
     public static class Alcance extends HudMod {
-        public Alcance() { super("alcance", "Alcance", "Distância de cada hit que você acerta", Category.COMBATE, 10000, 204, false); }
+        public Alcance() { super("alcance", "Alcance", "Distância de cada hit que você acerta", Category.COMBATE, 10000, 188, false); }
 
         private String value() {
             double r = CombatTracker.reach();
