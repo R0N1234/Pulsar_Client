@@ -31,3 +31,14 @@ net.minecraft.entity.EntityLivingBase
 net.minecraftforge.client.event.RenderGameOverlayEvent$ElementType
 net.minecraft.client.gui.inventory.GuiContainer
 net.minecraft.client.settings.GameSettings
+net.minecraft.client.gui.GuiScreen
+net.minecraft.client.gui.GuiButton
+net.minecraft.client.renderer.texture.TextureUtil
+net.minecraft.client.renderer.GlStateManager
+net.minecraft.client.multiplayer.ServerData
+net.minecraft.client.gui.GuiScreenResourcePacks
+net.minecraft.client.multiplayer.PlayerControllerMP
+net.minecraft.client.entity.EntityPlayerSP
+net.minecraft.client.gui.inventory.GuiInventory
+net.minecraft.inventory.Container
+net.minecraft.client.renderer.entity.Render
