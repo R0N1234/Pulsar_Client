@@ -236,3 +236,34 @@ body.playing .pulsar .beams{animation-duration:1.2s}
 .upd-card .help.err{color:var(--bad)}
 @keyframes fade{from{opacity:0}}
 @keyframes subir{from{opacity:0;transform:translateY(12px) scale(.98)}}
+
+/* 0.6.1: contas (original e offline) */
+.right{position:relative}
+.acct-now{display:flex;align-items:center;gap:10px;background:none;border:1px solid transparent;border-radius:10px;padding:4px 8px 4px 4px;cursor:pointer;text-align:left}
+.acct-now:hover,.acct-now[aria-expanded="true"]{border-color:var(--line-2);background:rgba(17,26,54,.6)}
+.acct-info{display:flex;flex-direction:column;line-height:1.2}
+.acct-info .name{font-size:14px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct .st.off,.conta .ava.off+span+small{color:var(--nebula)}
+.acct .caret{color:var(--mute);font-size:11px}
+.ava{flex:none;width:30px;height:30px;border-radius:7px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:14px;color:#04121A;background:linear-gradient(180deg,#B9F3FF,var(--beam))}
+.ava.off{color:#fff;background:linear-gradient(180deg,#B7A3FF,var(--nebula))}
+.acct-menu{position:absolute;top:52px;right:70px;z-index:40;width:300px;max-height:calc(100vh - 80px);overflow:auto;border:1px solid var(--line-2);border-radius:12px;background:linear-gradient(180deg,rgba(22,33,74,.98),rgba(10,15,33,.98));box-shadow:0 20px 50px rgba(0,0,0,.5);padding:12px;display:flex;flex-direction:column;gap:6px;-webkit-app-region:no-drag;animation:subir .15s ease-out}
+.acct-menu h5{margin:6px 2px 2px;font-family:var(--f-mono);font-weight:400;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--beam)}
+.acct-menu h5:first-child{margin-top:0}
+.conta{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:9px;background:rgba(17,26,54,.6)}
+.conta.on{border-color:rgba(110,231,168,.55)}
+.conta-usar{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:none;border:0;padding:6px 8px;cursor:pointer;text-align:left;border-radius:9px}
+.conta-usar:hover{background:var(--beam-soft)}
+.conta-usar span:not(.ava){flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+.conta-usar small{font-family:var(--f-mono);font-size:10.5px;color:var(--mute)}
+.conta.on .conta-usar small{color:var(--ok)}
+.conta-x{padding:0 10px;color:var(--mute);font-size:13px;text-decoration:none}
+.conta-x:hover{color:var(--bad)}
+.conta-ms{width:100%}
+.conta-nova{display:flex;gap:6px;margin-top:2px}
+.conta-nova input{flex:1;min-width:0;background:rgba(5,7,15,.6);border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;font-family:var(--f-mono);font-size:13px;user-select:text}
+.conta-nova input:focus-visible{outline:none;border-color:var(--beam)}
+.conta-nova .btn-ghost{padding:7px 12px}
+.acct-menu .help{font-size:11.5px;line-height:1.4}
+.acct-menu .help.err{color:var(--bad)}
+.acct-menu .help.err:empty{display:none}

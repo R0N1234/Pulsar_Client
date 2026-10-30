@@ -25,6 +25,10 @@ const DEFAULTS = {
   optifinePath: "",
   version: "1.8.9",
   openConsole: true,
+  // Contas offline (só liberadas depois que uma conta Microsoft com o Minecraft entrou neste PC).
+  contasOffline: [],
+  contaAtiva: "microsoft",
+  originalVerificada: false,
 };
 
 function readJson(file, fallback) {

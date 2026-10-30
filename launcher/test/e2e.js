@@ -8,6 +8,7 @@ const path = require("path");
 const { Authenticator } = require("minecraft-launcher-core");
 const { launch } = require("../lib/launch");
 const { startBridge } = require("../lib/ponte");
+const { uuidOffline } = require("../lib/auth");
 
 const work = path.resolve(process.argv[2] || "e2e-work");
 const logFile = path.join(work, "e2e.log");
@@ -24,6 +25,7 @@ const REQUIRED = [
   [/Motor: gancho de animações instalado/, "gancho de animações do Motor"],
   [/Motor: gancho de partículas instalado/, "gancho de partículas do Motor"],
   [/Conta trocada para PulsarTroca/, "troca de conta pela ponte do launcher"],
+  [/Conta trocada para NickTeste \(offline\)/, "nick offline criado e usado dentro do jogo"],
   [/selftest: mundo-pronto/, "mundo de teste"],
   [/Fonte: ganchos instalados em FontRenderer/, "ganchos da Fonte do Pulsar"],
   [/Fonte: espaçamento com fração instalado/, "espaçamento da Fonte do Pulsar"],
@@ -99,9 +101,20 @@ setTimeout(() => finish(1, `FALHOU: tempo esgotado (pulsar=${pulsarLoaded}, jogo
 
 (async () => {
   try {
-    // Ponte de conta de mentira: o jogo pede para trocar e recebe uma conta offline.
+    // Ponte de conta de mentira: o jogo pede para trocar e recebe uma conta; a lista tem uma original e nicks offline.
+    const original = { name: "PulsarTroca", uuid: "0123456789abcdef0123456789abcdef", token: "0" };
+    const contas = { microsoft: { name: original.name, uuid: original.uuid }, offline: ["RickPvP", "Rick_Alt2"], ativa: "microsoft", liberado: true };
+    const sessao = (c) => (c === "microsoft" ? original : { name: c, uuid: uuidOffline(c), token: "0", offline: true });
     const bridge = PRINTS
-      ? await startBridge({ onSwitchAccount: async () => ({ name: "PulsarTroca", uuid: "0123456789abcdef0123456789abcdef", token: "0" }) })
+      ? await startBridge({
+          onSwitchAccount: async () => original,
+          onList: async () => contas,
+          onUse: async (c) => sessao((contas.ativa = c)),
+          onAddOffline: async (n) => {
+            if (!contas.offline.includes(n)) contas.offline.push(n);
+            return sessao((contas.ativa = n));
+          },
+        })
       : null;
     const bridgeArgs = bridge ? [`-Dpulsar.ponte=${bridge.port}`, `-Dpulsar.chave=${bridge.key}`] : [];
     proc = await launch({

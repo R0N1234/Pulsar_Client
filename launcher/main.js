@@ -184,11 +184,12 @@ function openConsole() {
 
 app.whenReady().then(() => {
   config = new Config(app.getPath("userData"));
-  accounts = new Accounts(secretStore());
+  accounts = new Accounts(secretStore(), { get: () => config.get(), set: (patch) => config.set(patch) });
 
   ipcMain.handle("config:get", () => publicConfig());
   ipcMain.handle("config:set", (_e, patch) => {
-    const { msRefreshTokenEnc, updateTokenEnc, hasUpdateToken, ...safe } = patch || {};
+    // Contas só mudam pelos pedidos de conta (a liberação do offline não pode vir da tela).
+    const { msRefreshTokenEnc, updateTokenEnc, hasUpdateToken, contasOffline, contaAtiva, originalVerificada, ...safe } = patch || {};
     config.set(safe);
     return publicConfig();
   });
@@ -263,6 +264,9 @@ app.whenReady().then(() => {
   ipcMain.handle("account:restore", () => accounts.restore());
   ipcMain.handle("account:login", () => accounts.login({ icon: ICON }).catch((e) => Promise.reject(new Error(describeError(e)))));
   ipcMain.handle("account:logout", () => accounts.logout());
+  ipcMain.handle("account:usar", (_e, conta) => accounts.usar(String(conta)));
+  ipcMain.handle("account:offline-add", (_e, nick) => accounts.adicionarOffline(String(nick)));
+  ipcMain.handle("account:offline-remove", (_e, nick) => accounts.removerOffline(String(nick)));
 
   ipcMain.handle("game:launch", async () => {
     if (game || launching) throw new Error("O Minecraft já está aberto.");
@@ -274,7 +278,15 @@ app.whenReady().then(() => {
       send("game:log-reset");
       pushLog("──────── Abrindo o Minecraft ────────");
       if (cfg.openConsole) openConsole();
-      bridge = await startBridge({ onSwitchAccount: switchAccountFromGame });
+      bridge = await startBridge({
+        onSwitchAccount: switchAccountFromGame,
+        onList: async () => accounts.estado(),
+        onUse: async (conta) => {
+          if (conta === "microsoft" && !accounts.profile()) throw new Error("Entre com a conta Microsoft no launcher primeiro.");
+          return contaDoJogo(() => accounts.usar(conta));
+        },
+        onAddOffline: async (nick) => contaDoJogo(() => accounts.adicionarOffline(nick)),
+      });
       game = await launch({
         config: cfg,
         authorization: accounts.mclc(),
@@ -409,12 +421,21 @@ function closeBridge() {
 // e devolve a sessão nova para o jogo usar sem fechar.
 async function switchAccountFromGame() {
   try {
-    const profile = await accounts.login({ onTop: true, icon: ICON });
-    send("account:changed", profile);
+    send("account:changed", await accounts.login({ onTop: true, icon: ICON }));
     return accounts.session();
   } catch (err) {
     throw new Error(describeError(err));
   }
+}
+
+// Troca pedida pelo jogo para uma conta que o launcher já tem (a Microsoft ou um nick offline).
+async function contaDoJogo(mudar) {
+  const estado = mudar();
+  if (estado.ativa === "microsoft") await accounts.fresh();
+  const sessao = accounts.session();
+  if (!sessao) throw new Error("Entre com a conta Microsoft no launcher primeiro.");
+  send("account:changed", estado);
+  return sessao;
 }
 
 app.on("window-all-closed", () => app.quit());
