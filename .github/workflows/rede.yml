@@ -1,0 +1,59 @@
+name: Rede
+
+# Rede do Pulsar (ícone PC no nome, nível e amigos): testa o Worker e publica na Cloudflare.
+# Publica só quando os segredos CLOUDFLARE_API_TOKEN e CLOUDFLARE_ACCOUNT_ID existem no repositório.
+# O resultado (endereço da rede ou o motivo de não ter publicado) vai para o ramo ci-rede.
+on:
+  push:
+    branches: [main]
+    paths: ["rede/**", ".github/workflows/rede.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  rede:
+    runs-on: ubuntu-latest
+    env:
+      TEM_SEGREDOS: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Testar a rede no próprio runner
+        working-directory: rede
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+      - name: Publicar na Cloudflare
+        if: env.TEM_SEGREDOS == 'true'
+        working-directory: rede
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -o pipefail
+          npx wrangler deploy 2>&1 | tee "$RUNNER_TEMP/deploy.log"
+          grep -oE 'https://[a-z0-9.-]+\.workers\.dev' "$RUNNER_TEMP/deploy.log" | head -1 > "$RUNNER_TEMP/url.txt"
+          URL=$(cat "$RUNNER_TEMP/url.txt")
+          test -n "$URL"
+          curl -fsS "$URL" | tee "$RUNNER_TEMP/resposta.txt"
+      - name: Contar o resultado no ramo ci-rede
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p /tmp/ci-rede
+          if [ "$TEM_SEGREDOS" != "true" ]; then echo "sem segredos da Cloudflare no repositório" > /tmp/ci-rede/estado.txt
+          elif [ -s "$RUNNER_TEMP/url.txt" ]; then echo "publicada" > /tmp/ci-rede/estado.txt; cp "$RUNNER_TEMP/url.txt" /tmp/ci-rede/url.txt
+          else echo "falhou ao publicar" > /tmp/ci-rede/estado.txt; fi
+          [ -f "$RUNNER_TEMP/deploy.log" ] && grep -v -i "token" "$RUNNER_TEMP/deploy.log" | tail -60 > /tmp/ci-rede/deploy.log || true
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git checkout -q --orphan ci-rede
+          git rm -rfq --cached .
+          cp /tmp/ci-rede/* .
+          git add estado.txt $(ls url.txt deploy.log 2>/dev/null)
+          git commit -qm "Rede ${GITHUB_SHA}: $(cat estado.txt)"
+          git push -qf origin ci-rede

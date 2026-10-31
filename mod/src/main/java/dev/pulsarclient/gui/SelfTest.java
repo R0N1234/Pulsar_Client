@@ -7,6 +7,7 @@ import dev.pulsarclient.mods.HudMod;
 import dev.pulsarclient.mods.MiraPulsar;
 import dev.pulsarclient.mods.PulsarMod;
 import dev.pulsarclient.mods.Telescopio;
+import dev.pulsarclient.rede.Rede;
 import dev.pulsarclient.settings.ColorSetting;
 import dev.pulsarclient.settings.ActionSetting;
 import dev.pulsarclient.settings.Setting;
@@ -35,6 +36,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -202,6 +205,12 @@ public class SelfTest {
                 boolean voltou = telescopio().mouseScale() >= 0.999 && mc.gameSettings.mouseSensitivity == sensibilidade;
                 log(voltou ? "zoom-ok" : "zoom-falhou");
                 spawnBonecos(mc);
+                // Com a rede no ar: os bonecos viram usuários do Pulsar (ícone PC e nível no nome) e chegam amigos de mentira.
+                if (Rede.noAr()) {
+                    List<UUID> bonecos = new ArrayList<UUID>();
+                    for (int i = 1; i <= 2; i++) bonecos.add(UUID.nameUUIDFromBytes(("Boneco" + i).getBytes()));
+                    Rede.get().dadosDeTeste(bonecos);
+                }
                 break;
             case 18:
                 // Um boneco perto (completo) e um longe (otimizado pelo Motor).
@@ -214,9 +223,15 @@ public class SelfTest {
                 show("hudjogo", new GuiHudEditor(null));
                 break;
             case 20:
+                if (Rede.noAr()) show("amigos", new GuiAmigos(null).escolher("a1", "AnaPvP"));
+                break;
+            case 21:
+                // Desliga o rádio um passo antes do fim: o pedido de parar sai em até meio segundo.
                 PulsarClient.get().mod("rastro_cometa").setEnabled(false);
                 PulsarClient.get().mod("radio_pulsar").setEnabled(false);
                 mc.displayGuiScreen(null);
+                break;
+            case 22:
                 finish(mc);
                 break;
             default: break;

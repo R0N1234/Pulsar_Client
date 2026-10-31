@@ -690,28 +690,42 @@ $("updModal").addEventListener("click", (e) => {
 
 /* ---------- rádio pulsar ---------- */
 // O jogo pede pela ponte e o launcher toca. Um elemento de áudio só, criado na primeira vez.
+// Cada estação vem com endereços reserva: se um falhar, tenta o próximo antes de avisar.
 let radio = null;
+let radioPedido = null;
+function radioTocar(i) {
+  const c = radioPedido;
+  if (!c || i >= c.urls.length) {
+    if (c) api.radioErro(`não deu para tocar ${c.nome} (${radio && radio.error ? "erro " + radio.error.code : "sem resposta"})`);
+    return;
+  }
+  radio.dataset.indice = String(i);
+  radio.src = c.urls[i];
+  radio.play().catch((e) => {
+    // "AbortError" é só a troca de estação no meio; os outros erros caem no evento "error".
+    if (e && e.name === "NotAllowedError") api.radioErro(`não deu para tocar ${c.nome}: ${e.message}`);
+  });
+}
 api.onRadio((c) => {
   if (!c.tocando) {
+    radioPedido = null;
     if (radio) {
       radio.pause();
       radio.removeAttribute("src");
       radio.load();
-      radio.dataset.url = "";
     }
     return;
   }
   if (!radio) {
     radio = new Audio();
     radio.preload = "none";
-    radio.addEventListener("error", () => radio.dataset.url && api.radioErro(`não deu para tocar ${radio.dataset.nome} (erro ${radio.error ? radio.error.code : "?"})`));
+    radio.addEventListener("error", () => radioPedido && radioTocar(Number(radio.dataset.indice || 0) + 1));
   }
   radio.volume = Math.max(0, Math.min(1, c.volume / 100));
-  if (radio.dataset.url === c.url && !radio.paused) return;
-  radio.dataset.url = c.url;
-  radio.dataset.nome = c.nome;
-  radio.src = c.url;
-  radio.play().catch((e) => api.radioErro(`não deu para tocar ${c.nome}: ${e.message}`));
+  const mesma = radioPedido && radioPedido.nome === c.nome;
+  radioPedido = c;
+  if (mesma && !radio.paused) return;
+  radioTocar(0);
 });
 
 /* ---------- início ---------- */

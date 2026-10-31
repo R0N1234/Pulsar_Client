@@ -5,7 +5,10 @@ import dev.pulsarclient.gui.GuiPulsarPanel;
 import dev.pulsarclient.gui.Janela;
 import dev.pulsarclient.gui.MenuButtons;
 import dev.pulsarclient.gui.SelfTest;
+import dev.pulsarclient.rede.Rede;
+import dev.pulsarclient.rede.Selos;
 import dev.pulsarclient.hud.GuiHudEditor;
+import dev.pulsarclient.mods.Amigos;
 import dev.pulsarclient.mods.AnimacoesClassicas;
 import dev.pulsarclient.mods.AtalhosTexto;
 import dev.pulsarclient.mods.Atmosfera;
@@ -21,6 +24,7 @@ import dev.pulsarclient.mods.CoresVivas;
 import dev.pulsarclient.mods.Cronometro;
 import dev.pulsarclient.mods.FontePulsar;
 import dev.pulsarclient.mods.GgAutomatico;
+import dev.pulsarclient.mods.IconePulsar;
 import dev.pulsarclient.mods.Impacto;
 import dev.pulsarclient.mods.Inventario;
 import dev.pulsarclient.mods.ListaTab;
@@ -32,6 +36,7 @@ import dev.pulsarclient.mods.Efeitos;
 import dev.pulsarclient.mods.HudMod;
 import dev.pulsarclient.mods.MiraPulsar;
 import dev.pulsarclient.mods.MotorPulsar;
+import dev.pulsarclient.mods.Nivel;
 import dev.pulsarclient.mods.Propulsao;
 import dev.pulsarclient.mods.PulsarMod;
 import dev.pulsarclient.mods.RadioPulsar;
@@ -132,6 +137,12 @@ public class PulsarClient {
         add(new GgAutomatico());
         add(new SinalDiscord());
         add(new RadioPulsar());
+        // Ícone PC, Nível e Amigos dependem da rede do Pulsar: sem o endereço dela no mod, ficam de fora.
+        if (Rede.noAr()) {
+            add(new IconePulsar());
+            add(new Nivel());
+            add(new Amigos());
+        }
         add(motor);
 
         config = new PulsarConfig(Minecraft.getMinecraft().mcDataDir);
@@ -148,6 +159,11 @@ public class PulsarClient {
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new MenuButtons());
         MinecraftForge.EVENT_BUS.register(new CombatTracker());
+        if (Rede.noAr()) {
+            MinecraftForge.EVENT_BUS.register(Rede.get());
+            MinecraftForge.EVENT_BUS.register(new Selos());
+            Rede.get().iniciar();
+        }
         if (Boolean.getBoolean("pulsar.selftest")) MinecraftForge.EVENT_BUS.register(new SelfTest());
         System.out.println("[Pulsar] Pulsar Client " + VERSION + " iniciado com " + mods.size() + " mods");
         System.out.println("[Pulsar] Motor: ganchos ativos " + MotorPulsar.hooksSummary());

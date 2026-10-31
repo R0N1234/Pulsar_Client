@@ -1,0 +1,13 @@
+{
+  "name": "pulsar-rede",
+  "private": true,
+  "description": "Rede do Pulsar Client: ícone PC no nome, nível e amigos",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node test/rede.test.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "4.156.0"
+  }
+}

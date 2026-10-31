@@ -86,11 +86,20 @@ public class ListaTab extends PulsarMod {
         int pontosMax = 0;
         int pingMax = 0;
         List<String> nomes = new ArrayList<String>(total);
-        for (NetworkPlayerInfo j : jogadores) {
+        // Rede do Pulsar: ícone PC antes do nome e o nível depois, para quem usa o Pulsar.
+        dev.pulsarclient.mods.IconePulsar icone = (dev.pulsarclient.mods.IconePulsar) dev.pulsarclient.PulsarClient.get().mod("icone_pulsar");
+        dev.pulsarclient.mods.Nivel nivelMod = (dev.pulsarclient.mods.Nivel) dev.pulsarclient.PulsarClient.get().mod("nivel");
+        boolean comIcone = icone != null && icone.noTab();
+        boolean comNivel = nivelMod != null && nivelMod.noTab();
+        int[] niveis = new int[total];
+        for (int i = 0; i < total; i++) niveis[i] = comIcone || comNivel ? dev.pulsarclient.rede.Rede.get().nivelDe(jogadores.get(i).getGameProfile()) : 0;
+        for (int i = 0; i < total; i++) {
+            NetworkPlayerInfo j = jogadores.get(i);
             String nome = tab.getPlayerName(j);
             if (j.getGameType() == WorldSettings.GameType.SPECTATOR) nome = EnumChatFormatting.ITALIC + nome;
             nomes.add(nome);
-            nomeMax = Math.max(nomeMax, fr.getStringWidth(nome));
+            int extra = niveis[i] > 0 ? (comIcone ? 10 : 0) + (comNivel ? fr.getStringWidth(" " + niveis[i]) : 0) : 0;
+            nomeMax = Math.max(nomeMax, fr.getStringWidth(nome) + extra);
             if (objetivo != null) pontosMax = Math.max(pontosMax, fr.getStringWidth(" " + pontos(placar, objetivo, j)));
             if (ping.index() == 0) pingMax = Math.max(pingMax, fr.getStringWidth(textoPing(j.getResponseTime())));
         }
@@ -132,7 +141,13 @@ public class ListaTab extends PulsarMod {
             Gui.drawRect(cx, cy, cx + celula, cy + LINHA - 1, voce ? CELULA_VOCE : CELULA);
             cabeca(j, cx + 1, cy);
             boolean espectador = j.getGameType() == WorldSettings.GameType.SPECTATOR;
-            fr.drawStringWithShadow(nomes.get(i), cx + 11, cy + 1, espectador ? 0x90FFFFFF : 0xFFFFFFFF);
+            int nx = cx + 11;
+            if (niveis[i] > 0 && comIcone) {
+                dev.pulsarclient.gui.Universo.icone(nx, cy, 8);
+                nx += 10;
+            }
+            nx = fr.drawStringWithShadow(nomes.get(i), nx, cy + 1, espectador ? 0x90FFFFFF : 0xFFFFFFFF);
+            if (niveis[i] > 0 && comNivel) fr.drawStringWithShadow(String.valueOf(niveis[i]), nx + 1, cy + 1, dev.pulsarclient.rede.Selos.COR_NIVEL);
             int direita = cx + celula - 2;
             if (ping.index() == 0) {
                 String p = textoPing(j.getResponseTime());
