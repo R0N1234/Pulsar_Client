@@ -48,7 +48,7 @@ public class Inventario extends PulsarMod {
     public final KeyBinding lockKey = new KeyBinding("Travar item (no inventário)", Keyboard.KEY_L, "Pulsar Client");
 
     private final BoolSetting locking = add(new BoolSetting("travar", "Travar itens no inventário", true));
-    private final TeclaDoJogo lockKeySetting = add(new TeclaDoJogo("tecla_travar", "Tecla de travar (com o mouse no item)", lockKey));
+    private final TeclaDoJogo lockKeySetting = add(new TeclaDoJogo("tecla_travar", "Tecla para travar item", lockKey));
     private final BoolSetting noShift = add(new BoolSetting("centralizar", "Inventário no meio mesmo com efeitos", true));
     private final BoolSetting hideEffects = add(new BoolSetting("sem_efeitos", "Esconder os efeitos ao lado do inventário", false));
     private final TextSetting lockedSlots = add(new TextSetting("slots", ""));

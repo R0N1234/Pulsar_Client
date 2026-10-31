@@ -8,7 +8,7 @@ import org.lwjgl.input.Keyboard;
 /** Propulsão: correr fica ligado sem segurar a tecla. Equivale ao Toggle Sprint. */
 public class Propulsao extends HudMod {
     public final KeyBinding key = new KeyBinding("Propulsão (correr fixo)", Keyboard.KEY_R, "Pulsar Client");
-    private final TeclaDoJogo modeKey = add(new TeclaDoJogo("tecla_correr", "Tecla para trocar entre fixo e manual", key));
+    private final TeclaDoJogo modeKey = add(new TeclaDoJogo("tecla_correr", "Tecla do correr fixo", key));
     private boolean active = true;
 
     public Propulsao() {
