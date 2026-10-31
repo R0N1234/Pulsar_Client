@@ -46,7 +46,7 @@ window.PULSAR_MODS = [
   ["cores_vivas", "Cores Vivas", "Contraste e saturação para deixar o jogo mais vivo", "Visual", "off"],
   ["telescopio", "Telescópio", "Zoom suave segurando uma tecla (padrão C), a roda do mouse ajusta", "Visual", true],
   ["orbita_livre", "Órbita Livre", "Segurando uma tecla (padrão Alt), a câmera gira 360° em volta do personagem (Perspective)", "Visual", true],
-  ["rastro_cometa", "Rastro de Cometa", "Desfoque de movimento", "Visual"],
+  ["rastro_cometa", "Rastro de Cometa", "Desfoque de movimento: a imagem deixa um rastro quando você vira", "Visual", "off"],
   ["meu_nick", "Meu Nick", "Mostra o seu nick em cima do personagem no F5", "Visual", true],
   ["supernova", "Supernova", "Brilho total, enxerga no escuro", "Visual", "off"],
   ["contorno", "Contorno", "Cor e espessura do contorno do bloco", "Visual", "off"],

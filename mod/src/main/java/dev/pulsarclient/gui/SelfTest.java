@@ -4,8 +4,16 @@ import dev.pulsarclient.PulsarClient;
 import dev.pulsarclient.hud.GuiHudEditor;
 import dev.pulsarclient.mods.Category;
 import dev.pulsarclient.mods.HudMod;
+import dev.pulsarclient.mods.MiraPulsar;
+import dev.pulsarclient.mods.PulsarMod;
 import dev.pulsarclient.mods.Telescopio;
+import dev.pulsarclient.settings.ColorSetting;
+import dev.pulsarclient.settings.ActionSetting;
+import dev.pulsarclient.settings.Setting;
+import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityOtherPlayerMP;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiVideoSettings;
@@ -70,7 +78,13 @@ public class SelfTest {
             case 4: show("video", new GuiVideoSettings(menu, mc.gameSettings)); break;
             case 5: show("esc", new GuiIngameMenu()); break;
             case 6: show("hud", new GuiHudEditor(menu)); break;
-            case 7: show("atalhos", new GuiPulsarPanel(menu, Category.SERVIDORES, PulsarClient.get().mod("atalhos_texto"))); break;
+            case 7:
+                // Atalhos sem limite: o botão de adicionar cria o terceiro atalho.
+                for (Setting s : PulsarClient.get().mod("atalhos_texto").panelSettings()) {
+                    if (s instanceof ActionSetting && s.key().equals("adicionar")) ((ActionSetting) s).run();
+                }
+                show("atalhos", new GuiPulsarPanel(menu, Category.SERVIDORES, PulsarClient.get().mod("atalhos_texto")));
+                break;
             case 8: show("travas", new GuiPulsarPanel(menu, Category.COMBATE, PulsarClient.get().inventario())); break;
             case 9:
                 // Tecla repetida de propósito (a mesma do zoom), para o print mostrar o aviso.
@@ -78,15 +92,23 @@ public class SelfTest {
                 show("teclas", new GuiPulsarPanel(menu, Category.VISUAL, PulsarClient.get().mod("telescopio")));
                 break;
             case 10: show("texturas", new GuiTexturas(menu)); break;
-            case 11:
+            case 11: show("mira", new GuiMiraEditor(menu, (MiraPulsar) PulsarClient.get().mod("mira_pulsar"))); break;
+            case 12:
+                // Paleta de cores aberta no Contorno.
+                PulsarMod contorno = PulsarClient.get().mod("contorno");
+                GuiPulsarPanel paleta = GuiPulsarPanel.options(menu, contorno);
+                for (Setting s : contorno.settings()) if (s instanceof ColorSetting) paleta.showPicker((ColorSetting) s);
+                show("paleta", paleta);
+                break;
+            case 13:
                 mc.displayGuiScreen(menu);
                 Conta.trocar();
                 break;
-            case 12: show("conta", menu); break;
-            case 13: mc.displayGuiScreen(new GuiContas(menu)); break;
-            case 14: Conta.adicionarOffline("NickTeste"); break;
-            case 15: log("contas"); break;
-            case 16:
+            case 14: show("conta", menu); break;
+            case 15: mc.displayGuiScreen(new GuiContas(menu)); break;
+            case 16: Conta.adicionarOffline("NickTeste"); break;
+            case 17: log("contas"); break;
+            case 18:
                 log("criando-mundo");
                 mc.launchIntegratedServer("pulsar-teste", "Pulsar Teste",
                         new WorldSettings(2026L, WorldSettings.GameType.SURVIVAL, false, false, WorldType.FLAT));
@@ -179,9 +201,41 @@ public class SelfTest {
             case 17:
                 boolean voltou = telescopio().mouseScale() >= 0.999 && mc.gameSettings.mouseSensitivity == sensibilidade;
                 log(voltou ? "zoom-ok" : "zoom-falhou");
+                spawnBonecos(mc);
+                break;
+            case 18:
+                // Um boneco perto (completo) e um longe (otimizado pelo Motor).
+                log(PulsarClient.get().motor().simplifiedPlayers() > 0 ? "bonecos" : "bonecos-falhou");
+                PulsarClient.get().mod("rastro_cometa").setEnabled(true);
+                break;
+            case 19:
+                show("hudjogo", new GuiHudEditor(null));
+                break;
+            case 20:
+                PulsarClient.get().mod("rastro_cometa").setEnabled(false);
+                mc.displayGuiScreen(null);
                 finish(mc);
                 break;
             default: break;
+        }
+    }
+
+    /** Dois jogadores de mentira na frente da câmera: um a 3 blocos e outro a 20, com armadura encantada. */
+    private void spawnBonecos(Minecraft mc) {
+        float yaw = mc.thePlayer.rotationYaw * (float) Math.PI / 180f;
+        double[] dist = {3, 20};
+        for (int i = 0; i < dist.length; i++) {
+            String nome = "Boneco" + (i + 1);
+            EntityOtherPlayerMP p = new EntityOtherPlayerMP(mc.theWorld, new GameProfile(UUID.nameUUIDFromBytes(nome.getBytes()), nome));
+            double x = mc.thePlayer.posX - Math.sin(yaw) * dist[i] + (i == 0 ? 1.2 : -2);
+            double z = mc.thePlayer.posZ + Math.cos(yaw) * dist[i];
+            p.setPositionAndRotation(x, mc.thePlayer.posY, z, mc.thePlayer.rotationYaw + 180f, 0f);
+            p.rotationYawHead = mc.thePlayer.rotationYaw + 180f;
+            ItemStack peito = new ItemStack(Items.diamond_chestplate);
+            peito.addEnchantment(Enchantment.protection, 1);
+            p.setCurrentItemOrArmor(0, new ItemStack(Items.diamond_sword));
+            p.setCurrentItemOrArmor(3, peito);
+            mc.theWorld.addEntityToWorld(-4242 - i, p);
         }
     }
 
@@ -226,6 +280,11 @@ public class SelfTest {
     private void prepareWorld(Minecraft mc) {
         protegerJogador(mc);
         for (HudMod m : PulsarClient.get().hudMods()) m.setEnabled(true);
+        // HUD do FPS em 150% e a mira desenhada, para os prints.
+        ((HudMod) PulsarClient.get().mod("fps")).resize(5);
+        MiraPulsar mira = (MiraPulsar) PulsarClient.get().mod("mira_pulsar");
+        mira.useDrawing();
+        mira.setEnabled(true);
         mc.thePlayer.inventory.setInventorySlotContents(0, new ItemStack(Items.diamond_sword));
         mc.thePlayer.inventory.setInventorySlotContents(1, new ItemStack(Items.ender_pearl, 16));
         mc.thePlayer.inventory.setInventorySlotContents(2, new ItemStack(Items.golden_apple, 8));

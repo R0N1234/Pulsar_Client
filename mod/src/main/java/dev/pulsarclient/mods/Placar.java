@@ -2,6 +2,7 @@ package dev.pulsarclient.mods;
 
 import dev.pulsarclient.hud.GuiHudEditor;
 import dev.pulsarclient.settings.BoolSetting;
+import dev.pulsarclient.settings.ColorSetting;
 import dev.pulsarclient.settings.SliderSetting;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
@@ -24,7 +25,6 @@ public class Placar extends HudMod {
     private static final int MAX_LINHAS = 15;
 
     private final BoolSetting numeros = add(new BoolSetting("numeros", "Mostrar os números vermelhos", false));
-    private final SliderSetting escala = add(new SliderSetting("escala", "Tamanho", 100, 50, 150, 5, "%"));
     private final SliderSetting opacidade = add(new SliderSetting("opacidade", "Fundo", 30, 0, 80, 5, "%"));
 
     private boolean escondeuDoJogo;
@@ -47,7 +47,7 @@ public class Placar extends HudMod {
 
     public Placar() {
         super("placar", "Placar", "Placar lateral do servidor: mover, mudar o tamanho e tirar os números", Category.HUD, 10000, 90, false);
-        color.set(5);
+        color.set(ColorSetting.VERMELHO);
     }
 
     @Override
@@ -131,10 +131,6 @@ public class Placar extends HudMod {
         return (linhas.size() + 1) * LINHA + 1;
     }
 
-    private float escala() {
-        return (float) (escala.get() / 100.0);
-    }
-
     private boolean noEditor() {
         return mc.currentScreen instanceof GuiHudEditor;
     }
@@ -142,13 +138,13 @@ public class Placar extends HudMod {
     @Override
     public int width() {
         montar(noEditor());
-        return Math.max(1, Math.round(largura * escala()));
+        return Math.max(1, largura);
     }
 
     @Override
     public int height() {
         montar(noEditor());
-        return Math.max(1, Math.round(alturaBase() * escala()));
+        return Math.max(1, alturaBase());
     }
 
     @Override
@@ -157,9 +153,9 @@ public class Placar extends HudMod {
         int w = largura;
         int fundo = (int) Math.round(opacidade.get() * 2.55) << 24;
         int fundoTitulo = Math.min(255, (int) Math.round(opacidade.get() * 2.55) + 16) << 24;
+        // O tamanho escolhido vem do HudMod; aqui só se desenha a partir de (x, y).
         GlStateManager.pushMatrix();
         GlStateManager.translate(x, y, 0);
-        GlStateManager.scale(escala(), escala(), 1f);
         if (background.get() && opacidade.get() > 0) {
             Gui.drawRect(0, 0, w, LINHA + 1, fundoTitulo);
             Gui.drawRect(0, LINHA + 1, w, alturaBase(), fundo);
