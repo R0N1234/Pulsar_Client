@@ -263,7 +263,7 @@ public class GuiPulsarPanel extends GuiScreen {
             drawCenteredString(fontRendererObj, done ? "Feito!" : s.label(), mx + mw / 2, cy, done ? BEAM : TEXT);
             return;
         }
-        int room = s instanceof BoolSetting ? mw - 44 : s instanceof TextSetting ? mw - 186 : mw - 130;
+        int room = s instanceof BoolSetting ? mw - 44 : s instanceof TextSetting ? mw - 186 : s instanceof KeySetting ? mw - 118 : mw - 130;
         // Teclas ganham uma segunda linha: como cancelar enquanto espera, ou onde mais a tecla já é usada.
         String note = null;
         int noteColor = MUTED;
@@ -272,7 +272,7 @@ public class GuiPulsarPanel extends GuiScreen {
         } else if (s instanceof KeySetting) {
             String other = conflict((KeySetting) s);
             if (other != null) {
-                note = "Também usada em: " + other;
+                note = "Já usada em: " + other;
                 noteColor = AMBER;
             }
         }
@@ -295,10 +295,12 @@ public class GuiPulsarPanel extends GuiScreen {
             drawRect(cx, y + 4, cx + 110, y + ROW_H - 4, 0xFF0B1222);
             drawCenteredString(fontRendererObj, v, cx + 55, cy, BEAM);
         } else if (s instanceof KeySetting) {
+            // Caixa da tecla mais estreita, para sobrar espaço para o aviso embaixo do nome.
             boolean waiting = listening == s;
-            drawRect(cx, y + 4, cx + 110, y + ROW_H - 4, 0xFF0B1222);
-            if (waiting) outline(cx, y + 4, cx + 110, y + ROW_H - 4, 0xFFFFD84A);
-            drawCenteredString(fontRendererObj, waiting ? "Aperte uma tecla" : ((KeySetting) s).display(), cx + 55, cy, waiting ? 0xFFFFD84A : BEAM);
+            int kx = mx + mw - 106;
+            drawRect(kx, y + 4, kx + 100, y + ROW_H - 4, 0xFF0B1222);
+            if (waiting) outline(kx, y + 4, kx + 100, y + ROW_H - 4, 0xFFFFD84A);
+            drawCenteredString(fontRendererObj, waiting ? "Aperte uma tecla" : ((KeySetting) s).display(), kx + 50, cy, waiting ? 0xFFFFD84A : BEAM);
         } else if (s instanceof TextSetting) {
             int fx = mx + mw - 176;
             drawRect(fx, y + 4, mx + mw - 6, y + ROW_H - 4, 0xFF0B1222);
@@ -328,7 +330,8 @@ public class GuiPulsarPanel extends GuiScreen {
         for (PulsarMod m : PulsarClient.get().mods()) {
             for (Setting s : m.settings()) {
                 if (s == k || !(s instanceof KeySetting) || s instanceof TeclaDoJogo || ((KeySetting) s).get() != code) continue;
-                return s == m.toggleKey() ? "ligar e desligar " + m.name() : m.name();
+                // Na mesma tela, o nome do mod não ajuda: diz qual das teclas é.
+                return s == m.toggleKey() && m.settings().contains(k) ? "ligar e desligar" : m.name();
             }
         }
         return null;
