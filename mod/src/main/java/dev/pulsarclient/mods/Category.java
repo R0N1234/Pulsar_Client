@@ -5,6 +5,7 @@ public enum Category {
     HUD("HUD"),
     VISUAL("Visual"),
     SERVIDORES("Servidores"),
+    SOCIAL("Social"),
     MOTOR("Motor Pulsar");
 
     public final String label;

@@ -151,11 +151,14 @@ public class GuiPulsarPanel extends GuiScreen {
             y = sideItem(c.label, category == c && open == null, y, mouseX, mouseY);
         }
         drawRect(px + 10, y + 1, px + SIDE_W - 10, y + 2, LINE);
-        sideItem("Texturas  >", false, y + 4, mouseX, mouseY);
+        int fim = sideItem("Texturas  >", false, y + 4, mouseX, mouseY);
 
-        int on = 0;
-        for (PulsarMod m : PulsarClient.get().mods()) if (m.isEnabled()) on++;
-        drawCenteredString(fontRendererObj, on + " ligados", cx, py + ph - 42, MUTED);
+        // Em telas baixas a contagem sai para não encostar na lista.
+        if (fim + 2 <= py + ph - 42) {
+            int on = 0;
+            for (PulsarMod m : PulsarClient.get().mods()) if (m.isEnabled()) on++;
+            drawCenteredString(fontRendererObj, on + " ligados", cx, py + ph - 42, MUTED);
+        }
         int by = py + ph - 28;
         boolean hover = inside(mouseX, mouseY, px + 8, by, px + SIDE_W - 8, by + 18);
         drawRect(px + 8, by, px + SIDE_W - 8, by + 18, hover ? 0xFF1C2A48 : CARD);
@@ -508,6 +511,7 @@ public class GuiPulsarPanel extends GuiScreen {
             case VISUAL: return 0xFF9B7CFF;
             case MOTOR: return 0xFFE8C547;
             case SERVIDORES: return 0xFF6EE7A8;
+            case SOCIAL: return 0xFFFF7AB6;
             default: return BEAM;
         }
     }

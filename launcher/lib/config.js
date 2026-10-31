@@ -25,6 +25,8 @@ const DEFAULTS = {
   optifinePath: "",
   version: "1.8.9",
   openConsole: true,
+  // Idioma do launcher ("" = o do sistema): pt-BR, en-US, en-GB, ru ou de.
+  idioma: "",
   // Contas offline (só liberadas depois que uma conta Microsoft com o Minecraft entrou neste PC).
   contasOffline: [],
   contaAtiva: "microsoft",

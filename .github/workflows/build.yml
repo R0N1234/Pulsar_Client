@@ -90,19 +90,22 @@ jobs:
           E2E_PRINTS: ${{ runner.temp }}/prints
         run: |
           npm install --ignore-scripts --no-audit --no-fund
+          node test/radio.js > "$RUNNER_TEMP/radio.txt" 2>&1 || true
+          cat "$RUNNER_TEMP/radio.txt"
           status=0
           xvfb-run -a -s "-screen 0 1280x720x24" node test/e2e.js "$RUNNER_TEMP/e2e" || status=$?
           # Publica o log e os prints das telas do Pulsar no ramo ci-log, para conferir o visual.
           mkdir -p /tmp/ci-log
           cp "$RUNNER_TEMP/e2e/e2e.log" /tmp/ci-log/build.log || echo "sem log" > /tmp/ci-log/build.log
           cp "$E2E_PRINTS"/*.png /tmp/ci-log/ 2>/dev/null || true
+          cp "$RUNNER_TEMP/radio.txt" /tmp/ci-log/ 2>/dev/null || true
           cd "$GITHUB_WORKSPACE"
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
           git checkout -q --orphan ci-log
           git rm -rfq --cached .
           cp /tmp/ci-log/* .
-          git add build.log *.png 2>/dev/null || git add build.log
+          git add build.log *.png *.txt 2>/dev/null || git add build.log
           git commit -qm "Log e prints do e2e ${GITHUB_SHA}"
           git push -qf origin ci-log || true
           exit $status
