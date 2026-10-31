@@ -53,6 +53,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,7 +64,7 @@ import java.util.Set;
 @Mod(modid = PulsarClient.MODID, name = "Pulsar Client", version = PulsarClient.VERSION, clientSideOnly = true, acceptedMinecraftVersions = "[1.8.9]")
 public class PulsarClient {
     public static final String MODID = "pulsar";
-    public static final String VERSION = "0.6.0";
+    public static final String VERSION = "0.6.2";
     private static PulsarClient instance;
 
     private final List<PulsarMod> mods = new ArrayList<PulsarMod>();
@@ -79,7 +80,6 @@ public class PulsarClient {
     private PulsarConfig config;
 
     private final KeyBinding keyPanel = new KeyBinding("Painel do Pulsar", Keyboard.KEY_RSHIFT, "Pulsar Client");
-    private final KeyBinding keySprint = new KeyBinding("Propulsão (correr fixo)", Keyboard.KEY_R, "Pulsar Client");
 
     public static PulsarClient get() {
         return instance;
@@ -132,7 +132,7 @@ public class PulsarClient {
         config.load(mods);
 
         ClientRegistry.registerKeyBinding(keyPanel);
-        ClientRegistry.registerKeyBinding(keySprint);
+        ClientRegistry.registerKeyBinding(propulsao.key);
         ClientRegistry.registerKeyBinding(telescopio.key);
         ClientRegistry.registerKeyBinding(orbita.key);
         ClientRegistry.registerKeyBinding(inventario.lockKey);
@@ -246,7 +246,35 @@ public class PulsarClient {
     @SubscribeEvent
     public void onKey(InputEvent.KeyInputEvent event) {
         if (keyPanel.isPressed()) Minecraft.getMinecraft().displayGuiScreen(new GuiPulsarPanel(null));
-        if (keySprint.isPressed() && propulsao.isEnabled()) propulsao.toggleActive();
+        if (propulsao.key.isPressed() && propulsao.isEnabled()) propulsao.toggleActive();
+        if (Keyboard.getEventKeyState()) pressToggleKey(Keyboard.getEventKey());
+    }
+
+    @SubscribeEvent
+    public void onMouseInput(InputEvent.MouseInputEvent event) {
+        if (Mouse.getEventButtonState() && Mouse.getEventButton() >= 0) pressToggleKey(Mouse.getEventButton() - 100);
+    }
+
+    /** Tecla de ligar e desligar escolhida no painel de cada mod (mesmo código das teclas do Minecraft). */
+    public void pressToggleKey(int code) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (code == 0 || mc.currentScreen != null || mc.thePlayer == null) return;
+        StringBuilder shown = new StringBuilder();
+        for (PulsarMod mod : mods) {
+            if (mod.toggleKey().get() != code || broken.contains(mod)) continue;
+            try {
+                mod.toggle();
+            } catch (Throwable t) {
+                fail(mod, t);
+                continue;
+            }
+            if (shown.length() > 0) shown.append("§7, ");
+            shown.append("§f").append(mod.name()).append(mod.isEnabled() ? " §aligado" : " §cdesligado");
+            System.out.println("[Pulsar] Tecla " + mod.toggleKey().display() + ": " + mod.name() + (mod.isEnabled() ? " ligado" : " desligado"));
+        }
+        if (shown.length() == 0) return;
+        mc.ingameGUI.setRecordPlaying(shown.toString(), false);
+        save();
     }
 
     @SubscribeEvent

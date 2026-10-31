@@ -10,10 +10,13 @@ import dev.pulsarclient.settings.KeySetting;
 import dev.pulsarclient.settings.ModeSetting;
 import dev.pulsarclient.settings.Setting;
 import dev.pulsarclient.settings.SliderSetting;
+import dev.pulsarclient.settings.TeclaDoJogo;
 import dev.pulsarclient.settings.TextSetting;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.settings.KeyBinding;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
@@ -36,6 +39,7 @@ public class GuiPulsarPanel extends GuiScreen {
     private static final int TEXT = 0xFFE6ECFF;
     private static final int MUTED = 0xFF8892B0;
     private static final int OFF = 0xFF353E5A;
+    private static final int AMBER = 0xFFFFB347;
     private static final int CARD_H = 44;
     private static final int ROW_H = 22;
     private static final int GAP = 6;
@@ -260,7 +264,20 @@ public class GuiPulsarPanel extends GuiScreen {
             return;
         }
         int room = s instanceof BoolSetting ? mw - 44 : s instanceof TextSetting ? mw - 186 : mw - 130;
-        fontRendererObj.drawString(fontRendererObj.trimStringToWidth(s.label(), room), mx + 6, cy, TEXT);
+        // Teclas ganham uma segunda linha: como cancelar enquanto espera, ou onde mais a tecla já é usada.
+        String note = null;
+        int noteColor = MUTED;
+        if (listening == s) {
+            note = "Esc cancela, Backspace deixa sem tecla";
+        } else if (s instanceof KeySetting) {
+            String other = conflict((KeySetting) s);
+            if (other != null) {
+                note = "Também usada em: " + other;
+                noteColor = AMBER;
+            }
+        }
+        fontRendererObj.drawString(fontRendererObj.trimStringToWidth(s.label(), room), mx + 6, note == null ? cy : y + 3, TEXT);
+        if (note != null) fontRendererObj.drawString(caber(note, room), mx + 6, y + 12, noteColor);
         if (s instanceof BoolSetting) {
             toggle(mx + mw - 28, y + 6, ((BoolSetting) s).get());
         } else if (s instanceof SliderSetting) {
@@ -296,6 +313,25 @@ public class GuiPulsarPanel extends GuiScreen {
                 else fontRendererObj.drawString(fontRendererObj.trimStringToWidth(t, 160), fx + 4, cy, TEXT);
             }
         }
+    }
+
+    /** Onde mais a tecla é usada (nos controles do jogo ou em outro mod do Pulsar), ou null. */
+    private String conflict(KeySetting k) {
+        int code = k.get();
+        if (code == 0) return null;
+        KeyBinding own = k instanceof TeclaDoJogo ? ((TeclaDoJogo) k).bind() : null;
+        for (KeyBinding kb : mc.gameSettings.keyBindings) {
+            // As teclas de transmissão da Twitch do 1.8.9 não fazem mais nada.
+            if (kb == own || kb.getKeyCode() != code || "key.categories.stream".equals(kb.getKeyCategory())) continue;
+            return I18n.format(kb.getKeyDescription());
+        }
+        for (PulsarMod m : PulsarClient.get().mods()) {
+            for (Setting s : m.settings()) {
+                if (s == k || !(s instanceof KeySetting) || s instanceof TeclaDoJogo || ((KeySetting) s).get() != code) continue;
+                return s == m.toggleKey() ? "ligar e desligar " + m.name() : m.name();
+            }
+        }
+        return null;
     }
 
     private void toggle(int x, int y, boolean on) {

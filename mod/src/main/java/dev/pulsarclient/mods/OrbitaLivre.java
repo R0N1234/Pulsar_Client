@@ -2,6 +2,7 @@ package dev.pulsarclient.mods;
 
 import dev.pulsarclient.settings.BoolSetting;
 import dev.pulsarclient.settings.ModeSetting;
+import dev.pulsarclient.settings.TeclaDoJogo;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.MathHelper;
@@ -24,7 +25,8 @@ import org.lwjgl.input.Keyboard;
 public class OrbitaLivre extends PulsarMod {
     public final KeyBinding key = new KeyBinding("Órbita Livre (girar a câmera)", Keyboard.KEY_LMENU, "Pulsar Client");
 
-    private final ModeSetting mode = add(new ModeSetting("modo", "Tecla", 0, "Segurar", "Apertar liga e desliga"));
+    private final TeclaDoJogo orbitKey = add(new TeclaDoJogo("tecla_orbita", "Tecla da órbita", key));
+    private final ModeSetting mode = add(new ModeSetting("modo", "Jeito da tecla", 0, "Segurar", "Apertar liga e desliga"));
     private final BoolSetting invert = add(new BoolSetting("inverter", "Inverter o mouse para cima e para baixo", false));
     private final BoolSetting front = add(new BoolSetting("frente", "Começar olhando de frente", false));
 
@@ -41,7 +43,7 @@ public class OrbitaLivre extends PulsarMod {
     private float prevPitch0;
 
     public OrbitaLivre() {
-        super("orbita_livre", "Órbita Livre", "Gira a câmera 360° em volta do personagem segurando Alt", Category.VISUAL, true);
+        super("orbita_livre", "Órbita Livre", "Gira a câmera 360° em volta do personagem com uma tecla", Category.VISUAL, true);
     }
 
     public boolean active() { return active; }

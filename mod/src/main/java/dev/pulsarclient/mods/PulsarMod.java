@@ -1,5 +1,6 @@
 package dev.pulsarclient.mods;
 
+import dev.pulsarclient.settings.KeySetting;
 import dev.pulsarclient.settings.Setting;
 import net.minecraft.client.Minecraft;
 
@@ -18,6 +19,8 @@ public abstract class PulsarMod {
     private final String description;
     private final Category category;
     private final List<Setting> settings = new ArrayList<Setting>();
+    // Todo mod tem a sua: a pessoa escolhe a tecla no painel do mod (no começo, nenhuma).
+    private final KeySetting toggleKey = add(new KeySetting("tecla_ligar", "Tecla para ligar e desligar", 0));
     private boolean enabled;
 
     protected PulsarMod(String id, String name, String description, Category category, boolean enabledByDefault) {
@@ -41,6 +44,7 @@ public abstract class PulsarMod {
         return out;
     }
     public boolean isEnabled() { return enabled; }
+    public KeySetting toggleKey() { return toggleKey; }
 
     public void setEnabled(boolean enabled) {
         if (this.enabled == enabled) return;

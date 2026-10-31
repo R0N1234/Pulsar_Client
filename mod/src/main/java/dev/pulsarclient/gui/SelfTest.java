@@ -24,6 +24,7 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.lwjgl.input.Keyboard;
 
 import java.util.UUID;
 
@@ -69,16 +70,21 @@ public class SelfTest {
             case 6: show("hud", new GuiHudEditor(menu)); break;
             case 7: show("atalhos", new GuiPulsarPanel(menu, Category.SERVIDORES, PulsarClient.get().mod("atalhos_texto"))); break;
             case 8: show("travas", new GuiPulsarPanel(menu, Category.COMBATE, PulsarClient.get().inventario())); break;
-            case 9: show("texturas", new GuiTexturas(menu)); break;
-            case 10:
+            case 9:
+                // Tecla repetida de propósito (a mesma do zoom), para o print mostrar o aviso.
+                PulsarClient.get().mod("telescopio").toggleKey().set(Keyboard.KEY_C);
+                show("teclas", new GuiPulsarPanel(menu, Category.VISUAL, PulsarClient.get().mod("telescopio")));
+                break;
+            case 10: show("texturas", new GuiTexturas(menu)); break;
+            case 11:
                 mc.displayGuiScreen(menu);
                 Conta.trocar();
                 break;
-            case 11: show("conta", menu); break;
-            case 12: mc.displayGuiScreen(new GuiContas(menu)); break;
-            case 13: Conta.adicionarOffline("NickTeste"); break;
-            case 14: log("contas"); break;
-            case 15:
+            case 12: show("conta", menu); break;
+            case 13: mc.displayGuiScreen(new GuiContas(menu)); break;
+            case 14: Conta.adicionarOffline("NickTeste"); break;
+            case 15: log("contas"); break;
+            case 16:
                 log("criando-mundo");
                 mc.launchIntegratedServer("pulsar-teste", "Pulsar Teste",
                         new WorldSettings(2026L, WorldSettings.GameType.SURVIVAL, false, false, WorldType.FLAT));
@@ -149,7 +155,14 @@ public class SelfTest {
                 show("texturasjogo", new GuiTexturas(null));
                 break;
             case 13:
+                // A tecla de ligar e desligar escolhida no painel: desliga o Telescópio e o aviso aparece na tela.
                 mc.displayGuiScreen(null);
+                PulsarClient.get().mod("telescopio").toggleKey().set(Keyboard.KEY_G);
+                PulsarClient.get().pressToggleKey(Keyboard.KEY_G);
+                log("tecla");
+                break;
+            case 14:
+                PulsarClient.get().pressToggleKey(Keyboard.KEY_G);
                 finish(mc);
                 break;
             default: break;

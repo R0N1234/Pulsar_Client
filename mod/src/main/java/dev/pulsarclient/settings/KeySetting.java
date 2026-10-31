@@ -20,7 +20,7 @@ public class KeySetting extends Setting {
     public void set(int code) { this.code = code; }
 
     public String display() {
-        return code == 0 ? "Nenhuma" : GameSettings.getKeyDisplayString(code);
+        return get() == 0 ? "Nenhuma" : GameSettings.getKeyDisplayString(get());
     }
 
     @Override public JsonElement save() { return new JsonPrimitive(code); }

@@ -27,6 +27,8 @@ const REQUIRED = [
   [/Conta trocada para PulsarTroca/, "troca de conta pela ponte do launcher"],
   [/Conta trocada para NickTeste \(offline\)/, "nick offline criado e usado dentro do jogo"],
   [/selftest: mundo-pronto/, "mundo de teste"],
+  [/Tecla G: Telescópio desligado/, "tecla escolhida no painel desliga o mod"],
+  [/Tecla G: Telescópio ligado/, "a mesma tecla liga o mod de novo"],
   [/Fonte: ganchos instalados em FontRenderer/, "ganchos da Fonte do Pulsar"],
   [/Fonte: espaçamento com fração instalado/, "espaçamento da Fonte do Pulsar"],
   [/Fonte do Pulsar carregada/, "Fonte do Pulsar carregada"],
