@@ -47,8 +47,15 @@ public class GuiHudEditor extends GuiScreen {
         if (mc.theWorld == null) Universo.draw(width, height);
         drawRect(0, 0, width, height, 0x55000000);
         drawCross();
-        drawCenteredString(fontRendererObj, "Pulsar · Editor de HUD", width / 2, 12, 0xFF7FE7FF);
-        drawCenteredString(fontRendererObj, "Arraste para mover. Roda do mouse muda o tamanho. Botão direito abre as opções.", width / 2, 24, 0xFFB0BCD8);
+        // A ajuda fica embaixo, acima da barra de itens, e por baixo dos HUDs (some enquanto arrasta).
+        if (dragging == null) {
+            String ajuda = "Arraste para mover. Roda do mouse muda o tamanho. Botão direito abre as opções.";
+            int w = fontRendererObj.getStringWidth(ajuda) / 2 + 8;
+            int y = height - 96;
+            drawRect(width / 2 - w, y - 4, width / 2 + w, y + 22, 0x99070B18);
+            drawCenteredString(fontRendererObj, "Pulsar · Editor de HUD", width / 2, y, 0xFF7FE7FF);
+            drawCenteredString(fontRendererObj, ajuda, width / 2, y + 11, 0xFFB0BCD8);
+        }
 
         List<HudMod> mods = visible();
         if (mods.isEmpty()) {

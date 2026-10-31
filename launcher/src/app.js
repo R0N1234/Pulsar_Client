@@ -2,6 +2,14 @@ const api = window.pulsar;
 const MODS = window.PULSAR_MODS;
 const CATS = window.PULSAR_CATS;
 const $ = (id) => document.getElementById(id);
+const i18n = window.i18n;
+const t = (texto) => i18n.t(texto);
+// Primeira tradução já na abertura, sem esperar a configuração (evita piscar em português).
+let idiomaGuardado = "";
+try {
+  idiomaGuardado = localStorage.getItem("pulsar.idioma") || "";
+} catch {}
+i18n.definir(idiomaGuardado || navigator.language);
 
 let enabled = {};
 let cat = "Todos";
@@ -61,7 +69,7 @@ function renderAccount(estado) {
   const offline = contas.ativa !== "microsoft";
   const nome = offline ? contas.ativa : contas.microsoft && contas.microsoft.name;
   if (!nome && !contas.offline.length && !contas.liberado) {
-    const b = el("button", "btn-ghost", "Entrar com Microsoft");
+    const b = el("button", "btn-ghost", t("Entrar com Microsoft"));
     b.type = "button";
     b.onclick = doLogin;
     box.append(b);
@@ -73,7 +81,7 @@ function renderAccount(estado) {
   atual.setAttribute("aria-expanded", String(!$("acctMenu").hidden));
   atual.append(avatar(nome || "?", offline));
   const info = el("span", "acct-info");
-  info.append(el("span", "name", nome || "Sem conta"), el("span", "st" + (offline ? " off" : ""), offline ? "● offline" : nome ? "● original" : "entre para jogar"));
+  info.append(el("span", "name", nome || t("Sem conta")), el("span", "st" + (offline ? " off" : ""), t(offline ? "● offline" : nome ? "● original" : "entre para jogar")));
   atual.append(info, el("span", "caret", "▾"));
   atual.onclick = (e) => {
     e.stopPropagation();
@@ -86,39 +94,39 @@ function renderAccount(estado) {
 function renderMenuContas() {
   const m = $("acctMenu");
   m.textContent = "";
-  m.append(el("h5", "", "Conta original"));
+  m.append(el("h5", "", t("Conta original")));
   if (contas.microsoft) {
     const linha = el("div", "conta" + (contas.ativa === "microsoft" ? " on" : ""));
     const usar = el("button", "conta-usar");
     usar.type = "button";
-    usar.append(avatar(contas.microsoft.name, false), el("span", "", contas.microsoft.name), el("small", "", contas.ativa === "microsoft" ? "em uso" : "usar"));
+    usar.append(avatar(contas.microsoft.name, false), el("span", "", contas.microsoft.name), el("small", "", t(contas.ativa === "microsoft" ? "em uso" : "usar")));
     usar.onclick = () => acaoConta(() => api.useAccount("microsoft"));
-    const sair = el("button", "linkbtn conta-x", "sair");
+    const sair = el("button", "linkbtn conta-x", t("sair"));
     sair.type = "button";
     sair.onclick = () => acaoConta(() => api.logout());
     linha.append(usar, sair);
     m.append(linha);
   } else {
-    const b = el("button", "btn-ghost conta-ms", "Entrar com Microsoft");
+    const b = el("button", "btn-ghost conta-ms", t("Entrar com Microsoft"));
     b.type = "button";
     b.onclick = doLogin;
     m.append(b);
   }
 
-  m.append(el("h5", "", "Contas offline"));
+  m.append(el("h5", "", t("Contas offline")));
   if (!contas.liberado) {
-    m.append(el("p", "help", "Entre uma vez com uma conta Microsoft que tenha o Minecraft para liberar os nicks offline."));
+    m.append(el("p", "help", t("Entre uma vez com uma conta Microsoft que tenha o Minecraft para liberar os nicks offline.")));
     return;
   }
   for (const nick of contas.offline) {
     const linha = el("div", "conta" + (contas.ativa === nick ? " on" : ""));
     const usar = el("button", "conta-usar");
     usar.type = "button";
-    usar.append(avatar(nick, true), el("span", "", nick), el("small", "", contas.ativa === nick ? "em uso" : "usar"));
+    usar.append(avatar(nick, true), el("span", "", nick), el("small", "", t(contas.ativa === nick ? "em uso" : "usar")));
     usar.onclick = () => acaoConta(() => api.useAccount(nick));
     const x = el("button", "linkbtn conta-x", "×");
     x.type = "button";
-    x.setAttribute("aria-label", "Apagar " + nick);
+    x.setAttribute("aria-label", t("Apagar " + nick));
     x.onclick = () => acaoConta(() => api.removeOffline(nick));
     linha.append(usar, x);
     m.append(linha);
@@ -126,18 +134,18 @@ function renderMenuContas() {
   const form = el("form", "conta-nova");
   const input = el("input");
   input.id = "novoNick";
-  input.placeholder = "Novo nick";
+  input.placeholder = t("Novo nick");
   input.maxLength = 16;
   input.autocomplete = "off";
   input.spellcheck = false;
-  const add = el("button", "btn-ghost", "Adicionar");
+  const add = el("button", "btn-ghost", t("Adicionar"));
   add.type = "submit";
   form.append(input, add);
   form.onsubmit = (e) => {
     e.preventDefault();
     acaoConta(() => api.addOffline(input.value), true);
   };
-  m.append(form, el("p", "help", "Para servidores que aceitam conta offline (pirata), LAN e jogar sem internet. Dentro do jogo dá para trocar pelo botão da conta no menu."));
+  m.append(form, el("p", "help", t("Para servidores que aceitam conta offline (pirata), LAN e jogar sem internet. Dentro do jogo dá para trocar pelo botão da conta no menu.")));
   const erro = el("p", "help err");
   erro.id = "contaErro";
   m.append(erro);
@@ -150,7 +158,7 @@ async function acaoConta(fn, focarNick = false) {
     if (focarNick && $("novoNick")) $("novoNick").focus();
   } catch (err) {
     const e = $("contaErro");
-    if (e) e.textContent = cleanErr(err);
+    if (e) e.textContent = t(cleanErr(err));
     else setStatus(cleanErr(err), true);
   }
 }
@@ -185,9 +193,12 @@ async function doLogin() {
 }
 
 /* ---------- jogar ---------- */
+// O texto chega em português (do launcher ou daqui) e é traduzido na hora de mostrar.
+let ultimoStatus = ["", false];
 function setStatus(text, isError = false) {
+  ultimoStatus = [text, isError];
   const el = $("status");
-  el.textContent = text;
+  el.textContent = t(text);
   el.classList.toggle("err", isError);
 }
 const cleanErr = (err) => String(err && err.message ? err.message : err).replace(/^Error invoking remote method '[^']+': (Error: )?/, "");
@@ -239,17 +250,22 @@ api.onLog((lines) => {
   });
 });
 api.onLogReset(() => (logLines.length = 0));
+// O registro fica fora da tradução automática (são as linhas do jogo); só o aviso de vazio muda de idioma.
+function logVazio() {
+  if (!logLines.length) $("log").textContent = t("Os logs do Minecraft aparecem aqui quando o jogo abrir.");
+}
+logVazio();
 api.onAccount((estado) => renderAccount(estado));
 $("btnConsole").onclick = () => api.openConsole();
 
 $("btnCopyLog").onclick = async () => {
   try {
     await navigator.clipboard.writeText(logLines.join("\n"));
-    $("btnCopyLog").textContent = "copiado";
+    $("btnCopyLog").textContent = t("copiado");
   } catch {
-    $("btnCopyLog").textContent = "não deu para copiar";
+    $("btnCopyLog").textContent = t("não deu para copiar");
   }
-  setTimeout(() => ($("btnCopyLog").textContent = "copiar"), 2000);
+  setTimeout(() => ($("btnCopyLog").textContent = t("copiar")), 2000);
 };
 
 /* ---------- mods ---------- */
@@ -260,9 +276,9 @@ function isOn(m) {
 function updateCounts() {
   const ready = MODS.filter((m) => m.pronto);
   const on = ready.filter(isOn).length;
-  $("homeModCount").textContent = `${on} de ${ready.length}`;
+  $("homeModCount").textContent = t(`${on} de ${ready.length}`);
   $("homeSub").hidden = $("loader").value === "optifine";
-  $("modsSummary").textContent = `${on} mods ligados. ${ready.length} prontos e ${MODS.length - ready.length} a caminho.`;
+  $("modsSummary").textContent = t(`${on} mods ligados. ${ready.length} prontos e ${MODS.length - ready.length} a caminho.`);
   document.querySelectorAll("#mc [data-mod]").forEach((el) => {
     const m = MODS.find((x) => x.id === el.dataset.mod);
     el.hidden = !(m && isOn(m));
@@ -275,7 +291,7 @@ function renderChips() {
   ["Todos", ...Object.keys(CATS)].forEach((c) => {
     const b = document.createElement("button");
     b.type = "button";
-    b.textContent = c;
+    b.textContent = t(c);
     b.setAttribute("aria-pressed", String(c === cat));
     b.onclick = () => {
       cat = c;
@@ -291,23 +307,24 @@ function renderGrid() {
   const onlyReady = $("onlyReady").checked;
   const grid = $("grid");
   grid.textContent = "";
-  MODS.filter((m) => (cat === "Todos" || m.cat === cat) && (!onlyReady || m.pronto) && (!q || (m.nome + " " + m.desc).toLowerCase().includes(q)))
+  const busca = (m) => (m.nome + " " + m.desc + " " + t(m.nome) + " " + t(m.desc)).toLowerCase();
+  MODS.filter((m) => (cat === "Todos" || m.cat === cat) && (!onlyReady || m.pronto) && (!q || busca(m).includes(q)))
     .sort((a, b) => b.pronto - a.pronto)
     .forEach((m) => {
       const c = document.createElement("div");
       c.className = "mcard" + (m.pronto ? "" : " soon");
       c.innerHTML = `<div class="head"><b></b><button class="tog" type="button"></button></div><p></p><small><span></span><span></span></small>`;
-      c.querySelector("b").textContent = m.nome;
-      c.querySelector("p").textContent = m.desc;
+      c.querySelector("b").textContent = t(m.nome);
+      c.querySelector("p").textContent = t(m.desc);
       const [catEl, stEl] = c.querySelectorAll("small span");
-      catEl.textContent = m.cat;
-      stEl.textContent = m.pronto ? "pronto" : "em breve";
+      catEl.textContent = t(m.cat);
+      stEl.textContent = t(m.pronto ? "pronto" : "em breve");
       if (m.pronto) stEl.className = "ready";
-      const t = c.querySelector(".tog");
-      t.setAttribute("aria-label", (isOn(m) ? "Desligar " : "Ligar ") + m.nome);
-      t.setAttribute("aria-pressed", String(isOn(m)));
-      t.disabled = !m.pronto;
-      t.onclick = async () => {
+      const tog = c.querySelector(".tog");
+      tog.setAttribute("aria-label", t((isOn(m) ? "Desligar " : "Ligar ") + m.nome));
+      tog.setAttribute("aria-pressed", String(isOn(m)));
+      tog.disabled = !m.pronto;
+      tog.onclick = async () => {
         enabled = await api.setMod(m.id, !isOn(m));
         renderGrid();
         updateCounts();
@@ -333,7 +350,7 @@ $("modsSeg").addEventListener("click", (e) => {
 });
 
 function umMsg(text, isError = false) {
-  $("umMsg").textContent = text;
+  $("umMsg").textContent = t(text);
   $("umMsg").classList.toggle("err", isError);
 }
 
@@ -344,30 +361,32 @@ function renderUserMods(lista) {
   if (!lista.length) {
     const vazio = document.createElement("div");
     vazio.className = "um-empty";
-    vazio.innerHTML = "<b>Nenhum mod seu ainda.</b><span>Clique em Adicionar mods ou arraste os arquivos .jar para cá.</span>";
+    vazio.append(el("b", "", t("Nenhum mod seu ainda.")), el("span", "", t("Clique em Adicionar mods ou arraste os arquivos .jar para cá.")));
     box.append(vazio);
     return;
   }
   for (const m of lista) {
     const row = document.createElement("div");
     row.className = "um-row" + (m.ligado ? "" : " off");
-    row.innerHTML = `<button class="tog" type="button"></button><div class="um-info"><b></b><small></small></div><button type="button" class="linkbtn um-del">remover</button>`;
+    row.innerHTML = `<button class="tog" type="button"></button><div class="um-info"><b></b><small></small></div><button type="button" class="linkbtn um-del"></button>`;
+    row.querySelector(".um-del").textContent = t("remover");
     row.querySelector("b").textContent = m.nome;
-    const det = [m.versao && "versão " + m.versao, m.mc && "Minecraft " + m.mc, m.arquivo].filter(Boolean).join("  ·  ");
-    row.querySelector("small").textContent = m.aviso || det;
+    const det = [m.versao && t("versão " + m.versao), m.mc && "Minecraft " + m.mc, m.arquivo].filter(Boolean).join("  ·  ");
+    row.querySelector("small").textContent = m.aviso ? t(m.aviso) : det;
     if (m.aviso) row.querySelector("small").className = "warn";
-    const t = row.querySelector(".tog");
-    t.setAttribute("aria-pressed", String(m.ligado));
-    t.setAttribute("aria-label", (m.ligado ? "Desligar " : "Ligar ") + m.nome);
-    t.onclick = () => umAcao(() => api.alternarMod(m.arquivo, !m.ligado));
+    const tog = row.querySelector(".tog");
+    tog.setAttribute("aria-pressed", String(m.ligado));
+    tog.setAttribute("aria-label", t((m.ligado ? "Desligar " : "Ligar ") + m.nome));
+    tog.onclick = () => umAcao(() => api.alternarMod(m.arquivo, !m.ligado));
     row.querySelector(".um-del").onclick = () => umAcao(() => api.removerMod(m.arquivo), m.nome + " foi para a Lixeira.");
     box.append(row);
   }
 }
 
+let ultimosMods = null;
 async function umAcao(fn, ok = "") {
   try {
-    renderUserMods(await fn());
+    renderUserMods((ultimosMods = await fn()));
     umMsg(ok);
   } catch (err) {
     umMsg(cleanErr(err), true);
@@ -409,7 +428,7 @@ addEventListener("drop", (e) => e.preventDefault());
 const progresso = {};
 
 function txMsg(text, isError = false) {
-  $("txMsg").textContent = text;
+  $("txMsg").textContent = t(text);
   $("txMsg").classList.toggle("err", isError);
 }
 
@@ -433,7 +452,7 @@ function renderTexturas(lista) {
     img.onerror = () => img.remove();
     c.querySelector(".tx-ico span").textContent = p.resolucao;
     c.querySelector("b").textContent = p.nome;
-    c.querySelector("p").textContent = p.desc;
+    c.querySelector("p").textContent = t(p.desc);
     c.querySelector("small").textContent = `${p.resolucao}  ·  ${tamanho(p.tamanho)}`;
     const btn = c.querySelector(".tx-btn");
     const sub = c.querySelector(".tx-sub");
@@ -446,21 +465,21 @@ function renderTexturas(lista) {
       sub.hidden = true;
     } else if (p.emUso) {
       btn.className = "tx-btn using";
-      btn.textContent = "Em uso";
-      btn.title = "Clique para desligar";
+      btn.textContent = t("Em uso");
+      btn.title = t("Clique para desligar");
       btn.onclick = () => txAcao(() => api.usarTextura(p.id, false), p.nome + " desligada.");
-      sub.textContent = "página";
+      sub.textContent = t("página");
       sub.onclick = () => api.openLink(p.pagina);
     } else if (p.baixado) {
-      btn.textContent = "Usar";
+      btn.textContent = t("Usar");
       btn.onclick = () => txAcao(() => api.usarTextura(p.id, true), `Usando ${p.nome}. Ela aparece na próxima vez que o jogo abrir.`);
-      sub.textContent = "apagar";
+      sub.textContent = t("apagar");
       sub.onclick = () => txAcao(() => api.removerTextura(p.id), p.nome + " apagada.");
     } else {
       btn.className = "tx-btn get";
-      btn.textContent = "Baixar";
+      btn.textContent = t("Baixar");
       btn.onclick = () => baixarTextura(p);
-      sub.textContent = "página";
+      sub.textContent = t("página");
       sub.onclick = () => api.openLink(p.pagina);
     }
     (p.tipo === "pvp" ? $("txPvp") : $("txQual")).append(c);
@@ -507,17 +526,66 @@ api.onTexturaProgresso(({ id, pct }) => {
 });
 $("btnTexFolder").onclick = () => api.abrirPastaTexturas();
 
+/* ---------- idioma ---------- */
+// Bandeira à esquerda e só o nome da língua. A troca vale na hora, sem precisar salvar.
+function renderIdiomas() {
+  const box = $("idiomas");
+  box.textContent = "";
+  for (const i of i18n.IDIOMAS) {
+    const b = el("button");
+    b.type = "button";
+    b.setAttribute("role", "radio");
+    b.setAttribute("aria-checked", String(i.id === i18n.atual()));
+    b.setAttribute("aria-label", i.rotulo);
+    const flag = el("span", "flag");
+    flag.innerHTML = i18n.bandeira(i.id);
+    b.append(flag, el("span", "", i.nome));
+    b.onclick = () => trocarIdioma(i.id);
+    box.append(b);
+  }
+}
+
+async function trocarIdioma(id) {
+  if (id === i18n.atual()) return;
+  i18n.definir(id);
+  retraduzir();
+  try {
+    await api.setConfig({ idioma: i18n.atual() });
+  } catch {}
+}
+
+// Redesenha o que o launcher monta na hora (o HTML fixo o i18n.definir já trocou).
+function retraduzir() {
+  renderIdiomas();
+  renderChips();
+  renderGrid();
+  updateCounts();
+  renderAccount(null);
+  if (!$("acctMenu").hidden) renderMenuContas();
+  if (ultimosMods) renderUserMods(ultimosMods);
+  if (ultimaLista.length) renderTexturas(ultimaLista);
+  setStatus(...ultimoStatus);
+  logVazio();
+  if (ultimaAtualizacao) mostrarAtualizacao(ultimaAtualizacao);
+  $("memOut").textContent = t($("mem").value + " GB");
+  ["umMsg", "txMsg", "saved"].forEach((id) => ($(id).textContent = ""));
+  api.getConfig().then((cfg) => {
+    renderOptifine(cfg);
+    $("updToken").placeholder = t(cfg.hasUpdateToken ? "Chave salva. Cole outra para trocar." : "Cole a chave do GitHub (github_pat_…)");
+  });
+}
+
 /* ---------- ajustes ---------- */
 function renderOptifine(cfg) {
   const el = $("ofFile");
-  el.textContent = cfg.optifinePath ? cfg.optifinePath.split(/[\\/]/).pop() : "Nenhum arquivo escolhido";
+  el.textContent = cfg.optifinePath ? cfg.optifinePath.split(/[\\/]/).pop() : t("Nenhum arquivo escolhido");
   el.classList.toggle("ok", !!cfg.optifinePath);
 }
 
 async function loadSettings() {
   const cfg = await api.getConfig();
   $("mem").value = cfg.memoryMaxGb;
-  $("memOut").textContent = cfg.memoryMaxGb + " GB";
+  $("memOut").textContent = t(cfg.memoryMaxGb + " GB");
   $("java").value = cfg.javaPath;
   $("dir").value = cfg.gameDir;
   $("loader").value = cfg.loader;
@@ -526,15 +594,15 @@ async function loadSettings() {
   renderOptifine(cfg);
   updateCounts();
 }
-$("mem").addEventListener("input", () => ($("memOut").textContent = $("mem").value + " GB"));
+$("mem").addEventListener("input", () => ($("memOut").textContent = t($("mem").value + " GB")));
 function renderUpdateToken(cfg) {
   $("updToken").value = "";
-  $("updToken").placeholder = cfg.hasUpdateToken ? "Chave salva. Cole outra para trocar." : "Cole a chave do GitHub (github_pat_…)";
+  $("updToken").placeholder = t(cfg.hasUpdateToken ? "Chave salva. Cole outra para trocar." : "Cole a chave do GitHub (github_pat_…)");
 }
 $("btnUpdToken").onclick = async () => {
   const cfg = await api.setUpdateToken($("updToken").value);
   renderUpdateToken(cfg);
-  $("saved").textContent = cfg.hasUpdateToken ? "Chave salva. Procurando atualização…" : "Chave removida.";
+  $("saved").textContent = t(cfg.hasUpdateToken ? "Chave salva. Procurando atualização…" : "Chave removida.");
 };
 $("btnPickOf").onclick = async () => renderOptifine(await api.pickOptifine());
 $("btnOfSite").onclick = () => api.openLink("https://optifine.net/downloads");
@@ -558,39 +626,42 @@ $("settingsForm").addEventListener("submit", async (e) => {
   updateCounts();
   renderGrid();
   loadUserMods();
-  $("saved").textContent = "Salvo.";
+  $("saved").textContent = t("Salvo.");
   setTimeout(() => ($("saved").textContent = ""), 2000);
 });
 
 /* ---------- atualização ---------- */
-api.onUpdate((u) => {
+let ultimaAtualizacao = null;
+api.onUpdate(mostrarAtualizacao);
+function mostrarAtualizacao(u) {
+  ultimaAtualizacao = u;
   const b = $("update");
   b.hidden = false;
   if (u.state === "downloading") {
     b.className = "update";
-    b.textContent = `Baixando atualização${u.version ? " " + u.version : ""}… ${u.percent || 0}%`;
+    b.textContent = t(`Baixando atualização${u.version ? " " + u.version : ""}… ${u.percent || 0}%`);
     if (u.version) b.dataset.version = u.version;
   } else if (u.state === "none") {
     b.hidden = true;
   } else if (u.state === "error") {
     b.className = "update";
-    b.textContent = u.text;
+    b.textContent = t(u.text);
   } else if (u.state === "ready") {
     b.className = "update ready";
-    b.textContent = `Atualizar para ${u.version}`;
+    b.textContent = t(`Atualizar para ${u.version}`);
     // A janela aparece uma vez por versão; depois fica o botão no topo.
     if (avisada !== u.version) {
       avisada = u.version;
       abrirAtualizacao(u);
     }
   }
-});
+}
 
 let avisada = "";
 function abrirAtualizacao(u) {
   $("updVer").textContent = u.version || "";
-  $("updNotes").textContent = u.notas || "Melhorias e correções para o seu PvP.";
-  $("updHelp2").textContent = "O Pulsar fecha, atualiza e abre de novo sozinho em alguns segundos.";
+  $("updNotes").textContent = u.notas || t("Melhorias e correções para o seu PvP.");
+  $("updHelp2").textContent = t("O Pulsar fecha, atualiza e abre de novo sozinho em alguns segundos.");
   $("updHelp2").classList.remove("err");
   $("updModal").hidden = false;
 }
@@ -600,7 +671,7 @@ async function instalarAtualizacao() {
     $("updNow").disabled = true;
     await api.installUpdate();
   } catch (err) {
-    $("updHelp2").textContent = cleanErr(err);
+    $("updHelp2").textContent = t(cleanErr(err));
     $("updHelp2").classList.add("err");
     setStatus(cleanErr(err), true);
   } finally {
@@ -617,8 +688,38 @@ $("updModal").addEventListener("click", (e) => {
   if (e.target === $("updModal")) $("updModal").hidden = true;
 });
 
+/* ---------- rádio pulsar ---------- */
+// O jogo pede pela ponte e o launcher toca. Um elemento de áudio só, criado na primeira vez.
+let radio = null;
+api.onRadio((c) => {
+  if (!c.tocando) {
+    if (radio) {
+      radio.pause();
+      radio.removeAttribute("src");
+      radio.load();
+      radio.dataset.url = "";
+    }
+    return;
+  }
+  if (!radio) {
+    radio = new Audio();
+    radio.preload = "none";
+    radio.addEventListener("error", () => radio.dataset.url && api.radioErro(`não deu para tocar ${radio.dataset.nome} (erro ${radio.error ? radio.error.code : "?"})`));
+  }
+  radio.volume = Math.max(0, Math.min(1, c.volume / 100));
+  if (radio.dataset.url === c.url && !radio.paused) return;
+  radio.dataset.url = c.url;
+  radio.dataset.nome = c.nome;
+  radio.src = c.url;
+  radio.play().catch((e) => api.radioErro(`não deu para tocar ${c.nome}: ${e.message}`));
+});
+
 /* ---------- início ---------- */
 (async function init() {
+  // O idioma salvo no launcher manda; o do navegador só vale até a configuração chegar.
+  const cfg = await api.getConfig().catch(() => ({}));
+  if (cfg.idioma && i18n.escolher(cfg.idioma) !== i18n.atual()) i18n.definir(cfg.idioma);
+  renderIdiomas();
   enabled = await api.getMods();
   renderChips();
   renderGrid();

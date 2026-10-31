@@ -37,6 +37,8 @@ contextBridge.exposeInMainWorld("pulsar", {
   checkUpdate: () => ipcRenderer.invoke("update:check"),
   installUpdate: () => ipcRenderer.invoke("update:install"),
   onUpdate: (fn) => ipcRenderer.on("update:status", (_e, s) => fn(s)),
+  onRadio: (fn) => ipcRenderer.on("radio:comando", (_e, c) => fn(c)),
+  radioErro: (texto) => ipcRenderer.send("radio:erro", texto),
   minimize: () => ipcRenderer.send("window:minimize"),
   close: () => ipcRenderer.send("window:close"),
 });

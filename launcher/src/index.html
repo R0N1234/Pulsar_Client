@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://cdn.modrinth.com">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://cdn.modrinth.com; media-src https://*.somafm.com https://stream.nightride.fm https://*.radioparadise.com https://*.laut.fm">
   <title>Pulsar Client</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
   <link rel="stylesheet" href="styles.css">
@@ -54,7 +54,7 @@
     </div>
     <section class="card news">
       <h4>Novidades</h4>
-      <p><b>Versão 0.6.2:</b> cada mod tem uma tecla para ligar e desligar, escolhida nas opções do mod no painel do jogo (Shift direito). Na 0.6: Fonte do Pulsar, Cores Vivas, aba Texturas, seus próprios mods e mais 5 mods de PvP.</p>
+      <p><b>Versão 0.7.0:</b> Editar HUD mostra só os mods ligados, com tamanho na roda do mouse e uma cruz com ímã no meio da tela. Paleta de cores, mira desenhada, atalhos sem limite, bonecos otimizados no Motor, Rastro de Cometa e idiomas no launcher.</p>
     </section>
     <section class="card log">
       <h4>Registro do jogo <button type="button" class="linkbtn" id="btnConsole">console</button> <button type="button" class="linkbtn" id="btnCopyLog">copiar</button></h4>
@@ -79,7 +79,7 @@
       <div class="um-tools">
         <button class="btn-ghost" type="button" id="btnAddMods">+ Adicionar mods</button>
         <button class="btn-ghost" type="button" id="btnModsFolder">Abrir pasta</button>
-        <p class="help">Mods <b>Forge 1.8.9</b> rodam junto com o Pulsar, para jogar solo ou com amigos em servidor privado. Em servidores grandes, use só mods permitidos.</p>
+        <p class="help">Os mods do <b>Forge 1.8.9</b> rodam junto com o Pulsar, para jogar solo ou com amigos em servidor privado. Em servidores grandes, use só mods permitidos.</p>
       </div>
       <div class="um-list" id="umList"></div>
       <p class="um-msg" id="umMsg" role="status"></p>
@@ -133,6 +133,9 @@
   <main class="view" id="view-settings">
     <form class="settings" id="settingsForm">
       <h2>Ajustes</h2>
+      <label id="idiomaRotulo">Idioma</label>
+      <div class="idiomas" id="idiomas" role="radiogroup" aria-labelledby="idiomaRotulo"></div>
+
       <label for="mem">Memória para o jogo <output id="memOut">3 GB</output></label>
       <input id="mem" type="range" min="1" max="8" step="1" value="3">
 
@@ -186,6 +189,7 @@
     </div>
   </div>
 
+  <script src="i18n.js"></script>
   <script src="mods.js"></script>
   <script src="app.js"></script>
 </body>

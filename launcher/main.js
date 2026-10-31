@@ -9,11 +9,17 @@ const { launch } = require("./lib/launch");
 const { startBridge } = require("./lib/ponte");
 const texturas = require("./lib/texturas");
 const usermods = require("./lib/usermods");
+const i18n = require("./src/i18n");
+const { SinalDiscord } = require("./lib/discord");
+const radio = require("./lib/radio");
 
 // Janelas (inclusive o login da Microsoft) em português.
 app.commandLine.appendSwitch("lang", "pt-BR");
 
 const ICON = path.join(__dirname, "src", "logo.png");
+// Idioma escolhido em Ajustes (vazio = o do sistema). As telas traduzem sozinhas; aqui só os diálogos.
+const idioma = () => i18n.escolher((config && config.get().idioma) || app.getLocale());
+const tr = (texto) => i18n.t(texto, idioma());
 
 let win;
 let consoleWin = null;
@@ -71,7 +77,8 @@ function createWindow() {
     frame: false,
     title: "Pulsar Client",
     icon: ICON,
-    webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, sandbox: true },
+    // O Rádio Pulsar começa a tocar por pedido do jogo, sem clique na janela do launcher.
+    webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, sandbox: true, autoplayPolicy: "no-user-gesture-required", backgroundThrottling: false },
   });
   win.loadFile(path.join(__dirname, "src", "index.html"));
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -79,6 +86,43 @@ function createWindow() {
     return { action: "deny" };
   });
 }
+
+// Sinal Discord: enquanto o jogo está aberto, o perfil do Discord mostra "Pulsar Client" e onde a pessoa está.
+// O mod Sinal Discord dentro do jogo avisa pela ponte quando muda (e quando é desligado).
+const presenca = {
+  discord: null,
+  inicio: 0,
+  ligado: false,
+  estado: "No menu principal",
+  timer: null,
+  comecar(ligado) {
+    this.discord = this.discord || new SinalDiscord(pushLog);
+    this.inicio = Date.now();
+    this.ligado = ligado;
+    this.estado = "No menu principal";
+    this.mostrar();
+    // Se o Discord abrir depois do jogo, a próxima volta conecta.
+    clearInterval(this.timer);
+    this.timer = setInterval(() => this.ligado && !this.discord.pronto && this.mostrar(), 30000);
+  },
+  atualizar(p) {
+    if (!this.discord || !p) return;
+    const lugar = String(p.lugar || "menu");
+    const ip = String(p.servidor || "").slice(0, 60);
+    this.ligado = p.ligado !== false;
+    this.estado = lugar === "sozinho" ? "Jogando sozinho" : lugar === "servidor" ? (ip ? `Jogando em ${ip}` : "Jogando em um servidor") : "No menu principal";
+    this.mostrar();
+  },
+  mostrar() {
+    if (!this.ligado) return this.discord.apagar();
+    this.discord.mostrar({ detalhes: "Minecraft 1.8.9 · PvP", estado: tr(this.estado), inicio: this.inicio, versao: app.getVersion() }).catch(() => {});
+  },
+  parar() {
+    clearInterval(this.timer);
+    this.timer = null;
+    if (this.discord) this.discord.apagar();
+  },
+};
 
 // Atualização automática: as versões saem nos Releases do repositório privado Pulsar_Client.
 // Para baixar de um repositório privado, o launcher usa uma chave de leitura que o dono
@@ -173,12 +217,12 @@ function openConsole() {
     minWidth: 560,
     minHeight: 320,
     backgroundColor: "#05070F",
-    title: "Console do Pulsar",
+    title: tr("Console do Pulsar"),
     icon: ICON,
     autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, "console-preload.js"), contextIsolation: true, sandbox: true },
   });
-  consoleWin.loadFile(path.join(__dirname, "src", "console.html"));
+  consoleWin.loadFile(path.join(__dirname, "src", "console.html"), { query: { idioma: idioma() } });
   consoleWin.on("closed", () => (consoleWin = null));
 }
 
@@ -195,7 +239,7 @@ app.whenReady().then(() => {
   });
   ipcMain.handle("optifine:pick", async () => {
     const r = await dialog.showOpenDialog(win, {
-      title: "Escolha o OptiFine 1.8.9",
+      title: tr("Escolha o OptiFine 1.8.9"),
       filters: [{ name: "OptiFine", extensions: ["jar"] }],
       properties: ["openFile"],
     });
@@ -238,7 +282,7 @@ app.whenReady().then(() => {
     let arquivos = Array.isArray(caminhos) ? caminhos.map(String).filter(Boolean) : [];
     if (!arquivos.length) {
       const r = await dialog.showOpenDialog(win, {
-        title: "Escolha mods Forge para o Minecraft 1.8.9",
+        title: tr("Escolha mods Forge para o Minecraft 1.8.9"),
         filters: [{ name: "Mods (.jar)", extensions: ["jar"] }],
         properties: ["openFile", "multiSelections"],
       });
@@ -286,7 +330,14 @@ app.whenReady().then(() => {
           return contaDoJogo(() => accounts.usar(conta));
         },
         onAddOffline: async (nick) => contaDoJogo(() => accounts.adicionarOffline(nick)),
+        onPresenca: (p) => presenca.atualizar(p),
+        onRadio: (p) => {
+          const c = radio.comando(p);
+          pushLog(c.tocando ? `[Pulsar] Rádio: tocando ${c.nome} (volume ${c.volume}%)` : "[Pulsar] Rádio: parado");
+          send("radio:comando", c);
+        },
       });
+      presenca.comecar(config.getEnabledMods().sinal_discord !== false);
       game = await launch({
         config: cfg,
         authorization: accounts.mclc(),
@@ -297,6 +348,8 @@ app.whenReady().then(() => {
         onLog: pushLog,
         onClose: (code) => {
           game = null;
+          presenca.parar();
+          send("radio:comando", { tocando: false });
           closeBridge();
           flushLogs();
           send("game:status", { step: "closed", text: code === 0 ? "Pronto para jogar" : `O jogo fechou com erro (código ${code})` });
@@ -305,6 +358,7 @@ app.whenReady().then(() => {
       return true;
     } catch (err) {
       game = null;
+      presenca.parar();
       closeBridge();
       throw err;
     } finally {
@@ -312,6 +366,7 @@ app.whenReady().then(() => {
     }
   });
 
+  ipcMain.on("radio:erro", (_e, texto) => pushLog(`[Pulsar] Rádio: ${String(texto).slice(0, 200)}`));
   ipcMain.handle("console:open", () => openConsole());
   ipcMain.handle("console:lines", () => logLines.slice());
 

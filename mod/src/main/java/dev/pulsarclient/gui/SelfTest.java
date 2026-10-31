@@ -207,12 +207,15 @@ public class SelfTest {
                 // Um boneco perto (completo) e um longe (otimizado pelo Motor).
                 log(PulsarClient.get().motor().simplifiedPlayers() > 0 ? "bonecos" : "bonecos-falhou");
                 PulsarClient.get().mod("rastro_cometa").setEnabled(true);
+                // Rádio Pulsar: o jogo pede para o launcher tocar (o e2e confere o pedido na ponte).
+                PulsarClient.get().mod("radio_pulsar").setEnabled(true);
                 break;
             case 19:
                 show("hudjogo", new GuiHudEditor(null));
                 break;
             case 20:
                 PulsarClient.get().mod("rastro_cometa").setEnabled(false);
+                PulsarClient.get().mod("radio_pulsar").setEnabled(false);
                 mc.displayGuiScreen(null);
                 finish(mc);
                 break;

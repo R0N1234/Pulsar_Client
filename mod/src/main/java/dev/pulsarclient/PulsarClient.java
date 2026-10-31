@@ -128,6 +128,8 @@ public class PulsarClient {
         add(new RastroCometa());
         add(new AtalhosTexto());
         add(new GgAutomatico());
+        add(new SinalDiscord());
+        add(new RadioPulsar());
         add(motor);
 
         config = new PulsarConfig(Minecraft.getMinecraft().mcDataDir);

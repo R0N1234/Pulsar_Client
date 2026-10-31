@@ -32,6 +32,9 @@ const REQUIRED = [
   [/selftest: zoom-ok/, "sensibilidade do mouse igual depois do zoom"],
   [/selftest: bonecos/, "bonecos longe otimizados pelo Motor"],
   [/Rastro de Cometa: shader carregado/, "shader do Rastro de Cometa"],
+  [/\[e2e\] Sinal Discord: ligado (menu|sozinho)/, "Sinal Discord avisando o launcher pela ponte"],
+  [/\[e2e\] Rádio: tocando space_station/, "Rádio Pulsar pedindo para o launcher tocar"],
+  [/\[e2e\] Rádio: parado/, "Rádio Pulsar pedindo para parar"],
   [/Fonte: ganchos instalados em FontRenderer/, "ganchos da Fonte do Pulsar"],
   [/Fonte: espaçamento com fração instalado/, "espaçamento da Fonte do Pulsar"],
   [/Fonte do Pulsar carregada/, "Fonte do Pulsar carregada"],
@@ -122,6 +125,8 @@ setTimeout(() => finish(1, `FALHOU: tempo esgotado (pulsar=${pulsarLoaded}, jogo
             if (!contas.offline.includes(n)) contas.offline.push(n);
             return sessao((contas.ativa = n));
           },
+          onPresenca: (p) => onLog(`[e2e] Sinal Discord: ${p.ligado ? "ligado" : "desligado"} ${p.lugar} ${p.servidor || ""}`),
+          onRadio: (p) => onLog(`[e2e] Rádio: ${p.tocando ? "tocando " + p.estacao + " " + p.volume + "%" : "parado"}`),
         })
       : null;
     const bridgeArgs = bridge ? [`-Dpulsar.ponte=${bridge.port}`, `-Dpulsar.chave=${bridge.key}`] : [];
