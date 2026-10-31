@@ -10,6 +10,8 @@ import org.lwjgl.opengl.GL11;
 public final class Universo {
     public static final ResourceLocation FUNDO = new ResourceLocation("pulsar", "textures/gui/fundo.png");
     public static final ResourceLocation LOGO = new ResourceLocation("pulsar", "textures/gui/logo.png");
+    // Ícone PC pequeno (32x32), para o nome dos jogadores e o TAB.
+    public static final ResourceLocation ICONE = new ResourceLocation("pulsar", "textures/gui/icone.png");
     private static final int W = 1920;
     private static final int H = 1080;
 
@@ -27,6 +29,12 @@ public final class Universo {
     /** Logo "PC" no círculo, quadrado de lado size. */
     public static void logo(int x, int y, int size) {
         bind(LOGO);
+        Gui.drawModalRectWithCustomSizedTexture(x, y, 0, 0, size, size, size, size);
+    }
+
+    /** Ícone PC pequeno, quadrado de lado size. */
+    public static void icone(int x, int y, int size) {
+        bind(ICONE);
         Gui.drawModalRectWithCustomSizedTexture(x, y, 0, 0, size, size, size, size);
     }
 

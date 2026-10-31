@@ -44,6 +44,12 @@ const REQUIRED = [
   [/Texturas: F8thful baixado/, "download de textura do catálogo"],
   [/Texturas: usando F8thful/, "textura ligada dentro do jogo"],
 ];
+// Com E2E_REDE=<endereço> (wrangler dev no CI), o jogo também conversa com a rede do Pulsar (ícone, nível e amigos).
+const REDE = process.env.E2E_REDE || "";
+if (REDE) {
+  REQUIRED.push([/Rede: conectado como \w+ \(offline\)/, "rede do Pulsar respondendo (conta offline)"]);
+  REQUIRED.push([/selftest: amigos/, "tela de Amigos"]);
+}
 const FORBIDDEN = [
   /selftest: mundo-falhou/,
   /selftest: textura-falhou/,
@@ -137,7 +143,7 @@ setTimeout(() => finish(1, `FALHOU: tempo esgotado (pulsar=${pulsarLoaded}, jogo
       runtimeDir: path.join(work, "runtime"),
       onStatus: (s) => console.log(`[status] ${s.text}${s.total ? ` ${s.done}/${s.total}` : ""}`),
       onLog,
-      extraJvmArgs: PRINTS ? ["-Dpulsar.selftest=true", ...bridgeArgs] : [],
+      extraJvmArgs: PRINTS ? ["-Dpulsar.selftest=true", ...bridgeArgs, ...(REDE ? [`-Dpulsar.rede=${REDE}`] : [])] : [],
       onClose: (code) => finish(pulsarLoaded && gameReady && selftestDone ? 0 : 1, `O jogo fechou com código ${code}`),
     });
   } catch (err) {

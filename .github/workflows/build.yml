@@ -92,13 +92,18 @@ jobs:
           npm install --ignore-scripts --no-audit --no-fund
           node test/radio.js > "$RUNNER_TEMP/radio.txt" 2>&1 || true
           cat "$RUNNER_TEMP/radio.txt"
+          # Rede do Pulsar rodando no próprio runner (wrangler dev, sem Mojang), para o jogo testar ícone, nível e amigos.
+          (cd ../rede && npm install --no-audit --no-fund >/dev/null 2>&1 && CI=1 WRANGLER_SEND_METRICS=false nohup npx wrangler dev --port 8799 --ip 127.0.0.1 --var TESTE_SEM_MOJANG:1 > "$RUNNER_TEMP/rede-dev.txt" 2>&1 &)
+          for i in $(seq 1 120); do curl -fsS http://127.0.0.1:8799/ >/dev/null 2>&1 && break; sleep 1; done
+          if curl -fsS http://127.0.0.1:8799/ >/dev/null 2>&1; then export E2E_REDE=http://127.0.0.1:8799; else echo "rede não subiu"; tail -30 "$RUNNER_TEMP/rede-dev.txt"; fi
           status=0
           xvfb-run -a -s "-screen 0 1280x720x24" node test/e2e.js "$RUNNER_TEMP/e2e" || status=$?
+          if [ -z "$E2E_REDE" ]; then echo "FALHOU: a rede do Pulsar não subiu no runner"; status=1; fi
           # Publica o log e os prints das telas do Pulsar no ramo ci-log, para conferir o visual.
           mkdir -p /tmp/ci-log
           cp "$RUNNER_TEMP/e2e/e2e.log" /tmp/ci-log/build.log || echo "sem log" > /tmp/ci-log/build.log
           cp "$E2E_PRINTS"/*.png /tmp/ci-log/ 2>/dev/null || true
-          cp "$RUNNER_TEMP/radio.txt" /tmp/ci-log/ 2>/dev/null || true
+          cp "$RUNNER_TEMP/radio.txt" "$RUNNER_TEMP/rede-dev.txt" /tmp/ci-log/ 2>/dev/null || true
           cd "$GITHUB_WORKSPACE"
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
