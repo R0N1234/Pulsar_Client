@@ -2,6 +2,7 @@ package dev.pulsarclient.mods;
 
 import dev.pulsarclient.settings.BoolSetting;
 import dev.pulsarclient.settings.SliderSetting;
+import dev.pulsarclient.settings.TeclaDoJogo;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.MouseEvent;
@@ -9,9 +10,10 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
 
-/** Telescópio: zoom segurando C, com a roda do mouse ajustando o quanto aproxima. */
+/** Telescópio: zoom segurando a tecla escolhida (C no começo), com a roda do mouse ajustando o quanto aproxima. */
 public class Telescopio extends PulsarMod {
     public final KeyBinding key = new KeyBinding("Telescópio (zoom)", Keyboard.KEY_C, "Pulsar Client");
+    private final TeclaDoJogo zoomKey = add(new TeclaDoJogo("tecla_zoom", "Tecla do zoom (segurar)", key));
 
     private final SliderSetting amount = add(new SliderSetting("zoom", "Aproximação", 4, 2, 12, 0.5, "x"));
     private final BoolSetting smooth = add(new BoolSetting("suave", "Zoom suave", true));
@@ -26,7 +28,7 @@ public class Telescopio extends PulsarMod {
     private boolean zooming;
 
     public Telescopio() {
-        super("telescopio", "Telescópio", "Zoom segurando C", Category.VISUAL, true);
+        super("telescopio", "Telescópio", "Zoom segurando uma tecla, a roda do mouse ajusta", Category.VISUAL, true);
     }
 
     private boolean held() {

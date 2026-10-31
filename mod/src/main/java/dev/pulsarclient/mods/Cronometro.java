@@ -1,14 +1,16 @@
 package dev.pulsarclient.mods;
 
 import dev.pulsarclient.settings.ActionSetting;
+import dev.pulsarclient.settings.TeclaDoJogo;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import org.lwjgl.input.Keyboard;
 
-/** Cronômetro: tecla P inicia e pausa; zere pelo painel. Bom para marcar partidas e treinos. */
+/** Cronômetro: uma tecla (P no começo) inicia e pausa; zere pelo painel. Bom para marcar partidas e treinos. */
 public class Cronometro extends HudMod {
     public final KeyBinding key = new KeyBinding("Cronômetro (iniciar/pausar)", Keyboard.KEY_P, "Pulsar Client");
+    private final TeclaDoJogo startKey = add(new TeclaDoJogo("tecla_iniciar", "Tecla para iniciar e pausar", key));
     private final ActionSetting reset = add(new ActionSetting("zerar", "Zerar o cronômetro", new Runnable() {
         @Override public void run() { zerar(); }
     }));
@@ -18,7 +20,7 @@ public class Cronometro extends HudMod {
     private boolean running;
 
     public Cronometro() {
-        super("cronometro", "Cronômetro", "Marca tempo de partidas e treinos (tecla P)", Category.HUD, 5, 226, false);
+        super("cronometro", "Cronômetro", "Marca tempo de partidas e treinos", Category.HUD, 5, 226, false);
     }
 
     private void zerar() {

@@ -1,6 +1,7 @@
 package dev.pulsarclient.mods;
 
 import dev.pulsarclient.settings.BoolSetting;
+import dev.pulsarclient.settings.TeclaDoJogo;
 import dev.pulsarclient.settings.TextSetting;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
@@ -35,7 +36,7 @@ import java.lang.reflect.Field;
 import java.util.TreeSet;
 
 /**
- * Inventário: trava itens para não dropar nem tirar do lugar sem querer (passe o mouse no item e aperte L),
+ * Inventário: trava itens para não dropar nem tirar do lugar sem querer (passe o mouse no item e aperte a tecla, L no começo),
  * impede de dropar os tipos de item escolhidos (espada, arco, picareta...) e ajusta a tela do inventário.
  *
  * Os tipos escolhidos continuam livres para mexer no inventário; só não saem dele: a tecla de dropar,
@@ -46,7 +47,8 @@ public class Inventario extends PulsarMod {
 
     public final KeyBinding lockKey = new KeyBinding("Travar item (no inventário)", Keyboard.KEY_L, "Pulsar Client");
 
-    private final BoolSetting locking = add(new BoolSetting("travar", "Travar itens com a tecla L", true));
+    private final BoolSetting locking = add(new BoolSetting("travar", "Travar itens no inventário", true));
+    private final TeclaDoJogo lockKeySetting = add(new TeclaDoJogo("tecla_travar", "Tecla de travar (com o mouse no item)", lockKey));
     private final BoolSetting noShift = add(new BoolSetting("centralizar", "Inventário no meio mesmo com efeitos", true));
     private final BoolSetting hideEffects = add(new BoolSetting("sem_efeitos", "Esconder os efeitos ao lado do inventário", false));
     private final TextSetting lockedSlots = add(new TextSetting("slots", ""));
@@ -76,7 +78,7 @@ public class Inventario extends PulsarMod {
     private long warnUntil;
 
     public Inventario() {
-        super("inventario", "Inventário", "Protege a espada e outros itens contra drop, trava slots (tecla L) e ajusta o inventário", Category.COMBATE, true);
+        super("inventario", "Inventário", "Protege a espada e outros itens contra drop, trava slots e ajusta o inventário", Category.COMBATE, true);
     }
 
     // ---------- slots travados ----------
@@ -176,7 +178,8 @@ public class Inventario extends PulsarMod {
     }
 
     private void warn() {
-        warn("Item travado (aperte L no inventário para destravar)");
+        String tecla = lockKeySetting.get() == 0 ? "a tecla de travar" : lockKeySetting.display();
+        warn("Item travado (aperte " + tecla + " no inventário para destravar)");
     }
 
     private void warnType() {
