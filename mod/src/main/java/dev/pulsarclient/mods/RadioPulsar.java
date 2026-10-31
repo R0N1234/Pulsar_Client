@@ -32,7 +32,7 @@ public class RadioPulsar extends HudMod {
     private int ticks;
 
     public RadioPulsar() {
-        super("radio_pulsar", "Rádio Pulsar", "Rádio da internet enquanto você joga", Category.SOCIAL, 10000, 10000, false);
+        super("radio_pulsar", "Rádio Pulsar", "Rádio da internet enquanto você joga", Category.SOCIAL, 10000, 200, false);
     }
 
     private String texto() {
