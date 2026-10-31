@@ -6,6 +6,7 @@ import dev.pulsarclient.mods.Category;
 import dev.pulsarclient.mods.PulsarMod;
 import dev.pulsarclient.settings.ActionSetting;
 import dev.pulsarclient.settings.BoolSetting;
+import dev.pulsarclient.settings.ColorSetting;
 import dev.pulsarclient.settings.KeySetting;
 import dev.pulsarclient.settings.ModeSetting;
 import dev.pulsarclient.settings.Setting;
@@ -15,6 +16,10 @@ import dev.pulsarclient.settings.TextSetting;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
 import org.lwjgl.input.Keyboard;
@@ -57,6 +62,12 @@ public class GuiPulsarPanel extends GuiScreen {
     private KeySetting listening;
     private TextSetting editing;
     private GuiTextField field;
+    // Paleta de cores aberta: matiz, saturação e brilho sendo escolhidos, e a parte arrastada (1 = quadrado, 2 = barra).
+    private ColorSetting picking;
+    private float pickH, pickS, pickB;
+    private int pickDrag;
+    // Aberto direto nas opções de um mod (pelo editor de HUD): voltar fecha o painel.
+    private boolean direct;
 
     // Painel calculado em initGui
     private int px, py, pw, ph;
@@ -70,6 +81,13 @@ public class GuiPulsarPanel extends GuiScreen {
         this.parent = parent;
         this.category = category;
         this.open = open;
+    }
+
+    /** Só as opções de um mod; "Voltar" e Esc voltam para a tela de antes. */
+    public static GuiPulsarPanel options(GuiScreen parent, PulsarMod mod) {
+        GuiPulsarPanel p = new GuiPulsarPanel(parent, mod.category(), mod);
+        p.direct = true;
+        return p;
     }
 
     @Override
@@ -114,6 +132,7 @@ public class GuiPulsarPanel extends GuiScreen {
 
         if (open == null) drawGrid(mouseX, mouseY);
         else drawSettings(mouseX, mouseY);
+        if (picking != null) drawPicker();
     }
 
     private void drawSidebar(int mouseX, int mouseY) {
@@ -263,7 +282,8 @@ public class GuiPulsarPanel extends GuiScreen {
             drawCenteredString(fontRendererObj, done ? "Feito!" : s.label(), mx + mw / 2, cy, done ? BEAM : TEXT);
             return;
         }
-        int room = s instanceof BoolSetting ? mw - 44 : s instanceof TextSetting ? mw - 186 : s instanceof KeySetting ? mw - 118 : mw - 130;
+        int room = s instanceof BoolSetting ? mw - 44 : s instanceof TextSetting ? mw - 186 : s instanceof KeySetting ? mw - 118
+                : s instanceof ColorSetting ? mw - 100 : mw - 130;
         // Teclas ganham uma segunda linha: como cancelar enquanto espera, ou onde mais a tecla já é usada.
         String note = null;
         int noteColor = MUTED;
@@ -290,6 +310,13 @@ public class GuiPulsarPanel extends GuiScreen {
             int kx = tx + (int) Math.round(sl.fraction() * tw);
             drawRect(tx, y + 10, kx, y + 12, BEAM);
             drawRect(kx - 2, y + 6, kx + 2, y + 16, TEXT);
+        } else if (s instanceof ColorSetting) {
+            // Quadradinho com a cor; o clique abre a paleta.
+            ColorSetting c = (ColorSetting) s;
+            int sx = mx + mw - 40;
+            fontRendererObj.drawString(c.hex(), sx - 6 - fontRendererObj.getStringWidth(c.hex()), cy, MUTED);
+            drawRect(sx, y + 4, sx + 34, y + ROW_H - 4, picking == s ? BEAM : 0xFF0B1222);
+            drawRect(sx + 2, y + 6, sx + 32, y + ROW_H - 6, c.argb(0xFF));
         } else if (s instanceof ModeSetting) {
             String v = "< " + ((ModeSetting) s).get() + " >";
             drawRect(cx, y + 4, cx + 110, y + ROW_H - 4, 0xFF0B1222);
@@ -328,13 +355,138 @@ public class GuiPulsarPanel extends GuiScreen {
             return I18n.format(kb.getKeyDescription());
         }
         for (PulsarMod m : PulsarClient.get().mods()) {
-            for (Setting s : m.settings()) {
+            // As opções do painel, para pegar também as teclas criadas na hora (Atalhos de Texto).
+            for (Setting s : m.panelSettings()) {
                 if (s == k || !(s instanceof KeySetting) || s instanceof TeclaDoJogo || ((KeySetting) s).get() != code) continue;
                 // Na mesma tela, o nome do mod não ajuda: diz qual das teclas é.
-                return s == m.toggleKey() && m.settings().contains(k) ? "ligar e desligar" : m.name();
+                return s == m.toggleKey() && m.panelSettings().contains(k) ? "ligar e desligar" : m.name();
             }
         }
         return null;
+    }
+
+    // ---------- paleta de cores ----------
+
+    private static final int PICK_W = 184;
+    private static final int PICK_H = 122;
+    private static final int SQ_W = 120;
+    private static final int SQ_H = 64;
+
+    private int pickX() { return mx + (mw - PICK_W) / 2; }
+    private int pickY() { return Math.max(top, top + (bottom - top - PICK_H) / 2); }
+
+    /** Abre a paleta de uma cor (teste automático). */
+    public void showPicker(ColorSetting c) {
+        openPicker(c);
+    }
+
+    private void openPicker(ColorSetting c) {
+        picking = c;
+        float[] hsb = ColorSetting.hsb(c.rgb());
+        pickH = hsb[0];
+        pickS = hsb[1];
+        pickB = hsb[2];
+    }
+
+    private void drawPicker() {
+        int x = pickX(), y = pickY();
+        drawRect(x, y, x + PICK_W, y + PICK_H, 0xFA0B1222);
+        outline(x, y, x + PICK_W, y + PICK_H, BEAM);
+        fontRendererObj.drawString(caber(picking.label(), PICK_W - 60), x + 8, y + 7, TEXT);
+        fontRendererObj.drawString(picking.hex(), x + PICK_W - 8 - fontRendererObj.getStringWidth(picking.hex()), y + 7, BEAM);
+
+        // Quadrado: da esquerda (sem cor) para a direita (cor pura), de cima (claro) para baixo (escuro).
+        int sx = x + 8, sy = y + 20;
+        int hue = 0xFF000000 | ColorSetting.hsb(pickH, 1f, 1f);
+        gradient(sx, sy, sx + SQ_W, sy + SQ_H, 0xFFFFFFFF, hue, 0xFFFFFFFF, hue);
+        gradient(sx, sy, sx + SQ_W, sy + SQ_H, 0x00000000, 0x00000000, 0xFF000000, 0xFF000000);
+        int kx = sx + Math.round(pickS * SQ_W), ky = sy + Math.round((1 - pickB) * SQ_H);
+        outline(kx - 2, ky - 2, kx + 3, ky + 3, pickB > 0.6f ? 0xFF000000 : 0xFFFFFFFF);
+
+        // Barra das cores (matiz), de cima para baixo.
+        int bx = sx + SQ_W + 6;
+        for (int i = 0; i < 6; i++) {
+            int a = 0xFF000000 | ColorSetting.hsb(i / 6f, 1f, 1f);
+            int b = 0xFF000000 | ColorSetting.hsb((i + 1) / 6f, 1f, 1f);
+            int t = sy + i * SQ_H / 6, bt = sy + (i + 1) * SQ_H / 6;
+            gradient(bx, t, bx + 10, bt, a, a, b, b);
+        }
+        int hy = sy + Math.round(pickH * SQ_H);
+        drawRect(bx - 1, hy - 1, bx + 11, hy + 1, 0xFFFFFFFF);
+
+        // Cor escolhida.
+        int px0 = bx + 16;
+        drawRect(px0, sy, x + PICK_W - 8, sy + SQ_H, 0xFF000000 | picking.rgb());
+        outline(px0, sy, x + PICK_W - 8, sy + SQ_H, LINE);
+
+        // Cores prontas.
+        int ry = sy + SQ_H + 8;
+        for (int i = 0; i < ColorSetting.PRONTAS.length; i++) {
+            int cx0 = sx + i * 11;
+            drawRect(cx0, ry, cx0 + 9, ry + 9, 0xFF000000 | ColorSetting.PRONTAS[i]);
+            if (ColorSetting.PRONTAS[i] == picking.rgb()) outline(cx0 - 1, ry - 1, cx0 + 10, ry + 10, 0xFFFFFFFF);
+        }
+        fontRendererObj.drawString("Clique fora da paleta para fechar", sx, ry + 15, MUTED);
+    }
+
+    /** true se o clique foi dentro da paleta. */
+    private boolean clickPicker(int mouseX, int mouseY) {
+        int x = pickX(), y = pickY();
+        if (!inside(mouseX, mouseY, x, y, x + PICK_W, y + PICK_H)) return false;
+        int sx = x + 8, sy = y + 20, bx = sx + SQ_W + 6;
+        if (inside(mouseX, mouseY, sx, sy, sx + SQ_W + 1, sy + SQ_H + 1)) pickDrag = 1;
+        else if (inside(mouseX, mouseY, bx - 2, sy, bx + 12, sy + SQ_H + 1)) pickDrag = 2;
+        else {
+            int ry = sy + SQ_H + 8;
+            for (int i = 0; i < ColorSetting.PRONTAS.length; i++) {
+                int cx0 = sx + i * 11;
+                if (!inside(mouseX, mouseY, cx0, ry, cx0 + 10, ry + 10)) continue;
+                picking.set(ColorSetting.PRONTAS[i]);
+                openPicker(picking);
+            }
+            return true;
+        }
+        dragPicker(mouseX, mouseY);
+        return true;
+    }
+
+    private void dragPicker(int mouseX, int mouseY) {
+        int sx = pickX() + 8, sy = pickY() + 20;
+        float fy = Math.max(0f, Math.min(1f, (mouseY - sy) / (float) SQ_H));
+        if (pickDrag == 1) {
+            pickS = Math.max(0f, Math.min(1f, (mouseX - sx) / (float) SQ_W));
+            pickB = 1 - fy;
+        } else if (pickDrag == 2) {
+            pickH = Math.min(0.999f, fy);
+        } else {
+            return;
+        }
+        picking.set(ColorSetting.hsb(pickH, pickS, pickB));
+    }
+
+    /** Retângulo com uma cor em cada canto (a cor muda suave de um canto para o outro). */
+    private static void gradient(int l, int t, int r, int b, int tl, int tr, int bl, int br) {
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableBlend();
+        GlStateManager.disableAlpha();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.shadeModel(GL11.GL_SMOOTH);
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer wr = tessellator.getWorldRenderer();
+        wr.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        vertex(wr, r, t, tr);
+        vertex(wr, l, t, tl);
+        vertex(wr, l, b, bl);
+        vertex(wr, r, b, br);
+        tessellator.draw();
+        GlStateManager.shadeModel(GL11.GL_FLAT);
+        GlStateManager.disableBlend();
+        GlStateManager.enableAlpha();
+        GlStateManager.enableTexture2D();
+    }
+
+    private static void vertex(WorldRenderer wr, int x, int y, int argb) {
+        wr.pos(x, y, 0).color(argb >> 16 & 255, argb >> 8 & 255, argb & 255, argb >>> 24).endVertex();
     }
 
     private void toggle(int x, int y, boolean on) {
@@ -364,6 +516,10 @@ public class GuiPulsarPanel extends GuiScreen {
 
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int button) throws IOException {
+        if (picking != null) {
+            if (!clickPicker(mouseX, mouseY)) picking = null;
+            return;
+        }
         if (listening != null) {
             // Botão do meio ou laterais do mouse viram a tecla; clique esquerdo ou direito cancela.
             if (button >= 2) listening.set(button - 100);
@@ -410,6 +566,8 @@ public class GuiPulsarPanel extends GuiScreen {
     private void select(Category c) {
         commitText();
         listening = null;
+        picking = null;
+        direct = false;
         category = c;
         open = null;
         scroll = 0;
@@ -461,6 +619,8 @@ public class GuiPulsarPanel extends GuiScreen {
             drag(mouseX);
         } else if (s instanceof KeySetting) {
             listening = (KeySetting) s;
+        } else if (s instanceof ColorSetting) {
+            openPicker((ColorSetting) s);
         } else if (s instanceof TextSetting) {
             editing = (TextSetting) s;
             field.setMaxStringLength(editing.maxLength());
@@ -484,11 +644,13 @@ public class GuiPulsarPanel extends GuiScreen {
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int button, long time) {
         if (dragging != null) drag(mouseX);
+        if (picking != null) dragPicker(mouseX, mouseY);
     }
 
     @Override
     protected void mouseReleased(int mouseX, int mouseY, int state) {
         dragging = null;
+        pickDrag = 0;
     }
 
     @Override
@@ -507,6 +669,10 @@ public class GuiPulsarPanel extends GuiScreen {
 
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        if (picking != null) {
+            if (keyCode == Keyboard.KEY_ESCAPE || keyCode == Keyboard.KEY_RETURN) picking = null;
+            return;
+        }
         if (listening != null) {
             if (keyCode == Keyboard.KEY_BACK || keyCode == Keyboard.KEY_DELETE) listening.set(0);
             else if (keyCode != Keyboard.KEY_ESCAPE && keyCode != 0) listening.set(keyCode);
@@ -540,6 +706,11 @@ public class GuiPulsarPanel extends GuiScreen {
     private void back() {
         commitText();
         listening = null;
+        picking = null;
+        if (direct) {
+            mc.displayGuiScreen(parent);
+            return;
+        }
         open = null;
         scroll = 0;
     }

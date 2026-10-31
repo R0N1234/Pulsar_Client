@@ -41,6 +41,8 @@ public class OrbitaLivre extends PulsarMod {
     private float pitch0;
     private float prevYaw0;
     private float prevPitch0;
+    private float drawnYaw = Float.NaN;
+    private float drawnPitch = Float.NaN;
 
     public OrbitaLivre() {
         super("orbita_livre", "Órbita Livre", "Gira a câmera 360° em volta do personagem com uma tecla", Category.VISUAL, true);
@@ -78,6 +80,17 @@ public class OrbitaLivre extends PulsarMod {
     private void stop() {
         active = false;
         mc.gameSettings.thirdPersonView = savedView;
+        // A lista de pedaços do mundo ainda é a da câmera girada: refaz para a visão normal.
+        redrawWorld();
+        drawnYaw = Float.NaN;
+    }
+
+    /**
+     * O jogo só refaz a lista de pedaços do mundo que aparecem na tela quando o personagem anda ou vira.
+     * Na órbita o personagem não vira, então sem isto o que fica atrás dele aparecia preto até andar.
+     */
+    private void redrawWorld() {
+        if (mc.renderGlobal != null) mc.renderGlobal.setDisplayListEntitiesDirty();
     }
 
     @SubscribeEvent
@@ -122,6 +135,11 @@ public class OrbitaLivre extends PulsarMod {
         }
         event.yaw = camYaw + 180f;
         event.pitch = camPitch;
+        if (camYaw != drawnYaw || camPitch != drawnPitch) {
+            redrawWorld();
+            drawnYaw = camYaw;
+            drawnPitch = camPitch;
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

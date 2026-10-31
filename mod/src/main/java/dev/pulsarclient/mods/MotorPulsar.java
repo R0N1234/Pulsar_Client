@@ -9,6 +9,7 @@ import dev.pulsarclient.settings.ModeSetting;
 import dev.pulsarclient.settings.SliderSetting;
 import dev.pulsarclient.settings.TextSetting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.particle.EntityRainFX;
@@ -33,6 +34,7 @@ import net.minecraft.world.WorldProvider;
 import net.minecraftforge.client.IRenderHandler;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.opengl.Display;
@@ -65,6 +67,8 @@ public class MotorPulsar extends PulsarMod {
     private final SliderSetting mobDistance = add(new SliderSetting("mobs_dist", "Distância dos mobs", 32, 16, 128, 8, " blocos"));
     private final SliderSetting itemDistance = add(new SliderSetting("itens_dist", "Itens no chão, flechas e XP até", 24, 8, 64, 4, " blocos"));
     private final SliderSetting tileDistance = add(new SliderSetting("blocos_dist", "Baús, placas e cabeças até", 32, 16, 64, 4, " blocos"));
+    private final BoolSetting players = add(new BoolSetting("bonecos", "Bonecos otimizados (a skin continua)", true));
+    private final SliderSetting playerDetail = add(new SliderSetting("bonecos_dist", "Bonecos com todos os detalhes até", 8, 0, 64, 4, " blocos"));
     private final BoolSetting limitNames = add(new BoolSetting("nomes", "Limitar distância dos nomes", false));
     private final SliderSetting nameDistance = add(new SliderSetting("nomes_dist", "Distância dos nomes", 32, 8, 64, 4, " blocos"));
     private final ModeSetting particles = add(new ModeSetting("particulas", "Partículas", 2, "Todas", "Menos", "Mínimas"));
@@ -81,6 +85,7 @@ public class MotorPulsar extends PulsarMod {
     }));
 
     private final Oclusao oclusao = new Oclusao();
+    private final Bonecos bonecos = new Bonecos();
     private int appliedParticles = -1;
     private World lastWorld;
 
@@ -249,8 +254,32 @@ public class MotorPulsar extends PulsarMod {
         if (event.entity.getDistanceSqToEntity(mc.thePlayer) > max * max) event.setCanceled(true);
     }
 
+    // ---------- bonecos ----------
+
+    /** Jogadores mais longe que a distância escolhida saem com menos detalhes (veja Bonecos). Você mesmo nunca. */
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public void onPlayerPre(RenderLivingEvent.Pre event) {
+        bonecos.restore();
+        Entity view = mc.getRenderViewEntity();
+        if (!isEnabled() || !players.get() || !(event.entity instanceof AbstractClientPlayer) || view == null || event.entity == view) return;
+        double d = playerDetail.get();
+        if (event.entity.getDistanceSqToEntity(view) <= d * d) return;
+        bonecos.simplify(event.renderer, (AbstractClientPlayer) event.entity);
+    }
+
+    @SubscribeEvent
+    public void onPlayerPost(RenderLivingEvent.Post event) {
+        bonecos.restore();
+    }
+
+    /** Quantos bonecos já saíram simplificados (teste automático). */
+    public long simplifiedPlayers() {
+        return bonecos.count();
+    }
+
     @SubscribeEvent
     public void onRender(TickEvent.RenderTickEvent event) {
+        bonecos.restore();
         if (event.phase != TickEvent.Phase.END || !isEnabled() || !background.get()) return;
         if (!Display.isActive()) Display.sync(backgroundFps.getInt());
     }
@@ -286,6 +315,8 @@ public class MotorPulsar extends PulsarMod {
         mobDistance.set(p == 0 ? 32 : p == 1 ? 48 : 96);
         itemDistance.set(p == 0 ? 24 : p == 1 ? 32 : 64);
         tileDistance.set(p == 0 ? 32 : p == 1 ? 48 : 64);
+        players.set(true);
+        playerDetail.set(p == 0 ? 8 : p == 1 ? 24 : 48);
         limitNames.set(p == 0);
         nameDistance.set(32);
         particleLimit.set(p == 0 ? 2 : p == 1 ? 1 : 0);

@@ -17,7 +17,7 @@ import org.lwjgl.opengl.GL11;
 
 /** Contorno: cor e espessura da linha em volta do bloco que você está mirando. */
 public class Contorno extends PulsarMod {
-    private final ColorSetting color = add(new ColorSetting("cor", "Cor", 0));
+    private final ColorSetting color = add(new ColorSetting("cor", "Cor", ColorSetting.CIANO));
     private final SliderSetting width = add(new SliderSetting("espessura", "Espessura", 2.5, 1, 6, 0.5, ""));
     private final SliderSetting alpha = add(new SliderSetting("opacidade", "Opacidade", 80, 20, 100, 5, "%"));
     private final BoolSetting throughWalls = add(new BoolSetting("atras", "Aparecer atrás de blocos", false));
