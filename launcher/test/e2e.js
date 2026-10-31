@@ -29,6 +29,7 @@ const REQUIRED = [
   [/selftest: mundo-pronto/, "mundo de teste"],
   [/Tecla G: Telescópio desligado/, "tecla escolhida no painel desliga o mod"],
   [/Tecla G: Telescópio ligado/, "a mesma tecla liga o mod de novo"],
+  [/selftest: zoom-ok/, "sensibilidade do mouse igual depois do zoom"],
   [/Fonte: ganchos instalados em FontRenderer/, "ganchos da Fonte do Pulsar"],
   [/Fonte: espaçamento com fração instalado/, "espaçamento da Fonte do Pulsar"],
   [/Fonte do Pulsar carregada/, "Fonte do Pulsar carregada"],
@@ -41,6 +42,7 @@ const REQUIRED = [
 const FORBIDDEN = [
   /selftest: mundo-falhou/,
   /selftest: textura-falhou/,
+  /selftest: zoom-(falhou|sem-mira-lenta)/,
   /\[Pulsar\] Texturas: .*(não carregou|Não deu)/,
   /\[Pulsar\] O mod .* deu erro/,
   /\[Pulsar\] .*desligad[oa]s? por erro/,

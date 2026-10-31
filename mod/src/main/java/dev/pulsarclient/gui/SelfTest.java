@@ -4,6 +4,7 @@ import dev.pulsarclient.PulsarClient;
 import dev.pulsarclient.hud.GuiHudEditor;
 import dev.pulsarclient.mods.Category;
 import dev.pulsarclient.mods.HudMod;
+import dev.pulsarclient.mods.Telescopio;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.GuiMainMenu;
@@ -41,6 +42,7 @@ public class SelfTest {
     private int phase;
     private int loadTicks;
     private int inWorld;
+    private float sensibilidade;
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
@@ -162,11 +164,29 @@ public class SelfTest {
                 log("tecla");
                 break;
             case 14:
+                // Zoom do Telescópio segurando a tecla; a sensibilidade do jogo não pode mudar em nenhum momento.
                 PulsarClient.get().pressToggleKey(Keyboard.KEY_G);
+                sensibilidade = mc.gameSettings.mouseSensitivity;
+                KeyBinding.setKeyBindState(telescopio().key.getKeyCode(), true);
+                break;
+            case 15:
+                boolean lenta = telescopio().mouseScale() < 0.99 && mc.gameSettings.mouseSensitivity == sensibilidade;
+                log(lenta ? "zoom" : "zoom-sem-mira-lenta");
+                break;
+            case 16:
+                KeyBinding.setKeyBindState(telescopio().key.getKeyCode(), false);
+                break;
+            case 17:
+                boolean voltou = telescopio().mouseScale() >= 0.999 && mc.gameSettings.mouseSensitivity == sensibilidade;
+                log(voltou ? "zoom-ok" : "zoom-falhou");
                 finish(mc);
                 break;
             default: break;
         }
+    }
+
+    private static Telescopio telescopio() {
+        return (Telescopio) PulsarClient.get().mod("telescopio");
     }
 
     private static Texturas.Pacote pacoteTeste() {
