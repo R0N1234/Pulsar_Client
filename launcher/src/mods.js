@@ -17,6 +17,7 @@ window.PULSAR_MODS = [
   ["animacoes_classicas", "Animações Clássicas", "Bloqueio e swing no estilo da 1.7", "Combate", "off"],
   ["mira_pulsar", "Mira de Pulsar", "Mira com formato, cor, tamanho e contorno", "Combate", "off"],
   ["impacto", "Impacto", "Muda a cor do inimigo quando ele leva dano", "Combate", "off"],
+  ["wtap_blockhit", "W-Tap e Blockhit", "Solta o correr e levanta a espada a cada hit (teclas padrão F5 e F6)", "Combate", "off"],
   ["campo_colisao", "Campo de Colisão", "Mostra a hitbox de jogadores e projéteis", "Combate", "off"],
   ["blindagem", "Blindagem", "Durabilidade da armadura e do item na mão", "Combate", "off"],
   ["efeitos", "Efeitos", "Poções ativas com tempo restante", "Combate", "off"],
