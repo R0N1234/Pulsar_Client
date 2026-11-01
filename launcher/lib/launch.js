@@ -26,6 +26,10 @@ const JVM_FLAGS = [
   "-XX:MaxGCPauseMillis=50",
   "-XX:G1HeapRegionSize=16M",
   "-Dfml.readTimeout=180",
+  // Registro do jogo em UTF-8: no Windows os acentos chegavam quebrados no console do Pulsar ("Telesc�pio").
+  "-Dfile.encoding=UTF-8",
+  "-Dsun.stdout.encoding=UTF-8",
+  "-Dsun.stderr.encoding=UTF-8",
 ];
 
 const LOADERS = {
