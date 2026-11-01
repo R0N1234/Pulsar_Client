@@ -68,11 +68,11 @@
     "mods do Pulsar ligados": ["Pulsar mods on", "модов Pulsar включено", "Pulsar-Mods an"],
     "{n0} de {n1}": ["{0} of {1}", "{0} из {1}", "{0} von {1}"],
     Novidades: ["What's new", "Что нового", "Neuigkeiten"],
-    "Versão 0.7.3:": ["Version 0.7.3:", "Версия 0.7.3:", "Version 0.7.3:"],
-    "Blocos mais leves no Motor Pulsar: no Desempenho, grama alta e flores saem do mapa, baús e cabeças atrás de paredes não são desenhados e placas longe ficam sem texto. A Fonte do Pulsar volta a funcionar também com o OptiFine, e o W-Tap e Blockhit está de volta.": [
-      "Lighter blocks in the Pulsar Engine: in Performance, tall grass and flowers leave the map, chests and heads behind walls are not drawn and far signs have no text. The Pulsar Font works again, also with OptiFine, and W-Tap and Blockhit is back.",
-      "Более лёгкие блоки в Двигателе Pulsar: в режиме Производительность высокая трава и цветы убираются с карты, сундуки и головы за стенами не рисуются, а у дальних табличек нет текста. Шрифт Pulsar снова работает, в том числе с OptiFine, а W-Tap и Blockhit вернулся.",
-      "Leichtere Blöcke im Pulsar-Motor: in Leistung verschwinden hohes Gras und Blumen von der Karte, Truhen und Köpfe hinter Wänden werden nicht gezeichnet und ferne Schilder haben keinen Text. Die Pulsar-Schrift funktioniert wieder, auch mit OptiFine, und W-Tap und Blockhit ist zurück.",
+    "Versão 0.7.4:": ["Version 0.7.4:", "Версия 0.7.4:", "Version 0.7.4:"],
+    "Blocos mais leves no Motor Pulsar: no Desempenho, grama alta e flores saem do mapa, baús e cabeças atrás de paredes não são desenhados e placas longe ficam sem texto. A Fonte do Pulsar volta a funcionar também com o OptiFine, e o W-Tap e Blockhit está de volta. O instalador fecha sozinho o Pulsar aberto antes de atualizar.": [
+      "Lighter blocks in the Pulsar Engine: in Performance, tall grass and flowers leave the map, chests and heads behind walls are not drawn and far signs have no text. The Pulsar Font works again, also with OptiFine, and W-Tap and Blockhit is back. The installer now closes an open Pulsar by itself before updating.",
+      "Более лёгкие блоки в Двигателе Pulsar: в режиме Производительность высокая трава и цветы убираются с карты, сундуки и головы за стенами не рисуются, а у дальних табличек нет текста. Шрифт Pulsar снова работает, в том числе с OptiFine, а W-Tap и Blockhit вернулся. Установщик сам закрывает открытый Pulsar перед обновлением.",
+      "Leichtere Blöcke im Pulsar-Motor: in Leistung verschwinden hohes Gras und Blumen von der Karte, Truhen und Köpfe hinter Wänden werden nicht gezeichnet und ferne Schilder haben keinen Text. Die Pulsar-Schrift funktioniert wieder, auch mit OptiFine, und W-Tap und Blockhit ist zurück. Der Installer schließt ein offenes Pulsar vor dem Update selbst.",
     ],
     "Registro do jogo": ["Game log", "Журнал игры", "Spielprotokoll"],
     console: ["console", "консоль", "Konsole"],
