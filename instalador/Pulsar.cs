@@ -317,6 +317,10 @@ namespace PulsarInstalador
                 string args = op.ModoAtualizar ? "--updated /S" : "/S";
                 if (Instalacao.TodosUsuarios) args += " /allusers";
                 if (temporario) EsperarArquivoLivre(setup);
+                // Pulsar ainda aberto (launcher, ícone perto do relógio ou partes do Electron) segura os arquivos,
+                // e o desinstalador da versão antiga para com "Falha ao desinstalar os arquivos do aplicativo antigo".
+                Avancar(0.09, "Fechando o Pulsar aberto...");
+                FecharPulsarAberto(pasta);
                 Process proc = null;
                 Stopwatch t = Stopwatch.StartNew();
                 // O instalador do Windows às vezes cai logo no começo (código -1073741819, quase sempre com o antivírus
@@ -329,6 +333,15 @@ namespace PulsarInstalador
                     proc = Process.Start(psi);
                     t = Stopwatch.StartNew();
                     AcompanharSetup(proc, t, esperado, antes, ref esvaziou);
+                    // 2 = o desinstalador da versão antiga não conseguiu apagar algum arquivo (algo ainda aberto):
+                    // fecha de novo o que estiver na pasta e tenta outra vez.
+                    if (proc.ExitCode == 2 && tentativa < 3)
+                    {
+                        Programa.Registrar("Instalador parou com o código 2 (arquivos da versão antiga em uso); fechando o Pulsar e tentando de novo");
+                        FecharPulsarAberto(pasta);
+                        Thread.Sleep(2000 * tentativa);
+                        continue;
+                    }
                     if (proc.ExitCode != -1073741819 || tentativa == 3) break;
                     Programa.Registrar("Instalador caiu com o código " + proc.ExitCode + " em " + (int)t.Elapsed.TotalSeconds + " s; tentando de novo");
                     Thread.Sleep(1500 * tentativa);
@@ -407,6 +420,56 @@ namespace PulsarInstalador
                     Avancar(0.08 * lidos / total, "Preparando...");
                 }
             }
+        }
+
+        /** Fecha todo programa que está rodando de dentro da pasta do Pulsar (menos este instalador). */
+        static void FecharPulsarAberto(string pasta)
+        {
+            string raiz = string.IsNullOrEmpty(pasta) ? null : Path.GetFullPath(pasta).TrimEnd('\\') + "\\";
+            int eu = Process.GetCurrentProcess().Id;
+            List<Process> abertos = new List<Process>();
+            foreach (Process p in Process.GetProcesses())
+            {
+                if (p.Id == eu) { p.Dispose(); continue; }
+                bool doPulsar = false;
+                try
+                {
+                    if (p.ProcessName.Equals("Pulsar Client", StringComparison.OrdinalIgnoreCase)) doPulsar = true;
+                    else if (raiz != null)
+                    {
+                        string exe = p.MainModule.FileName;
+                        doPulsar = exe != null && exe.StartsWith(raiz, StringComparison.OrdinalIgnoreCase);
+                    }
+                }
+                catch { }
+                if (doPulsar) abertos.Add(p);
+                else p.Dispose();
+            }
+            if (abertos.Count == 0) return;
+            foreach (Process p in abertos)
+            {
+                try
+                {
+                    Programa.Registrar("Fechando " + p.ProcessName + " (" + p.Id + ")");
+                    p.CloseMainWindow();
+                }
+                catch { }
+            }
+            Thread.Sleep(1500);
+            foreach (Process p in abertos)
+            {
+                try
+                {
+                    if (!p.HasExited)
+                    {
+                        p.Kill();
+                        p.WaitForExit(5000);
+                    }
+                }
+                catch (Exception e) { Programa.Registrar("Não deu para fechar " + p.Id + ": " + e.Message); }
+                finally { p.Dispose(); }
+            }
+            Thread.Sleep(1000);
         }
 
         void EsperarLauncher()
