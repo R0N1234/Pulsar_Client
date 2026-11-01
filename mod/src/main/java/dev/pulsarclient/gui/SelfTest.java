@@ -370,7 +370,7 @@ public class SelfTest {
 
     /**
      * Blocos do Motor: grama alta e flores à direita (no Desempenho saem da montagem dos chunks)
-     * e uma placa com texto a 24 blocos (longe demais para o texto, perto o bastante para a placa).
+     * e uma placa com texto a uns 30 blocos (longe demais para o texto, perto o bastante para a placa).
      * A grama só no mundo do cliente; a placa pelo servidor.
      */
     private BlockPos placaTeste;
@@ -380,7 +380,8 @@ public class SelfTest {
         mc.theWorld.setBlockState(new BlockPos(bx + 2, by, bz + 3), Blocks.tallgrass.getDefaultState().withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS));
         mc.theWorld.setBlockState(new BlockPos(bx + 3, by, bz + 3), Blocks.red_flower.getDefaultState());
         mc.theWorld.setBlockState(new BlockPos(bx + 4, by, bz + 3), Blocks.yellow_flower.getDefaultState());
-        final BlockPos placa = new BlockPos(bx, by, bz + 24);
+        // Em outro chunk que o do boneco longe: o servidor reenviando o chunk apagaria o boneco de mentira do OptiFine.
+        final BlockPos placa = new BlockPos(bx + 12, by, bz + 28);
         placaTeste = placa;
         // A placa vem do servidor, como num servidor de verdade (o bloco e o texto chegam por pacote).
         final net.minecraft.world.WorldServer ws = mc.getIntegratedServer().worldServerForDimension(0);
