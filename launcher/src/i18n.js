@@ -46,11 +46,11 @@
     "mods do Pulsar ligados": ["Pulsar mods on", "модов Pulsar включено", "Pulsar-Mods an"],
     "{n0} de {n1}": ["{0} of {1}", "{0} из {1}", "{0} von {1}"],
     Novidades: ["What's new", "Что нового", "Neuigkeiten"],
-    "Versão 0.7.0:": ["Version 0.7.0:", "Версия 0.7.0:", "Version 0.7.0:"],
-    "Editar HUD mostra só os mods ligados, com tamanho na roda do mouse e uma cruz com ímã no meio da tela. Paleta de cores, mira desenhada, atalhos sem limite, bonecos otimizados no Motor, Rastro de Cometa e idiomas no launcher.": [
-      "Edit HUD only shows the mods that are on, with size on the mouse wheel and a magnetic cross in the middle of the screen. Color palette, drawn crosshair, unlimited shortcuts, optimized players in the Engine, Comet Trail and launcher languages.",
-      "«Редактор HUD» показывает только включённые моды: размер меняется колесом мыши, а крест в центре экрана притягивает элементы. Палитра цветов, рисованный прицел, безлимитные быстрые фразы, оптимизированные игроки в Двигателе, Хвост кометы и языки в лаунчере.",
-      "HUD bearbeiten zeigt nur eingeschaltete Mods, mit Größe per Mausrad und einem magnetischen Kreuz in der Bildschirmmitte. Farbpalette, gezeichnetes Fadenkreuz, unbegrenzte Kürzel, optimierte Spieler im Motor, Kometenschweif und Sprachen im Launcher.",
+    "Versão 0.7.1:": ["Version 0.7.1:", "Версия 0.7.1:", "Version 0.7.1:"],
+    "Novo mod W-Tap e Blockhit na categoria Combate: solta o correr e levanta a espada a cada hit, com tecla própria para ligar e desligar cada um.": [
+      "New W-Tap and Blockhit mod in the Combat category: releases sprint and raises the sword on every hit, with its own key to turn each one on and off.",
+      "Новый мод W-Tap и Blockhit в категории «Бой»: отпускает бег и поднимает меч при каждом ударе, у каждого своя клавиша включения и выключения.",
+      "Neuer Mod W-Tap und Blockhit in der Kategorie Kampf: lässt den Sprint los und hebt das Schwert bei jedem Treffer, mit eigener Taste zum Ein- und Ausschalten.",
     ],
     "Registro do jogo": ["Game log", "Журнал игры", "Spielprotokoll"],
     console: ["console", "консоль", "Konsole"],
