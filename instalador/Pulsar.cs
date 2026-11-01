@@ -316,20 +316,23 @@ namespace PulsarInstalador
                 bool esvaziou = antes < esperado / 2;
                 string args = op.ModoAtualizar ? "--updated /S" : "/S";
                 if (Instalacao.TodosUsuarios) args += " /allusers";
-                Programa.Registrar("Rodando " + setup + " " + args);
-                ProcessStartInfo psi = new ProcessStartInfo(setup, args);
-                psi.UseShellExecute = false;
-                Process proc = Process.Start(psi);
+                if (temporario) EsperarArquivoLivre(setup);
+                Process proc = null;
                 Stopwatch t = Stopwatch.StartNew();
-                while (!proc.WaitForExit(250))
+                // O instalador do Windows às vezes cai logo no começo (código -1073741819, quase sempre com o antivírus
+                // ainda lendo o arquivo novo). Nesse caso ele não instalou nada: espera um pouco e roda de novo.
+                for (int tentativa = 1; tentativa <= 3; tentativa++)
                 {
-                    // Na atualização a versão velha sai antes da nova entrar: o tamanho só vale depois que a pasta esvazia.
-                    long agora = Instalacao.TamanhoPasta(pasta);
-                    if (agora < esperado / 2) esvaziou = true;
-                    double porTamanho = esvaziou && esperado > 0 ? (double)agora / esperado : 0;
-                    double porTempo = 1 - Math.Exp(-t.Elapsed.TotalSeconds / 14.0);
-                    double p = 0.08 + 0.88 * Math.Min(1, Math.Max(porTamanho, porTempo * 0.8));
-                    Avancar(p, porTamanho >= 0.98 ? "Criando os atalhos..." : "Copiando os arquivos...");
+                    Programa.Registrar("Rodando " + setup + " " + args + (tentativa > 1 ? " (tentativa " + tentativa + ")" : ""));
+                    ProcessStartInfo psi = new ProcessStartInfo(setup, args);
+                    psi.UseShellExecute = false;
+                    proc = Process.Start(psi);
+                    t = Stopwatch.StartNew();
+                    AcompanharSetup(proc, t, esperado, antes, ref esvaziou);
+                    if (proc.ExitCode != -1073741819 || tentativa == 3) break;
+                    Programa.Registrar("Instalador caiu com o código " + proc.ExitCode + " em " + (int)t.Elapsed.TotalSeconds + " s; tentando de novo");
+                    Thread.Sleep(1500 * tentativa);
+                    if (temporario) EsperarArquivoLivre(setup);
                 }
                 Programa.Registrar("Instalador terminou com o código " + proc.ExitCode + " em " + (int)t.Elapsed.TotalSeconds + " s");
                 if (proc.ExitCode != 0) throw new Exception("O instalador do Windows parou com o código " + proc.ExitCode + ".");
@@ -353,6 +356,37 @@ namespace PulsarInstalador
                     catch { }
                 }
             }
+        }
+
+        /** Espera ninguém mais estar com o arquivo aberto (antivírus lendo o instalador recém-criado), no máximo 5 s. */
+        static void EsperarArquivoLivre(string arquivo)
+        {
+            for (int i = 0; i < 50; i++)
+            {
+                try
+                {
+                    using (new FileStream(arquivo, FileMode.Open, FileAccess.Read, FileShare.None)) return;
+                }
+                catch (IOException)
+                {
+                    Thread.Sleep(100);
+                }
+            }
+        }
+
+        void AcompanharSetup(Process proc, Stopwatch t, long esperado, long antes, ref bool esvaziou)
+        {
+                while (!proc.WaitForExit(250))
+                {
+                    // Na atualização a versão velha sai antes da nova entrar: o tamanho só vale depois que a pasta esvazia.
+                    long agora = Instalacao.TamanhoPasta(pasta);
+                    if (agora < esperado / 2) esvaziou = true;
+                    double porTamanho = esvaziou && esperado > 0 ? (double)agora / esperado : 0;
+                    double porTempo = 1 - Math.Exp(-t.Elapsed.TotalSeconds / 14.0);
+                    double p = 0.08 + 0.88 * Math.Min(1, Math.Max(porTamanho, porTempo * 0.8));
+                    Avancar(p, porTamanho >= 0.98 ? "Criando os atalhos..." : "Copiando os arquivos...");
+                }
+                proc.WaitForExit();
         }
 
         void Extrair(string destino)

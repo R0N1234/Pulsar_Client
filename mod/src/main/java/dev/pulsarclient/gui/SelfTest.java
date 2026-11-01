@@ -252,7 +252,7 @@ public class SelfTest {
                 spawnItens(mc);
                 break;
             case 22:
-                log(GravidadeItens.desenhados() > 0 ? "itens-ok" : "itens-falhou");
+                log(GravidadeItens.desenhados() > 0 ? "itens" : "itens-falhou");
                 break;
             case 23:
                 // Nebulosa: o menu do ESC com o mundo desfocado atrás.
@@ -341,7 +341,7 @@ public class SelfTest {
     private void spawnItens(Minecraft mc) {
         ItemStack[] itens = {new ItemStack(Items.arrow, 64), new ItemStack(Items.diamond_sword), new ItemStack(Blocks.gold_block, 5)};
         for (int i = 0; i < itens.length; i++) {
-            EntityItem e = new EntityItem(mc.theWorld, mc.thePlayer.posX - 1 + i, mc.thePlayer.posY, mc.thePlayer.posZ + 2, itens[i]);
+            EntityItem e = new EntityItem(mc.theWorld, mc.thePlayer.posX - 0.8 + i * 0.8, mc.thePlayer.posY, mc.thePlayer.posZ + 3.5, itens[i]);
             e.motionX = e.motionY = e.motionZ = 0;
             e.setInfinitePickupDelay();
             mc.theWorld.addEntityToWorld(-6000 - i, e);

@@ -36,7 +36,7 @@ const REQUIRED = [
   [/Motor: molduras leves instaladas/, "molduras leves do Motor"],
   [/selftest: molduras-ok/, "molduras desenhadas no modo leve"],
   [/Gravidade de Itens: instalada/, "Gravidade de Itens trocando o desenho dos itens"],
-  [/selftest: itens-ok/, "itens deitados no chão"],
+  [/selftest: itens\b(?!-)/, "itens deitados no chão"],
   [/Nebulosa: shader carregado/, "shader da Nebulosa"],
   [/selftest: nebulosa-ok/, "desfoque no menu"],
   [/Capturas: print /, "Capturas achou a print nova"],
@@ -88,11 +88,25 @@ let prints = Promise.resolve();
 let proc;
 if (PRINTS) fs.mkdirSync(PRINTS, { recursive: true });
 
-// Espera a tela desenhar e tira um print da tela virtual inteira.
+// Espera a tela desenhar e tira um print da tela inteira (Linux: tela virtual do xvfb; Windows: pelo .NET).
 function takePrint(name, delay = 1500) {
-  prints = prints
-    .then(() => new Promise((r) => setTimeout(r, delay)))
-    .then(() => new Promise((r) => execFile("import", ["-window", "root", path.join(PRINTS, `${name}.png`)], () => r())));
+  const arquivo = path.join(PRINTS, `${name}.png`);
+  const tirar =
+    process.platform === "win32"
+      ? (r) =>
+          execFile(
+            "powershell",
+            [
+              "-NoProfile",
+              "-Command",
+              "Add-Type -AssemblyName System.Windows.Forms,System.Drawing; $b=[System.Windows.Forms.Screen]::PrimaryScreen.Bounds; " +
+                "$i=New-Object System.Drawing.Bitmap $b.Width,$b.Height; $g=[System.Drawing.Graphics]::FromImage($i); " +
+                `$g.CopyFromScreen($b.Location,[System.Drawing.Point]::Empty,$b.Size); $i.Save('${arquivo.replace(/'/g, "''")}')`,
+            ],
+            () => r()
+          )
+      : (r) => execFile("import", ["-window", "root", arquivo], () => r());
+  prints = prints.then(() => new Promise((r) => setTimeout(r, delay))).then(() => new Promise(tirar));
 }
 
 function finish(code, why) {

@@ -130,6 +130,62 @@ jobs:
           git push -qf origin ci-log || true
           exit $status
 
+  e2e-windows:
+    # O mesmo teste do jogo (todas as telas e mods) rodando no Windows, com OpenGL por software (Mesa),
+    # porque a máquina do GitHub não tem placa de vídeo. Prints e log no ramo ci-windows-jogo.
+    needs: mod
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v5
+        with:
+          name: pulsar-mod
+          path: mod/build/libs
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 8
+          architecture: x64
+      - name: OpenGL por software (Mesa) junto do Java
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $mesa = Join-Path $env:RUNNER_TEMP "mesa"
+          gh release download -R pal1000/mesa-dist-win -p "mesa3d-*-release-msvc.7z" -D $mesa
+          7z x (Get-ChildItem "$mesa\*.7z" | Select-Object -First 1).FullName "-o$mesa\x" -y | Out-Null
+          Copy-Item "$mesa\x\x64\*.dll" (Join-Path $env:JAVA_HOME "bin")
+          Get-ChildItem (Join-Path $env:JAVA_HOME "bin") -Filter *.dll | Where-Object { $_.Name -match "opengl|gallium|glapi" } | ForEach-Object { $_.Name }
+      - name: Abrir o Minecraft 1.8.9 com o Pulsar no Windows
+        working-directory: launcher
+        shell: pwsh
+        timeout-minutes: 20
+        env:
+          GALLIUM_DRIVER: llvmpipe
+        run: |
+          npm install --ignore-scripts --no-audit --no-fund
+          $env:E2E_PRINTS = Join-Path $env:RUNNER_TEMP "prints-jogo"
+          $env:E2E_JAVA = Join-Path $env:JAVA_HOME "bin\java.exe"
+          node test/e2e.js (Join-Path $env:RUNNER_TEMP "e2e")
+          $status = $LASTEXITCODE
+          $saida = Join-Path $env:RUNNER_TEMP "ci-jogo"
+          New-Item -ItemType Directory -Force -Path $saida | Out-Null
+          Copy-Item (Join-Path $env:RUNNER_TEMP "e2e\e2e.log") (Join-Path $saida "build.log") -ErrorAction SilentlyContinue
+          Copy-Item "$env:E2E_PRINTS\*.png" $saida -ErrorAction SilentlyContinue
+          Set-Location $env:GITHUB_WORKSPACE
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git checkout -q --orphan ci-windows-jogo
+          git rm -rfq --cached .
+          Copy-Item "$saida\*" .
+          git add build.log *.png 2>$null
+          git commit -qm "Teste do jogo no Windows $env:GITHUB_SHA"
+          git push -qf origin ci-windows-jogo
+          exit $status
+
   launcher-windows:
     needs: mod
     runs-on: windows-latest
