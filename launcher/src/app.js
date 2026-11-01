@@ -568,11 +568,61 @@ function retraduzir() {
   logVazio();
   if (ultimaAtualizacao) mostrarAtualizacao(ultimaAtualizacao);
   $("memOut").textContent = t($("mem").value + " GB");
-  ["umMsg", "txMsg", "saved"].forEach((id) => ($(id).textContent = ""));
+  ["umMsg", "txMsg", "saved", "versaoMsg"].forEach((id) => ($(id).textContent = ""));
+  renderVersoes();
   api.getConfig().then((cfg) => {
     renderOptifine(cfg);
     $("updToken").placeholder = t(cfg.hasUpdateToken ? "Chave salva. Cole outra para trocar." : "Cole a chave do GitHub (github_pat_…)");
   });
+}
+
+/* ---------- versões ---------- */
+// Duas opções: a versão atual do Pulsar e a anterior (só uma). A escolhida vale no próximo Jogar.
+let ultimasVersoes = null;
+function renderVersoes(v) {
+  if (v) ultimasVersoes = v;
+  v = ultimasVersoes;
+  if (!v) return;
+  const box = $("versoes");
+  box.textContent = "";
+  const card = (qual, info, rotulo, texto) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "versao " + qual;
+    b.setAttribute("role", "radio");
+    b.setAttribute("aria-checked", String(v.escolhida === qual && !!info));
+    b.disabled = !info;
+    const small = document.createElement("small");
+    small.textContent = t(rotulo);
+    const big = document.createElement("b");
+    big.textContent = info ? info.versao : "—";
+    const p = document.createElement("p");
+    p.textContent = t(texto);
+    const escolha = document.createElement("span");
+    escolha.className = "escolha";
+    escolha.textContent = !info ? "" : v.escolhida === qual ? t("✓ Jogando com esta") : t("Jogar com esta versão");
+    b.append(small, big, p, escolha);
+    if (info) b.onclick = () => escolherVersao(qual);
+    box.append(b);
+  };
+  card("atual", v.atual, "Atual", "A versão mais nova, com tudo o que saiu agora.");
+  card(
+    "anterior",
+    v.anterior,
+    "Anterior",
+    v.anterior ? "A versão de antes da última atualização, do jeito que ela era." : "Ainda não tem versão anterior. Ela aparece aqui depois da próxima atualização."
+  );
+  const aviso = $("homeVersao");
+  aviso.hidden = !(v.escolhida === "anterior" && v.anterior);
+  if (!aviso.hidden) aviso.textContent = t(`Jogando com a versão anterior (${v.anterior.versao})`);
+}
+async function escolherVersao(qual) {
+  try {
+    renderVersoes(await api.escolherVersao(qual));
+    $("versaoMsg").textContent = "";
+  } catch (e) {
+    $("versaoMsg").textContent = t(cleanErr(e));
+  }
 }
 
 /* ---------- ajustes ---------- */
@@ -734,6 +784,7 @@ api.onRadio((c) => {
   const cfg = await api.getConfig().catch(() => ({}));
   if (cfg.idioma && i18n.escolher(cfg.idioma) !== i18n.atual()) i18n.definir(cfg.idioma);
   renderIdiomas();
+  api.listVersoes().then(renderVersoes).catch(() => {});
   enabled = await api.getMods();
   renderChips();
   renderGrid();

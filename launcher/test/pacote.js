@@ -25,4 +25,12 @@ if (!fs.existsSync(atualizador)) {
   console.error("Faltando no instalador: resources/atualizador/PulsarAtualizador.exe");
   process.exit(1);
 }
+// A versão anterior do mod (aba Versões) vai em resources/anterior.
+const anterior = path.join(root, "dist", "win-unpacked", "resources", "anterior");
+const jars = fs.existsSync(anterior) ? fs.readdirSync(anterior).filter((f) => /^pulsar-client-.+\.jar$/.test(f)) : [];
+if (jars.length !== 1) {
+  console.error(`resources/anterior deveria ter 1 jar do Pulsar e tem ${jars.length}: ${jars.join(", ")}`);
+  process.exit(1);
+}
+console.log(`Versão anterior no instalador: ${jars[0]}`);
 console.log("Todos os arquivos estão no instalador.");

@@ -41,6 +41,13 @@
           "!*-sources.jar",
           "!*-dev.jar"
         ]
+      },
+      {
+        "from": "../mod/build/anterior",
+        "to": "anterior",
+        "filter": [
+          "pulsar-client-*.jar"
+        ]
       }
     ],
     "win": {

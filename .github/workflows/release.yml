@@ -35,6 +35,17 @@ jobs:
         with:
           name: pulsar-mod
           path: mod/build/libs/pulsar-client-*.jar
+      - name: Versão anterior do mod (aba Versões do launcher)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSAO: ${{ inputs.versao }}
+        run: .github/scripts/anterior.sh "$VERSAO"
+      - uses: actions/upload-artifact@v5
+        with:
+          name: pulsar-mod-anterior
+          path: mod/build/anterior/pulsar-client-*.jar
+          if-no-files-found: ignore
 
   publicar:
     needs: mod
@@ -45,6 +56,11 @@ jobs:
         with:
           name: pulsar-mod
           path: mod/build/libs
+      - uses: actions/download-artifact@v5
+        continue-on-error: true
+        with:
+          name: pulsar-mod-anterior
+          path: mod/build/anterior
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -63,3 +79,5 @@ jobs:
           npx electron-builder --win --x64 --publish always -c.releaseInfo.releaseNotes="${NOTAS:-Versão $VERSAO}"
           node ../instalador/compilar.js instalador
           gh release upload "v$VERSAO" "dist/Pulsar-Client-Instalador-$VERSAO.exe" --clobber
+          # O jar do mod vai junto: a próxima versão usa ele na aba Versões (versão anterior).
+          for f in ../mod/build/libs/pulsar-client-*.jar; do case "$f" in *-sources.jar|*-dev.jar) ;; *) gh release upload "v$VERSAO" "$f" --clobber ;; esac; done

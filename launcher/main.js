@@ -12,6 +12,7 @@ const usermods = require("./lib/usermods");
 const i18n = require("./src/i18n");
 const { SinalDiscord } = require("./lib/discord");
 const radio = require("./lib/radio");
+const versoes = require("./lib/versoes");
 
 // Janelas (inclusive o login da Microsoft) em português.
 app.commandLine.appendSwitch("lang", "pt-BR");
@@ -60,6 +61,18 @@ function secretStore() {
 
 function modSourceDir() {
   return app.isPackaged ? path.join(process.resourcesPath, "mods") : path.join(__dirname, "..", "mod", "build", "libs");
+}
+
+// A versão anterior do mod vem no instalador, em resources/anterior (no CI, mod/build/anterior).
+function modAnteriorDir() {
+  return app.isPackaged ? path.join(process.resourcesPath, "anterior") : path.join(__dirname, "..", "mod", "build", "anterior");
+}
+
+function listaVersoes() {
+  const lista = versoes.listar(modSourceDir(), modAnteriorDir());
+  const escolhida = versoes.escolher(lista, config.get().versaoJogo).qual;
+  const sem = (v) => v && { versao: v.versao };
+  return { atual: sem(lista.atual), anterior: sem(lista.anterior), escolhida };
 }
 
 function publicConfig() {
@@ -250,6 +263,12 @@ app.whenReady().then(() => {
   ipcMain.handle("link:open", (_e, url) => {
     if (/^https:\/\/(optifine\.net|adoptium\.net|modrinth\.com)\//.test(String(url))) shell.openExternal(url);
   });
+  ipcMain.handle("versoes:list", () => listaVersoes());
+  ipcMain.handle("versoes:escolher", (_e, qual) => {
+    semJogo("Feche o Minecraft antes de trocar de versão.");
+    config.set({ versaoJogo: qual === "anterior" ? "anterior" : "atual" });
+    return listaVersoes();
+  });
   ipcMain.handle("mods:get", () => config.getEnabledMods());
   ipcMain.handle("mods:set", (_e, id, enabled) => config.setModEnabled(String(id), !!enabled));
 
@@ -338,10 +357,12 @@ app.whenReady().then(() => {
         },
       });
       presenca.comecar(config.getEnabledMods().sinal_discord !== false);
+      const versao = versoes.escolher(versoes.listar(modSourceDir(), modAnteriorDir()), cfg.versaoJogo);
+      if (versao.qual === "anterior") pushLog(`[Pulsar] Jogando com a versão anterior do Pulsar (${versao.versao}).`);
       game = await launch({
         config: cfg,
         authorization: accounts.mclc(),
-        modSourceDir: modSourceDir(),
+        modSourceDir: versao.pasta || modSourceDir(),
         runtimeDir: path.join(app.getPath("userData"), "runtime"),
         extraJvmArgs: [`-Dpulsar.ponte=${bridge.port}`, `-Dpulsar.chave=${bridge.key}`],
         onStatus: (s) => send("game:status", s),
@@ -454,6 +475,21 @@ async function tirarPrints(dir) {
     await espera(1000);
     await print("texturas-usando");
     console.log(`[prints] options: ${(fs.readFileSync(path.join(config.get().gameDir, "pulsar", "instancia-1.8.9", "options.txt"), "utf8").match(/resourcePacks:.*/) || ["?"])[0]}`);
+    // Aba Versões: escolhe a anterior (o Início avisa), confere e volta para a atual.
+    await aba("versoes");
+    await espera(800);
+    await print("versoes");
+    console.log(`[prints] versões: ${JSON.stringify(listaVersoes())}`);
+    await js(`document.querySelector('.versao.anterior:not([disabled])')?.click()`);
+    await espera(800);
+    await print("versoes-anterior");
+    console.log(`[prints] escolhida: ${listaVersoes().escolhida}`);
+    await aba("home");
+    await espera(800);
+    await print("inicio-anterior");
+    await js(`document.querySelector('#nav button[data-view="versoes"]').click(); document.querySelector('.versao.atual').click()`);
+    await espera(800);
+    console.log(`[prints] depois de voltar: ${listaVersoes().escolhida}`);
     await aba("settings");
     await espera(800);
     await print("ajustes");

@@ -27,6 +27,8 @@ const DEFAULTS = {
   openConsole: true,
   // Idioma do launcher ("" = o do sistema): pt-BR, en-US, en-GB, ru ou de.
   idioma: "",
+  // Versão do mod do Pulsar para jogar: "atual" ou "anterior" (aba Versões).
+  versaoJogo: "atual",
   // Contas offline (só liberadas depois que uma conta Microsoft com o Minecraft entrou neste PC).
   contasOffline: [],
   contaAtiva: "microsoft",

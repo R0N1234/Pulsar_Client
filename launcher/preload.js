@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld("pulsar", {
   pickOptifine: () => ipcRenderer.invoke("optifine:pick"),
   openLink: (url) => ipcRenderer.invoke("link:open", url),
   getMods: () => ipcRenderer.invoke("mods:get"),
+  listVersoes: () => ipcRenderer.invoke("versoes:list"),
+  escolherVersao: (qual) => ipcRenderer.invoke("versoes:escolher", qual),
   setMod: (id, enabled) => ipcRenderer.invoke("mods:set", id, enabled),
   listTexturas: () => ipcRenderer.invoke("texturas:list"),
   baixarTextura: (id) => ipcRenderer.invoke("texturas:baixar", id),

@@ -55,6 +55,9 @@ public class GuiPulsarPanel extends GuiScreen {
     private PulsarMod open;
     private GuiTextField search;
     private int scroll;
+    // Barra de rolagem: segurando o mouse nela, a lista acompanha (-1 = não está arrastando).
+    private int barraAgarrada = -1;
+    private int ultimoMouseX, ultimoMouseY;
     private int contentHeight;
     private SliderSetting dragging;
     private ActionSetting flashed;
@@ -124,6 +127,8 @@ public class GuiPulsarPanel extends GuiScreen {
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        ultimoMouseX = mouseX;
+        ultimoMouseY = mouseY;
         if (mc.theWorld == null) Universo.draw(width, height);
         drawRect(0, 0, width, height, 0x66000000);
         drawRect(px, py, px + pw, py + ph, BG);
@@ -497,12 +502,59 @@ public class GuiPulsarPanel extends GuiScreen {
         drawRect(on ? x + 11 : x + 1, y + 1, on ? x + 19 : x + 9, y + 9, on ? BEAM : MUTED);
     }
 
+    private int barraAltura() {
+        int view = bottom - top;
+        return Math.max(16, view * view / Math.max(1, contentHeight));
+    }
+
+    private int barraTopo() {
+        int view = bottom - top;
+        return top + (view - barraAltura()) * scroll / Math.max(1, contentHeight - view);
+    }
+
+    /** Área da barra (um pouco mais larga que o desenho, para ficar fácil de pegar). */
+    private boolean naBarra(int mouseX, int mouseY) {
+        return contentHeight > bottom - top && mouseX >= px + pw - 10 && mouseX < px + pw && mouseY >= top && mouseY < bottom;
+    }
+
+    /** Só para o teste: segura a barra, arrasta até embaixo e depois volta até em cima. */
+    String testarBarra() {
+        if (contentHeight <= bottom - top) return "sem-barra";
+        int x = px + pw - 5, max = contentHeight - (bottom - top);
+        try {
+            mouseClicked(x, barraTopo() + 2, 0);
+            mouseClickMove(x, bottom + 40, 0, 100);
+            int embaixo = scroll;
+            mouseReleased(x, bottom + 40, 0);
+            mouseClicked(x, barraTopo() + 2, 0);
+            mouseClickMove(x, top - 40, 0, 100);
+            int emCima = scroll;
+            mouseReleased(x, top - 40, 0);
+            System.out.println("[Pulsar] Barra de rolagem: embaixo " + embaixo + " de " + max + ", em cima " + emCima);
+            return embaixo == max && emCima == 0 ? "ok" : "falhou";
+        } catch (IOException e) {
+            return "falhou";
+        }
+    }
+
     private void drawScrollbar() {
         int view = bottom - top;
         if (contentHeight <= view) return;
-        int bh = Math.max(16, view * view / contentHeight);
-        int by = top + (view - bh) * scroll / (contentHeight - view);
-        drawRect(px + pw - 5, by, px + pw - 3, by + bh, 0x887FE7FF);
+        int bh = barraAltura();
+        int by = barraTopo();
+        boolean sobre = barraAgarrada >= 0 || naBarra(ultimoMouseX, ultimoMouseY);
+        drawRect(px + pw - 7, top, px + pw - 3, bottom, sobre ? 0x227FE7FF : 0x117FE7FF);
+        drawRect(px + pw - 7, by, px + pw - 3, by + bh, barraAgarrada >= 0 ? 0xFF7FE7FF : sobre ? 0xCC7FE7FF : 0x887FE7FF);
+    }
+
+    /** Move a lista para a barra ficar com o ponto agarrado embaixo do mouse. */
+    private void arrastarBarra(int mouseY) {
+        int view = bottom - top;
+        int livre = view - barraAltura();
+        if (livre <= 0) return;
+        int novoTopo = mouseY - barraAgarrada - top;
+        scroll = Math.round((float) novoTopo * (contentHeight - view) / livre);
+        clampScroll();
     }
 
     private static int categoryColor(Category c) {
@@ -531,6 +583,13 @@ public class GuiPulsarPanel extends GuiScreen {
             return;
         }
         if (editing != null) commitText();
+        if (button == 0 && naBarra(mouseX, mouseY)) {
+            int by = barraTopo();
+            // Clicou fora da parte clara: ela pula para o mouse e já fica agarrada no meio.
+            barraAgarrada = mouseY >= by && mouseY < by + barraAltura() ? mouseY - by : barraAltura() / 2;
+            arrastarBarra(mouseY);
+            return;
+        }
         if (open == null) search.mouseClicked(mouseX, mouseY, button);
         if (clickSidebar(mouseX, mouseY)) return;
         if (mouseY < py + 26) {
@@ -647,12 +706,17 @@ public class GuiPulsarPanel extends GuiScreen {
 
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int button, long time) {
+        if (barraAgarrada >= 0) {
+            arrastarBarra(mouseY);
+            return;
+        }
         if (dragging != null) drag(mouseX);
         if (picking != null) dragPicker(mouseX, mouseY);
     }
 
     @Override
     protected void mouseReleased(int mouseX, int mouseY, int state) {
+        barraAgarrada = -1;
         dragging = null;
         pickDrag = 0;
     }

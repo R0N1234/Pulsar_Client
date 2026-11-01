@@ -42,3 +42,8 @@ net.minecraft.client.entity.EntityPlayerSP
 net.minecraft.client.gui.inventory.GuiInventory
 net.minecraft.inventory.Container
 net.minecraft.client.renderer.entity.Render
+net.minecraft.client.renderer.tileentity.RenderItemFrame
+net.minecraft.client.renderer.entity.RenderItem
+net.minecraft.client.renderer.entity.RenderManager
+net.minecraft.entity.item.EntityItemFrame
+net.minecraft.client.renderer.BlockModelRenderer

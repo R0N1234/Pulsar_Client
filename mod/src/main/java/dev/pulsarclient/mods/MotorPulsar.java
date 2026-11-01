@@ -17,6 +17,8 @@ import net.minecraft.client.particle.EntitySpellParticleFX;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -25,6 +27,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
@@ -37,7 +40,10 @@ import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.opengl.Display;
+
+import java.util.Map;
 
 /**
  * Motor Pulsar: o otimizador do próprio client.
@@ -67,6 +73,9 @@ public class MotorPulsar extends PulsarMod {
     private final SliderSetting mobDistance = add(new SliderSetting("mobs_dist", "Distância dos mobs", 32, 16, 128, 8, " blocos"));
     private final SliderSetting itemDistance = add(new SliderSetting("itens_dist", "Itens no chão, flechas e XP até", 24, 8, 64, 4, " blocos"));
     private final SliderSetting tileDistance = add(new SliderSetting("blocos_dist", "Baús, placas e cabeças até", 32, 16, 64, 4, " blocos"));
+    // Molduras (item frames) com itens pesam muito: no modo leve a moldura vira uma lista pronta e o item sai sem brilho nem animação.
+    private final BoolSetting framesLeves = add(new BoolSetting("molduras", "Molduras leves (itens sem brilho e sem animação)", true));
+    private final SliderSetting framesDistance = add(new SliderSetting("molduras_dist", "Molduras e itens nelas até", 24, 8, 64, 4, " blocos"));
     private final BoolSetting players = add(new BoolSetting("bonecos", "Bonecos otimizados (a skin continua)", true));
     private final SliderSetting playerDetail = add(new SliderSetting("bonecos_dist", "Bonecos com todos os detalhes até", 8, 0, 64, 4, " blocos"));
     private final BoolSetting limitNames = add(new BoolSetting("nomes", "Limitar distância dos nomes", false));
@@ -80,6 +89,7 @@ public class MotorPulsar extends PulsarMod {
     private final ModeSetting fire = add(new ModeSetting("fogo", "Fogo na tela quando queima", 1, "Normal", "Baixo", "Bem baixo"));
     private final BoolSetting ownPotions = add(new BoolSetting("pocoes", "Esconder partículas das suas poções", true));
     private final TextSetting profileVersion = add(new TextSetting("perfil_versao", ""));
+    private final TextSetting framesVersion = add(new TextSetting("molduras_versao", ""));
     private final ActionSetting freeMemory = add(new ActionSetting("memoria", "Liberar memória agora", new Runnable() {
         @Override public void run() { System.gc(); }
     }));
@@ -105,6 +115,25 @@ public class MotorPulsar extends PulsarMod {
         MotorHooks.particles = new MotorHooks.ParticleFilter() {
             @Override public boolean allow(EntityFX particle) { return allowParticle(particle); }
         };
+        MolduraLeve.usar(new MolduraLeve.Regra() {
+            @Override public boolean leve() { return isEnabled() && framesLeves.get(); }
+        });
+    }
+
+    private boolean molduraInstalada;
+
+    /** Troca o desenho das molduras pelo do Motor (que usa o do Minecraft quando a opção está desligada). */
+    @SuppressWarnings("unchecked")
+    private void instalarMolduras() {
+        if (molduraInstalada || mc.getRenderManager() == null || mc.getRenderItem() == null) return;
+        molduraInstalada = true;
+        try {
+            Map<Class<? extends Entity>, Render<? extends Entity>> mapa = ReflectionHelper.getPrivateValue(RenderManager.class, mc.getRenderManager(), "entityRenderMap", "field_78729_o");
+            mapa.put(EntityItemFrame.class, new MolduraLeve(mc.getRenderManager(), mc.getRenderItem()));
+            System.out.println("[Pulsar] Motor: molduras leves instaladas");
+        } catch (Throwable t) {
+            System.out.println("[Pulsar] Motor: molduras leves indisponíveis (" + t + ")");
+        }
     }
 
     /** Estado dos ganchos, para o painel e o log. */
@@ -115,6 +144,7 @@ public class MotorPulsar extends PulsarMod {
 
     @Override
     public void tick() {
+        instalarMolduras();
         MotorHooks.newTick();
         oclusao.tick();
         if (mc.theWorld != lastWorld) {
@@ -129,6 +159,14 @@ public class MotorPulsar extends PulsarMod {
             profile.set(0);
             if (isEnabled()) applyProfile(0);
             else PulsarClient.get().save();
+        }
+        if (framesVersion.get().isEmpty()) {
+            // Primeira vez com as molduras leves (0.7.2): seguem o perfil que a pessoa já usa.
+            framesVersion.set("0.7.2");
+            int p = profile.index();
+            framesLeves.set(p < 2);
+            framesDistance.set(p == 0 ? 16 : p == 1 ? 32 : 64);
+            PulsarClient.get().save();
         }
         updateSky();
         if (!isEnabled()) return;
@@ -222,7 +260,10 @@ public class MotorPulsar extends PulsarMod {
         // Suporte com nome é holograma de servidor: continua visível.
         if (armorStands.get() && e instanceof EntityArmorStand && !e.hasCustomName()) return false;
         double d2 = e.getDistanceSqToEntity(view);
-        if (e instanceof EntityItem || e instanceof EntityXPOrb || e instanceof EntityArrow) {
+        if (e instanceof EntityItemFrame) {
+            double max = framesDistance.get();
+            if (d2 > max * max) return false;
+        } else if (e instanceof EntityItem || e instanceof EntityXPOrb || e instanceof EntityArrow) {
             double max = itemDistance.get();
             if (d2 > max * max) return false;
         } else if (cullMobs.get() && e instanceof EntityLivingBase && !(e instanceof EntityPlayer)) {
@@ -315,6 +356,8 @@ public class MotorPulsar extends PulsarMod {
         mobDistance.set(p == 0 ? 32 : p == 1 ? 48 : 96);
         itemDistance.set(p == 0 ? 24 : p == 1 ? 32 : 64);
         tileDistance.set(p == 0 ? 32 : p == 1 ? 48 : 64);
+        framesLeves.set(p < 2);
+        framesDistance.set(p == 0 ? 16 : p == 1 ? 32 : 64);
         players.set(true);
         playerDetail.set(p == 0 ? 8 : p == 1 ? 24 : 48);
         limitNames.set(p == 0);

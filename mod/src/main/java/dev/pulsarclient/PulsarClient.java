@@ -11,6 +11,9 @@ import dev.pulsarclient.hud.GuiHudEditor;
 import dev.pulsarclient.mods.Amigos;
 import dev.pulsarclient.mods.AnimacoesClassicas;
 import dev.pulsarclient.mods.AtalhosTexto;
+import dev.pulsarclient.mods.Capturas;
+import dev.pulsarclient.mods.GravidadeItens;
+import dev.pulsarclient.mods.Nebulosa;
 import dev.pulsarclient.mods.Atmosfera;
 import dev.pulsarclient.mods.Blindagem;
 import dev.pulsarclient.mods.CampoColisao;
@@ -46,7 +49,6 @@ import dev.pulsarclient.mods.SimpleHudMods;
 import dev.pulsarclient.mods.SinalDiscord;
 import dev.pulsarclient.mods.Supernova;
 import dev.pulsarclient.mods.TeclasPulse;
-import dev.pulsarclient.mods.WTapBlockhit;
 import dev.pulsarclient.mods.Telescopio;
 import dev.pulsarclient.mods.TremorDano;
 import net.minecraft.client.Minecraft;
@@ -73,7 +75,7 @@ import java.util.Set;
 @Mod(modid = PulsarClient.MODID, name = "Pulsar Client", version = PulsarClient.VERSION, clientSideOnly = true, acceptedMinecraftVersions = "[1.8.9]")
 public class PulsarClient {
     public static final String MODID = "pulsar";
-    public static final String VERSION = "0.7.1";
+    public static final String VERSION = "0.7.2";
     private static PulsarClient instance;
 
     private final List<PulsarMod> mods = new ArrayList<PulsarMod>();
@@ -86,7 +88,6 @@ public class PulsarClient {
     private final Inventario inventario = new Inventario();
     private final Cronometro cronometro = new Cronometro();
     private final PoeiraEstelar poeira = new PoeiraEstelar();
-    private final WTapBlockhit wtapBlockhit = new WTapBlockhit();
     private PulsarConfig config;
 
     private final KeyBinding keyPanel = new KeyBinding("Painel do Pulsar", Keyboard.KEY_RSHIFT, "Pulsar Client");
@@ -122,7 +123,6 @@ public class PulsarClient {
         add(new Recargas());
         add(new AnimacoesClassicas());
         add(new Impacto());
-        add(wtapBlockhit);
         add(inventario);
         add(telescopio);
         add(orbita);
@@ -140,6 +140,9 @@ public class PulsarClient {
         add(new GgAutomatico());
         add(new SinalDiscord());
         add(new RadioPulsar());
+        add(new Nebulosa());
+        add(new GravidadeItens());
+        add(new Capturas());
         // Ícone PC, Nível e Amigos dependem da rede do Pulsar: sem o endereço dela no mod, ficam de fora.
         if (Rede.noAr()) {
             add(new IconePulsar());
@@ -157,8 +160,6 @@ public class PulsarClient {
         ClientRegistry.registerKeyBinding(orbita.key);
         ClientRegistry.registerKeyBinding(inventario.lockKey);
         ClientRegistry.registerKeyBinding(cronometro.key);
-        ClientRegistry.registerKeyBinding(wtapBlockhit.wtapKey);
-        ClientRegistry.registerKeyBinding(wtapBlockhit.blockhitKey);
         CombatTracker.listen(poeira);
         Janela.aplicar(VERSION);
         MinecraftForge.EVENT_BUS.register(this);

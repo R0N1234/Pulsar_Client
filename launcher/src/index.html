@@ -16,6 +16,7 @@
       <button type="button" data-view="home" class="on">Início</button>
       <button type="button" data-view="mods">Mods</button>
       <button type="button" data-view="texturas">Texturas</button>
+      <button type="button" data-view="versoes">Versões</button>
       <button type="button" data-view="settings">Ajustes</button>
     </nav>
     <div class="right">
@@ -50,11 +51,12 @@
       </div>
       <div class="status" id="status" role="status">Pronto para jogar</div>
       <div class="sub" id="homeSub"><span id="homeModCount">0</span> mods do Pulsar ligados</div>
+      <div class="sub versao-aviso" id="homeVersao" hidden></div>
       <div class="bar" id="bar" hidden><span id="barFill"></span></div>
     </div>
     <section class="card news">
       <h4>Novidades</h4>
-      <p><b>Versão 0.7.1:</b> Novo mod W-Tap e Blockhit na categoria Combate: solta o correr e levanta a espada a cada hit, com tecla própria para ligar e desligar cada um.</p>
+      <p><b>Versão 0.7.2:</b> Aba Versões para jogar a versão atual ou a anterior. Mods novos: Nebulosa, Gravidade de Itens e Capturas. Molduras bem mais leves no Motor, Propulsão sem zoom ao correr e barra de rolagem que dá para arrastar.</p>
     </section>
     <section class="card log">
       <h4>Registro do jogo <button type="button" class="linkbtn" id="btnConsole">console</button> <button type="button" class="linkbtn" id="btnCopyLog">copiar</button></h4>
@@ -127,6 +129,20 @@
       </section>
     </div>
     <p class="tx-msg" id="txMsg" role="status"></p>
+  </main>
+
+  <!-- Versões: a atual e só uma anterior -->
+  <main class="view" id="view-versoes">
+    <div class="mods-head">
+      <div class="pulsar mini"><div class="halo"></div><div class="tilt"><div class="beams"></div></div><div class="core"></div></div>
+      <div>
+        <h2>Versões do Pulsar</h2>
+        <p>Escolha com qual versão jogar. O Pulsar guarda a versão atual e só uma anterior.</p>
+      </div>
+    </div>
+    <div class="versoes" id="versoes" role="radiogroup" aria-label="Versão do Pulsar"></div>
+    <p class="help versoes-help">Seus mods ligados, a HUD, as teclas e as texturas são os mesmos nas duas versões. Se algo da versão nova der problema, jogue na anterior até sair a correção.</p>
+    <p class="tx-msg" id="versaoMsg" role="status"></p>
   </main>
 
   <!-- Ajustes -->

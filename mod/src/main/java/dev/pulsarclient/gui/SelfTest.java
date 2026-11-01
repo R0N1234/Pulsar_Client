@@ -5,11 +5,15 @@ import dev.pulsarclient.hud.GuiHudEditor;
 import dev.pulsarclient.mods.Category;
 import dev.pulsarclient.mods.HudMod;
 import dev.pulsarclient.mods.MiraPulsar;
+import dev.pulsarclient.mods.GravidadeItens;
+import dev.pulsarclient.mods.MolduraLeve;
+import dev.pulsarclient.mods.Nebulosa;
 import dev.pulsarclient.mods.PulsarMod;
 import dev.pulsarclient.mods.Telescopio;
 import dev.pulsarclient.rede.Rede;
 import dev.pulsarclient.settings.ColorSetting;
 import dev.pulsarclient.settings.ActionSetting;
+import dev.pulsarclient.settings.BoolSetting;
 import dev.pulsarclient.settings.Setting;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
@@ -20,7 +24,14 @@ import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiVideoSettings;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.gui.GuiChat;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.ScreenShotHelper;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
@@ -77,7 +88,10 @@ public class SelfTest {
         switch (ticks / STEP) {
             case 1: show("menu", menu); break;
             case 2: show("painel", new GuiPulsarPanel(menu)); break;
-            case 3: show("motor", new GuiPulsarPanel(menu, Category.MOTOR, PulsarClient.get().motor())); break;
+            case 3:
+                // A barra de rolagem do painel tem que dar para segurar e arrastar com o mouse.
+                if (mc.currentScreen instanceof GuiPulsarPanel) log("barra-" + ((GuiPulsarPanel) mc.currentScreen).testarBarra());
+                show("motor", new GuiPulsarPanel(menu, Category.MOTOR, PulsarClient.get().motor())); break;
             case 4: show("video", new GuiVideoSettings(menu, mc.gameSettings)); break;
             case 5: show("esc", new GuiIngameMenu()); break;
             case 6: show("hud", new GuiHudEditor(menu)); break;
@@ -136,7 +150,10 @@ public class SelfTest {
         if (t % STEP != 0) return;
         switch (t / STEP) {
             case 1: prepareWorld(mc); break;
-            case 2: log("mundo"); break;
+            case 2:
+                log("mundo");
+                testarFov(mc);
+                break;
             case 3:
                 PulsarClient.get().orbita().forceView(true, 150f);
                 log("orbita");
@@ -205,6 +222,7 @@ public class SelfTest {
                 boolean voltou = telescopio().mouseScale() >= 0.999 && mc.gameSettings.mouseSensitivity == sensibilidade;
                 log(voltou ? "zoom-ok" : "zoom-falhou");
                 spawnBonecos(mc);
+                spawnMolduras(mc);
                 // Com a rede no ar: os bonecos viram usuários do Pulsar (ícone PC e nível no nome) e chegam amigos de mentira.
                 if (Rede.noAr()) {
                     List<UUID> bonecos = new ArrayList<UUID>();
@@ -215,6 +233,8 @@ public class SelfTest {
             case 18:
                 // Um boneco perto (completo) e um longe (otimizado pelo Motor).
                 log(PulsarClient.get().motor().simplifiedPlayers() > 0 ? "bonecos" : "bonecos-falhou");
+                System.out.println("[Pulsar] Molduras leves desenhadas: " + MolduraLeve.desenhadas());
+                log(MolduraLeve.desenhadas() > 0 ? "molduras-ok" : "molduras-falhou");
                 PulsarClient.get().mod("rastro_cometa").setEnabled(true);
                 // Rádio Pulsar: o jogo pede para o launcher tocar (o e2e confere o pedido na ponte).
                 PulsarClient.get().mod("radio_pulsar").setEnabled(true);
@@ -226,12 +246,37 @@ public class SelfTest {
                 if (Rede.noAr()) show("amigos", new GuiAmigos(null).escolher("a1", "AnaPvP"));
                 break;
             case 21:
+                // Gravidade de Itens: itens jogados na frente do jogador, deitados no chão.
+                mc.displayGuiScreen(null);
+                PulsarClient.get().mod("gravidade_itens").setEnabled(true);
+                spawnItens(mc);
+                break;
+            case 22:
+                log(GravidadeItens.desenhados() > 0 ? "itens-ok" : "itens-falhou");
+                break;
+            case 23:
+                // Nebulosa: o menu do ESC com o mundo desfocado atrás.
+                PulsarClient.get().mod("gravidade_itens").setEnabled(false);
+                PulsarClient.get().mod("nebulosa").setEnabled(true);
+                show("nebulosa", new GuiIngameMenu());
+                break;
+            case 24:
+                log(Nebulosa.vezes() > 0 ? "nebulosa-ok" : "nebulosa-falhou");
+                mc.displayGuiScreen(null);
+                PulsarClient.get().mod("nebulosa").setEnabled(false);
+                // Capturas: uma print como a do F2; o mod acha na pasta, copia e mostra os botões no chat.
+                ScreenShotHelper.saveScreenshot(mc.mcDataDir, mc.displayWidth, mc.displayHeight, mc.getFramebuffer());
+                break;
+            case 25:
+                show("capturas", new GuiChat());
+                break;
+            case 26:
                 // Desliga o rádio um passo antes do fim: o pedido de parar sai em até meio segundo.
                 PulsarClient.get().mod("rastro_cometa").setEnabled(false);
                 PulsarClient.get().mod("radio_pulsar").setEnabled(false);
                 mc.displayGuiScreen(null);
                 break;
-            case 22:
+            case 27:
                 finish(mc);
                 break;
             default: break;
@@ -254,6 +299,52 @@ public class SelfTest {
             p.setCurrentItemOrArmor(0, new ItemStack(Items.diamond_sword));
             p.setCurrentItemOrArmor(3, peito);
             mc.theWorld.addEntityToWorld(-4242 - i, p);
+        }
+    }
+
+    /** Propulsão com "Tirar o zoom da tela ao correr": correndo, o FOV fica 1 (sem a opção, aumenta). */
+    private void testarFov(Minecraft mc) {
+        BoolSetting semZoom = null;
+        for (Setting s : PulsarClient.get().mod("propulsao").settings()) if (s.key().equals("sem_zoom")) semZoom = (BoolSetting) s;
+        if (semZoom == null) {
+            log("fov-falhou");
+            return;
+        }
+        boolean antes = semZoom.get();
+        boolean correndo = mc.thePlayer.isSprinting();
+        mc.thePlayer.setSprinting(true);
+        semZoom.set(false);
+        float normal = mc.thePlayer.getFovModifier();
+        semZoom.set(true);
+        float fixo = mc.thePlayer.getFovModifier();
+        semZoom.set(antes);
+        mc.thePlayer.setSprinting(correndo);
+        System.out.println("[Pulsar] FOV correndo: normal " + normal + ", sem zoom " + fixo);
+        log(normal > 1.01f && Math.abs(fixo - 1f) < 0.001f ? "fov-ok" : "fov-falhou");
+    }
+
+    /** Três molduras com itens (espada encantada, bússola e maçã dourada) à direita, para o Motor desenhar no modo leve. */
+    private void spawnMolduras(Minecraft mc) {
+        ItemStack espada = new ItemStack(Items.diamond_sword);
+        espada.addEnchantment(Enchantment.sharpness, 2);
+        ItemStack[] itens = {espada, new ItemStack(Items.compass), new ItemStack(Items.golden_apple)};
+        int bx = (int) Math.floor(mc.thePlayer.posX), by = (int) Math.floor(mc.thePlayer.posY) + 1, bz = (int) Math.floor(mc.thePlayer.posZ);
+        for (int i = 0; i < itens.length; i++) {
+            // O jogador olha para o sul (+Z): a moldura fica de frente para ele, presa no bloco de trás.
+            EntityItemFrame m = new EntityItemFrame(mc.theWorld, new BlockPos(bx - 2 - i, by, bz + 5), EnumFacing.NORTH);
+            m.setDisplayedItem(itens[i]);
+            mc.theWorld.addEntityToWorld(-5000 - i, m);
+        }
+    }
+
+    /** Uma pilha de flechas, uma espada e um bloco no chão, a 2 blocos do jogador. */
+    private void spawnItens(Minecraft mc) {
+        ItemStack[] itens = {new ItemStack(Items.arrow, 64), new ItemStack(Items.diamond_sword), new ItemStack(Blocks.gold_block, 5)};
+        for (int i = 0; i < itens.length; i++) {
+            EntityItem e = new EntityItem(mc.theWorld, mc.thePlayer.posX - 1 + i, mc.thePlayer.posY, mc.thePlayer.posZ + 2, itens[i]);
+            e.motionX = e.motionY = e.motionZ = 0;
+            e.setInfinitePickupDelay();
+            mc.theWorld.addEntityToWorld(-6000 - i, e);
         }
     }
 

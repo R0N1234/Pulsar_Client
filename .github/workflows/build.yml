@@ -43,6 +43,16 @@ jobs:
         with:
           name: pulsar-mod
           path: mod/build/libs/pulsar-client-*.jar
+      - name: Versão anterior do mod (aba Versões do launcher)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: .github/scripts/anterior.sh "$(grep -oP 'VERSION = "\K[^"]+' mod/src/main/java/dev/pulsarclient/PulsarClient.java)"
+      - uses: actions/upload-artifact@v5
+        with:
+          name: pulsar-mod-anterior
+          path: mod/build/anterior/pulsar-client-*.jar
+          if-no-files-found: ignore
       - name: Assinaturas da API do Minecraft para consulta (ramo ci-api)
         if: always()
         shell: bash
@@ -78,6 +88,11 @@ jobs:
         with:
           name: pulsar-mod
           path: mod/build/libs
+      - uses: actions/download-artifact@v5
+        continue-on-error: true
+        with:
+          name: pulsar-mod-anterior
+          path: mod/build/anterior
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -124,6 +139,11 @@ jobs:
         with:
           name: pulsar-mod
           path: mod/build/libs
+      - uses: actions/download-artifact@v5
+        continue-on-error: true
+        with:
+          name: pulsar-mod-anterior
+          path: mod/build/anterior
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -171,7 +191,10 @@ jobs:
             $p = Start-Process -FilePath $exe -Wait -PassThru -RedirectStandardOutput (Join-Path $prints "launcher.log") -RedirectStandardError (Join-Path $prints "launcher-erros.log")
             Remove-Item Env:PULSAR_PRINTS
             Anotar "launcher: código $($p.ExitCode)"
-            foreach ($aba in "inicio", "mods", "seus-mods", "texturas", "texturas-usando", "ajustes", "atualizacao") {
+            Get-Content (Join-Path $prints "launcher.log") -ErrorAction SilentlyContinue | Select-String "\[prints\] (versões|escolhida|depois)" | ForEach-Object { Anotar $_.Line }
+            $vl = Get-Content (Join-Path $prints "launcher.log") -Raw -ErrorAction SilentlyContinue
+            if ($vl -notmatch "escolhida: anterior" -or $vl -notmatch "depois de voltar: atual") { $falhas += "aba Versões" }
+            foreach ($aba in "inicio", "mods", "seus-mods", "texturas", "texturas-usando", "versoes", "versoes-anterior", "inicio-anterior", "ajustes", "atualizacao") {
               if (-not (Test-Path (Join-Path $prints "launcher-$aba.png"))) { $falhas += "print $aba" }
             }
 
