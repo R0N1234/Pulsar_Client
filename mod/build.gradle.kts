@@ -8,7 +8,8 @@ plugins {
 }
 
 group = "dev.pulsarclient"
-version = "0.6.0"
+// A versão vem do PulsarClient.VERSION, para o nome do jar (pulsar-client-X.jar) bater com o mod.
+version = Regex("VERSION = \"([^\"]+)\"").find(file("src/main/java/dev/pulsarclient/PulsarClient.java").readText())!!.groupValues[1]
 
 base {
     archivesName.set("pulsar-client")

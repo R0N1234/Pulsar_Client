@@ -10,9 +10,16 @@ TAG=$(gh release list --limit 30 --json tagName,isDraft,isPrerelease \
   -q "[.[] | select((.isDraft or .isPrerelease) | not) | .tagName | select(. != \"v$ATUAL\")][0] // \"\"")
 if [ -z "$TAG" ]; then echo "Nenhuma versão anterior lançada."; exit 0; fi
 echo "Versão anterior: $TAG"
+# Até a 0.7.2 o jar saía sempre como pulsar-client-0.6.0.jar: o nome passa a ser o da versão da tag.
+renomear() {
+  local jar
+  jar=$(ls "$DEST"/pulsar-client-*.jar | head -1)
+  [ "$jar" = "$DEST/pulsar-client-${TAG#v}.jar" ] || mv "$jar" "$DEST/pulsar-client-${TAG#v}.jar"
+  ls -la "$DEST"
+}
 if gh release download "$TAG" -p "pulsar-client-*.jar" -D "$DEST" --clobber 2>/dev/null && ls "$DEST"/pulsar-client-*.jar >/dev/null 2>&1; then
   find "$DEST" -name "*-sources.jar" -o -name "*-dev.jar" | xargs -r rm -f
-  ls -la "$DEST"; exit 0
+  renomear; exit 0
 fi
 echo "O Release $TAG não tem o jar do mod; compilando pela tag."
 git fetch -q --depth 1 origin "refs/tags/$TAG:refs/tags/$TAG"
@@ -23,4 +30,4 @@ for f in /tmp/pulsar-anterior/mod/build/libs/pulsar-client-*.jar; do
   case "$f" in *-sources.jar|*-dev.jar) ;; *) cp "$f" "$DEST/" ;; esac
 done
 git worktree remove --force /tmp/pulsar-anterior
-ls -la "$DEST"
+renomear
