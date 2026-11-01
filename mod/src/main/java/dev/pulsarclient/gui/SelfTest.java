@@ -162,6 +162,10 @@ public class SelfTest {
                 testarFov(mc);
                 // Cedo, para dar tempo de os chunks serem montados de novo antes da conferência (passo 18).
                 montarBlocos(mc);
+                // Câmera um pouco fora do eixo: olhando exatamente para o sul, a conta do campo de visão do jogo
+                // puro (caixa infinita x 0) dá NaN e as placas somem do quadro, um defeito do Minecraft.
+                mc.thePlayer.rotationYaw += 4f;
+                mc.thePlayer.rotationPitch = 3f;
                 break;
             case 3:
                 PulsarClient.get().orbita().forceView(true, 150f);
@@ -241,8 +245,6 @@ public class SelfTest {
                 break;
             case 18:
                 // Um boneco perto (completo) e um longe (otimizado pelo Motor).
-                System.out.println("[Pulsar] Bonecos: " + PulsarClient.get().motor().jogadoresVistos() + " desenhos de jogador, " + PulsarClient.get().motor().simplifiedPlayers() + " simplificados");
-                log(PulsarClient.get().motor().simplifiedPlayers() > 0 ? "bonecos" : "bonecos-falhou");
                 System.out.println("[Pulsar] Molduras leves desenhadas: " + MolduraLeve.desenhadas());
                 log(MolduraLeve.desenhadas() > 0 ? "molduras-ok" : "molduras-falhou");
                 System.out.println("[Pulsar] Blocos fora dos chunks: " + MotorHooks.skippedBlocks + ", placas sem texto: " + PlacaLeve.semTexto());
@@ -273,6 +275,9 @@ public class SelfTest {
                 break;
             case 22:
                 log(GravidadeItens.desenhados() > 0 ? "itens" : "itens-falhou");
+                // Bonecos conferidos só aqui: com o OptiFine o boneco longe às vezes demora alguns quadros para aparecer.
+                System.out.println("[Pulsar] Bonecos: " + PulsarClient.get().motor().jogadoresVistos() + " desenhos de jogador, " + PulsarClient.get().motor().simplifiedPlayers() + " simplificados");
+                log(PulsarClient.get().motor().simplifiedPlayers() > 0 ? "bonecos" : "bonecos-falhou");
                 break;
             case 23:
                 // Nebulosa: o menu do ESC com o mundo desfocado atrás.
