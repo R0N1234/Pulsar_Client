@@ -21,12 +21,12 @@ import org.lwjgl.input.Keyboard;
  * - Blockhit levanta a espada por alguns ticks logo depois do hit (o mesmo que apertar o botão direito).
  *
  * Tudo é feito pelas teclas do próprio jogo (correr e usar item), então o cliente e o servidor ficam de acordo
- * sobre quando você está correndo ou bloqueando. Cada parte tem a sua tecla (F5 e F6 no começo) e
- * pode ser trocada no painel do mod ou em Opções > Controles.
+ * sobre quando você está correndo ou bloqueando. Cada parte pode ter a sua tecla (nenhuma no começo), escolhida
+ * no painel do mod ou em Opções > Controles.
  */
 public class WTapBlockhit extends PulsarMod {
-    public final KeyBinding wtapKey = new KeyBinding("Ligar/desligar W-Tap", Keyboard.KEY_F5, "Pulsar Client");
-    public final KeyBinding blockhitKey = new KeyBinding("Ligar/desligar Blockhit", Keyboard.KEY_F6, "Pulsar Client");
+    public final KeyBinding wtapKey = new KeyBinding("Ligar/desligar W-Tap", Keyboard.KEY_NONE, "Pulsar Client");
+    public final KeyBinding blockhitKey = new KeyBinding("Ligar/desligar Blockhit", Keyboard.KEY_NONE, "Pulsar Client");
 
     private final BoolSetting wtap = add(new BoolSetting("wtap", "W-Tap", true));
     private final SliderSetting wtapTicks = add(new SliderSetting("wtap_ticks", "Tempo sem correr", 1, 1, 5, 1, " tick"));
