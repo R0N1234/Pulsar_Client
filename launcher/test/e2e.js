@@ -55,6 +55,8 @@ const REQUIRED = [
 ];
 // Com E2E_REDE=<endereço> (wrangler dev no CI), o jogo também conversa com a rede do Pulsar (ícone, nível e amigos).
 const REDE = process.env.E2E_REDE || "";
+// Com E2E_OPTIFINE (caminho do jar do OptiFine 1.8.9), o jogo abre no modo Forge + OptiFine, igual ao de muita gente.
+const OPTIFINE = process.env.E2E_OPTIFINE ? path.resolve(process.env.E2E_OPTIFINE) : "";
 if (REDE) {
   REQUIRED.push([/Rede: conectado como \w+ \(offline\)/, "rede do Pulsar respondendo (conta offline)"]);
   REQUIRED.push([/selftest: amigos/, "tela de Amigos"]);
@@ -166,7 +168,7 @@ setTimeout(() => finish(1, `FALHOU: tempo esgotado (pulsar=${pulsarLoaded}, jogo
       : null;
     const bridgeArgs = bridge ? [`-Dpulsar.ponte=${bridge.port}`, `-Dpulsar.chave=${bridge.key}`] : [];
     proc = await launch({
-      config: { gameDir: path.join(work, "minecraft"), memoryMaxGb: 2, javaPath: process.env.E2E_JAVA || "", loader: "forge", optifinePath: "" },
+      config: { gameDir: path.join(work, "minecraft"), memoryMaxGb: 2, javaPath: process.env.E2E_JAVA || "", loader: OPTIFINE ? "forge_optifine" : "forge", optifinePath: OPTIFINE },
       authorization: Authenticator.getAuth("PulsarTeste"),
       modSourceDir: path.resolve(__dirname, "..", "..", "mod", "build", "libs"),
       runtimeDir: path.join(work, "runtime"),
