@@ -1,5 +1,12 @@
 package dev.pulsarclient.gui;
 
+import dev.pulsarclient.mods.PlacaLeve;
+import dev.pulsarclient.core.MotorHooks;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.block.BlockTallGrass;
+import net.minecraft.block.BlockStandingSign;
 import dev.pulsarclient.PulsarClient;
 import dev.pulsarclient.hud.GuiHudEditor;
 import dev.pulsarclient.mods.Category;
@@ -223,6 +230,7 @@ public class SelfTest {
                 log(voltou ? "zoom-ok" : "zoom-falhou");
                 spawnBonecos(mc);
                 spawnMolduras(mc);
+                montarBlocos(mc);
                 // Com a rede no ar: os bonecos viram usuários do Pulsar (ícone PC e nível no nome) e chegam amigos de mentira.
                 if (Rede.noAr()) {
                     List<UUID> bonecos = new ArrayList<UUID>();
@@ -232,9 +240,13 @@ public class SelfTest {
                 break;
             case 18:
                 // Um boneco perto (completo) e um longe (otimizado pelo Motor).
+                System.out.println("[Pulsar] Bonecos: " + PulsarClient.get().motor().jogadoresVistos() + " desenhos de jogador, " + PulsarClient.get().motor().simplifiedPlayers() + " simplificados");
                 log(PulsarClient.get().motor().simplifiedPlayers() > 0 ? "bonecos" : "bonecos-falhou");
                 System.out.println("[Pulsar] Molduras leves desenhadas: " + MolduraLeve.desenhadas());
                 log(MolduraLeve.desenhadas() > 0 ? "molduras-ok" : "molduras-falhou");
+                System.out.println("[Pulsar] Blocos fora dos chunks: " + MotorHooks.skippedBlocks + ", placas sem texto: " + PlacaLeve.semTexto());
+                log(MotorHooks.skippedBlocks > 0 ? "plantas-ok" : "plantas-falhou");
+                log(PlacaLeve.semTexto() > 0 ? "placas-ok" : "placas-falhou");
                 PulsarClient.get().mod("rastro_cometa").setEnabled(true);
                 // Rádio Pulsar: o jogo pede para o launcher tocar (o e2e confere o pedido na ponte).
                 PulsarClient.get().mod("radio_pulsar").setEnabled(true);
@@ -334,6 +346,27 @@ public class SelfTest {
             EntityItemFrame m = new EntityItemFrame(mc.theWorld, new BlockPos(bx - 2 - i, by, bz + 5), EnumFacing.NORTH);
             m.setDisplayedItem(itens[i]);
             mc.theWorld.addEntityToWorld(-5000 - i, m);
+        }
+    }
+
+    /**
+     * Blocos do Motor: grama alta e flores à direita (no Desempenho saem da montagem dos chunks)
+     * e uma placa com texto a 24 blocos (longe demais para o texto, perto o bastante para a placa).
+     * Só no mundo do cliente, para não depender do servidor mandar a mudança.
+     */
+    private void montarBlocos(Minecraft mc) {
+        int bx = (int) Math.floor(mc.thePlayer.posX), by = (int) Math.floor(mc.thePlayer.posY), bz = (int) Math.floor(mc.thePlayer.posZ);
+        mc.theWorld.setBlockState(new BlockPos(bx + 2, by, bz + 3), Blocks.tallgrass.getDefaultState().withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS));
+        mc.theWorld.setBlockState(new BlockPos(bx + 3, by, bz + 3), Blocks.red_flower.getDefaultState());
+        mc.theWorld.setBlockState(new BlockPos(bx + 4, by, bz + 3), Blocks.yellow_flower.getDefaultState());
+        BlockPos placa = new BlockPos(bx, by, bz + 24);
+        mc.theWorld.setBlockState(placa, Blocks.standing_sign.getDefaultState().withProperty(BlockStandingSign.ROTATION, 8));
+        TileEntity te = mc.theWorld.getTileEntity(placa);
+        if (te instanceof TileEntitySign) {
+            ((TileEntitySign) te).signText[0] = new ChatComponentText("Pulsar");
+            ((TileEntitySign) te).signText[1] = new ChatComponentText("Client");
+        } else {
+            System.out.println("[Pulsar] selftest: placa sem bloco de placa (" + te + ")");
         }
     }
 

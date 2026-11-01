@@ -1,5 +1,6 @@
 package dev.pulsarclient.core;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
@@ -13,10 +14,15 @@ public final class MotorHooks {
     public interface EntityFilter { boolean shouldRender(Entity entity); }
     public interface TileFilter { boolean shouldRender(TileEntity tile); }
     public interface ParticleFilter { boolean allow(EntityFX particle); }
+    /** Chamado nas threads que montam os chunks: só pode ler valores prontos, nada de mexer no mundo. */
+    public interface BlockFilter { boolean shouldRender(IBlockState state); }
 
     public static volatile EntityFilter entities;
     public static volatile TileFilter tiles;
     public static volatile ParticleFilter particles;
+    public static volatile BlockFilter blocks;
+    /** Quantos blocos o Motor deixou de montar (teste automático). */
+    public static volatile long skippedBlocks;
     public static volatile boolean animations = true;
     /** Partículas novas por tick; 0 = sem limite. */
     public static volatile int particleLimit;
@@ -45,6 +51,20 @@ public final class MotorHooks {
         } catch (Throwable t) {
             tiles = null;
             System.err.println("[Pulsar] Motor: filtro de blocos especiais desligado por erro: " + t);
+            return true;
+        }
+    }
+
+    public static boolean shouldRenderBlock(IBlockState state) {
+        BlockFilter f = blocks;
+        if (f == null || state == null) return true;
+        try {
+            if (f.shouldRender(state)) return true;
+            skippedBlocks++;
+            return false;
+        } catch (Throwable t) {
+            blocks = null;
+            System.err.println("[Pulsar] Motor: filtro de blocos desligado por erro: " + t);
             return true;
         }
     }

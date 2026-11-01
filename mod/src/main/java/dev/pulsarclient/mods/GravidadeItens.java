@@ -28,7 +28,7 @@ import java.util.Random;
  */
 public class GravidadeItens extends PulsarMod {
     private final BoolSetting girarNoAr = add(new BoolSetting("girar_no_ar", "Girar enquanto cai", true));
-    private boolean instalado;
+    private boolean falhou;
     private static long desenhados;
 
     public GravidadeItens() {
@@ -40,16 +40,23 @@ public class GravidadeItens extends PulsarMod {
         return desenhados;
     }
 
+    private Map<Class<? extends Entity>, Render<? extends Entity>> mapa;
+    private Desenho desenho;
+    private int vezes;
+
+    /** Confere a cada tick: o OptiFine (modelos de entidade) devolve o desenho original quando o pacote de texturas muda. */
     @SubscribeEvent
     @SuppressWarnings("unchecked")
     public void onTick(TickEvent.ClientTickEvent event) {
-        if (instalado || event.phase != TickEvent.Phase.END || mc.getRenderManager() == null || mc.getRenderItem() == null) return;
-        instalado = true;
+        if (falhou || event.phase != TickEvent.Phase.END || mc.getRenderManager() == null || mc.getRenderItem() == null) return;
         try {
-            Map<Class<? extends Entity>, Render<? extends Entity>> mapa = ReflectionHelper.getPrivateValue(RenderManager.class, mc.getRenderManager(), "entityRenderMap", "field_78729_o");
-            mapa.put(EntityItem.class, new Desenho(mc.getRenderManager(), mc.getRenderItem()));
-            System.out.println("[Pulsar] Gravidade de Itens: instalada");
+            if (mapa == null) mapa = ReflectionHelper.getPrivateValue(RenderManager.class, mc.getRenderManager(), "entityRenderMap", "field_78729_o");
+            if (mapa.get(EntityItem.class) instanceof Desenho) return;
+            if (desenho == null) desenho = new Desenho(mc.getRenderManager(), mc.getRenderItem());
+            mapa.put(EntityItem.class, desenho);
+            System.out.println("[Pulsar] Gravidade de Itens: " + (vezes++ == 0 ? "instalada" : "instalada de novo (o desenho original tinha voltado)"));
         } catch (Throwable t) {
+            falhou = true;
             System.out.println("[Pulsar] Gravidade de Itens: não instalada (" + t + ")");
         }
     }

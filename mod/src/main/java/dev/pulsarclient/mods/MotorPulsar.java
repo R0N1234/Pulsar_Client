@@ -8,6 +8,12 @@ import dev.pulsarclient.settings.BoolSetting;
 import dev.pulsarclient.settings.ModeSetting;
 import dev.pulsarclient.settings.SliderSetting;
 import dev.pulsarclient.settings.TextSetting;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockDeadBush;
+import net.minecraft.block.BlockDoublePlant;
+import net.minecraft.block.BlockFlower;
+import net.minecraft.block.BlockTallGrass;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.multiplayer.WorldClient;
@@ -21,6 +27,8 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
@@ -32,6 +40,7 @@ import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraftforge.client.IRenderHandler;
@@ -73,6 +82,10 @@ public class MotorPulsar extends PulsarMod {
     private final SliderSetting mobDistance = add(new SliderSetting("mobs_dist", "Distância dos mobs", 32, 16, 128, 8, " blocos"));
     private final SliderSetting itemDistance = add(new SliderSetting("itens_dist", "Itens no chão, flechas e XP até", 24, 8, 64, 4, " blocos"));
     private final SliderSetting tileDistance = add(new SliderSetting("blocos_dist", "Baús, placas e cabeças até", 32, 16, 64, 4, " blocos"));
+    // Blocos: o que sai da montagem dos chunks e o que deixa de ser desenhado a cada quadro.
+    private final BoolSetting plants = add(new BoolSetting("plantas", "Grama alta e flores", false));
+    private final BoolSetting tileOcclusion = add(new BoolSetting("blocos_oclusao", "Baús e cabeças atrás de paredes não são desenhados", true));
+    private final SliderSetting signText = add(new SliderSetting("placas_texto", "Texto das placas até", 16, 8, 64, 4, " blocos"));
     // Molduras (item frames) com itens pesam muito: no modo leve a moldura vira uma lista pronta e o item sai sem brilho nem animação.
     private final BoolSetting framesLeves = add(new BoolSetting("molduras", "Molduras leves (itens sem brilho e sem animação)", true));
     private final SliderSetting framesDistance = add(new SliderSetting("molduras_dist", "Molduras e itens nelas até", 24, 8, 64, 4, " blocos"));
@@ -90,6 +103,7 @@ public class MotorPulsar extends PulsarMod {
     private final BoolSetting ownPotions = add(new BoolSetting("pocoes", "Esconder partículas das suas poções", true));
     private final TextSetting profileVersion = add(new TextSetting("perfil_versao", ""));
     private final TextSetting framesVersion = add(new TextSetting("molduras_versao", ""));
+    private final TextSetting blocksVersion = add(new TextSetting("blocos_versao", ""));
     private final ActionSetting freeMemory = add(new ActionSetting("memoria", "Liberar memória agora", new Runnable() {
         @Override public void run() { System.gc(); }
     }));
@@ -97,6 +111,9 @@ public class MotorPulsar extends PulsarMod {
     private final Oclusao oclusao = new Oclusao();
     private final Bonecos bonecos = new Bonecos();
     private int appliedParticles = -1;
+    /** Lido pelas threads que montam os chunks. */
+    private volatile boolean hidePlants;
+    private Boolean appliedPlants;
     private World lastWorld;
 
     /** Céu e clima vazios: no lugar do céu fica só a cor do horizonte, sem sol, lua, estrelas nem chuva. */
@@ -115,30 +132,62 @@ public class MotorPulsar extends PulsarMod {
         MotorHooks.particles = new MotorHooks.ParticleFilter() {
             @Override public boolean allow(EntityFX particle) { return allowParticle(particle); }
         };
+        MotorHooks.blocks = new MotorHooks.BlockFilter() {
+            @Override public boolean shouldRender(IBlockState state) { return shouldDraw(state); }
+        };
+        PlacaLeve.usar(new PlacaLeve.Regra() {
+            @Override public int distanciaTexto() { return isEnabled() ? signText.getInt() : 0; }
+        });
         MolduraLeve.usar(new MolduraLeve.Regra() {
             @Override public boolean leve() { return isEnabled() && framesLeves.get(); }
         });
     }
 
-    private boolean molduraInstalada;
+    private boolean molduraFalhou, placaFalhou;
+    private Map<Class<? extends Entity>, Render<? extends Entity>> mapaEntidades;
+    private MolduraLeve moldura;
+    private PlacaLeve placa;
+    private int vezesMoldura, vezesPlaca;
 
-    /** Troca o desenho das molduras pelo do Motor (que usa o do Minecraft quando a opção está desligada). */
+    /**
+     * Troca o desenho das molduras e das placas pelo do Motor (que usa o do Minecraft quando a opção está desligada).
+     * Confere a cada tick: o OptiFine (modelos de entidade) devolve o desenho original quando o pacote de texturas muda.
+     */
     @SuppressWarnings("unchecked")
     private void instalarMolduras() {
-        if (molduraInstalada || mc.getRenderManager() == null || mc.getRenderItem() == null) return;
-        molduraInstalada = true;
-        try {
-            Map<Class<? extends Entity>, Render<? extends Entity>> mapa = ReflectionHelper.getPrivateValue(RenderManager.class, mc.getRenderManager(), "entityRenderMap", "field_78729_o");
-            mapa.put(EntityItemFrame.class, new MolduraLeve(mc.getRenderManager(), mc.getRenderItem()));
-            System.out.println("[Pulsar] Motor: molduras leves instaladas");
-        } catch (Throwable t) {
-            System.out.println("[Pulsar] Motor: molduras leves indisponíveis (" + t + ")");
+        if (mc.getRenderManager() == null || mc.getRenderItem() == null) return;
+        if (!molduraFalhou) {
+            try {
+                if (mapaEntidades == null) mapaEntidades = ReflectionHelper.getPrivateValue(RenderManager.class, mc.getRenderManager(), "entityRenderMap", "field_78729_o");
+                if (!(mapaEntidades.get(EntityItemFrame.class) instanceof MolduraLeve)) {
+                    if (moldura == null) moldura = new MolduraLeve(mc.getRenderManager(), mc.getRenderItem());
+                    mapaEntidades.put(EntityItemFrame.class, moldura);
+                    System.out.println("[Pulsar] Motor: molduras leves " + (vezesMoldura++ == 0 ? "instaladas" : "instaladas de novo (o desenho original tinha voltado)"));
+                }
+            } catch (Throwable t) {
+                molduraFalhou = true;
+                System.out.println("[Pulsar] Motor: molduras leves indisponíveis (" + t + ")");
+            }
+        }
+        if (!placaFalhou) {
+            try {
+                Map<Class<? extends TileEntity>, TileEntitySpecialRenderer<? extends TileEntity>> mapa = TileEntityRendererDispatcher.instance.mapSpecialRenderers;
+                if (!(mapa.get(TileEntitySign.class) instanceof PlacaLeve)) {
+                    if (placa == null) placa = new PlacaLeve();
+                    placa.setRendererDispatcher(TileEntityRendererDispatcher.instance);
+                    mapa.put(TileEntitySign.class, placa);
+                    System.out.println("[Pulsar] Motor: placas leves " + (vezesPlaca++ == 0 ? "instaladas" : "instaladas de novo (o desenho original tinha voltado)"));
+                }
+            } catch (Throwable t) {
+                placaFalhou = true;
+                System.out.println("[Pulsar] Motor: placas leves indisponíveis (" + t + ")");
+            }
         }
     }
 
     /** Estado dos ganchos, para o painel e o log. */
     public static String hooksSummary() {
-        return "entidades=" + MotorFlags.entities + " blocos=" + MotorFlags.tiles
+        return "entidades=" + MotorFlags.entities + " baús=" + MotorFlags.tiles + " blocos=" + MotorFlags.blocks
                 + " animações=" + MotorFlags.animations + " partículas=" + MotorFlags.particles;
     }
 
@@ -168,6 +217,16 @@ public class MotorPulsar extends PulsarMod {
             framesDistance.set(p == 0 ? 16 : p == 1 ? 32 : 64);
             PulsarClient.get().save();
         }
+        if (blocksVersion.get().isEmpty()) {
+            // Primeira vez com as opções de blocos (0.7.3): seguem o perfil que a pessoa já usa.
+            blocksVersion.set("0.7.3");
+            int p = profile.index();
+            plants.set(p > 0);
+            tileOcclusion.set(true);
+            signText.set(p == 0 ? 16 : p == 1 ? 24 : 48);
+            PulsarClient.get().save();
+        }
+        updatePlants();
         updateSky();
         if (!isEnabled()) return;
         // Só aplica quando a opção do Motor muda, para não brigar com a opção de partículas do jogo.
@@ -175,6 +234,30 @@ public class MotorPulsar extends PulsarMod {
             appliedParticles = particles.index();
             mc.gameSettings.particleSetting = appliedParticles;
         }
+    }
+
+    // ---------- blocos ----------
+
+    /** Grama alta e flores: mudou a opção, os chunks são montados de novo (uma vez só). */
+    private void updatePlants() {
+        boolean hide = isEnabled() && !plants.get();
+        hidePlants = hide;
+        if (appliedPlants == null) {
+            appliedPlants = hide;
+            if (hide) System.out.println("[Pulsar] Motor: grama alta e flores fora dos chunks");
+            return;
+        }
+        if (appliedPlants == hide) return;
+        appliedPlants = hide;
+        System.out.println("[Pulsar] Motor: grama alta e flores " + (hide ? "fora dos chunks" : "de volta"));
+        if (mc.renderGlobal != null && mc.theWorld != null) mc.renderGlobal.loadRenderers();
+    }
+
+    /** Roda nas threads que montam os chunks: só olha o tipo do bloco. */
+    private boolean shouldDraw(IBlockState state) {
+        if (!hidePlants) return true;
+        Block b = state.getBlock();
+        return !(b instanceof BlockTallGrass || b instanceof BlockDoublePlant || b instanceof BlockFlower || b instanceof BlockDeadBush);
     }
 
     // ---------- céu e clima ----------
@@ -279,7 +362,8 @@ public class MotorPulsar extends PulsarMod {
         Entity view = mc.getRenderViewEntity();
         if (view == null) return true;
         double max = tileDistance.get();
-        return t.getDistanceSq(view.posX, view.posY, view.posZ) <= max * max;
+        if (t.getDistanceSq(view.posX, view.posY, view.posZ) > max * max) return false;
+        return !(tileOcclusion.get() && mc.theWorld != null && mc.gameSettings.thirdPersonView == 0 && oclusao.hidden(mc.theWorld, view.getPositionEyes(1f), t));
     }
 
     /** Sem o gancho de entidades (por exemplo, com outro mod mexendo no mesmo lugar), o evento do Forge faz o serviço. */
@@ -301,6 +385,7 @@ public class MotorPulsar extends PulsarMod {
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onPlayerPre(RenderLivingEvent.Pre event) {
         bonecos.restore();
+        if (event.entity instanceof AbstractClientPlayer) jogadoresVistos++;
         Entity view = mc.getRenderViewEntity();
         if (!isEnabled() || !players.get() || !(event.entity instanceof AbstractClientPlayer) || view == null || event.entity == view) return;
         double d = playerDetail.get();
@@ -311,6 +396,13 @@ public class MotorPulsar extends PulsarMod {
     @SubscribeEvent
     public void onPlayerPost(RenderLivingEvent.Post event) {
         bonecos.restore();
+    }
+
+    private long jogadoresVistos;
+
+    /** Quantos jogadores passaram pelo evento de desenho (teste automático). */
+    public long jogadoresVistos() {
+        return jogadoresVistos;
     }
 
     /** Quantos bonecos já saíram simplificados (teste automático). */
@@ -356,6 +448,11 @@ public class MotorPulsar extends PulsarMod {
         mobDistance.set(p == 0 ? 32 : p == 1 ? 48 : 96);
         itemDistance.set(p == 0 ? 24 : p == 1 ? 32 : 64);
         tileDistance.set(p == 0 ? 32 : p == 1 ? 48 : 64);
+        plants.set(p > 0);
+        tileOcclusion.set(true);
+        signText.set(p == 0 ? 16 : p == 1 ? 24 : 48);
+        hidePlants = isEnabled() && !plants.get();
+        appliedPlants = hidePlants;
         framesLeves.set(p < 2);
         framesDistance.set(p == 0 ? 16 : p == 1 ? 32 : 64);
         players.set(true);

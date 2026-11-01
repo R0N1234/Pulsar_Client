@@ -117,10 +117,19 @@ public class GanchosTransformer implements IClassTransformer {
             alvo.instructions.remove(i2f);
             Ganchos.ganchoAvanco = true;
             System.out.println("[Pulsar] Fonte: espaçamento com fração instalado (" + alvo.name + ")");
+        } else if (casts.isEmpty() && temCampo(node, "charWidthFloat")) {
+            // O FontRenderer do OptiFine já anda com fração (posX += largura, sem arredondar).
+            Ganchos.ganchoAvanco = true;
+            System.out.println("[Pulsar] Fonte: espaçamento com fração instalado (OptiFine já usa fração)");
         } else {
             System.err.println("[Pulsar] Fonte: espaçamento com fração não instalado (" + casts.size() + " conversões)");
         }
         return true;
+    }
+
+    private static boolean temCampo(ClassNode node, String nome) {
+        for (FieldNode f : node.fields) if (f.name.equals(nome)) return true;
+        return false;
     }
 
     /** ALOAD this; posX; posY; arg1; arg2; INVOKESTATIC; se >= 0 retorna, senão segue o método original. */

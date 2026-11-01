@@ -1,6 +1,7 @@
 package dev.pulsarclient.mods;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
@@ -22,6 +23,7 @@ final class Oclusao {
     private static final double NEAR = 3;
 
     private final Map<Integer, int[]> cache = new HashMap<Integer, int[]>();
+    private final Map<Long, int[]> tiles = new HashMap<Long, int[]>();
     private int ticks;
 
     void tick() {
@@ -30,10 +32,26 @@ final class Oclusao {
         for (Iterator<int[]> it = cache.values().iterator(); it.hasNext(); ) {
             if (ticks - it.next()[0] > 200) it.remove();
         }
+        for (Iterator<int[]> it = tiles.values().iterator(); it.hasNext(); ) {
+            if (ticks - it.next()[0] > 200) it.remove();
+        }
     }
 
     void clear() {
         cache.clear();
+        tiles.clear();
+    }
+
+    /** Baús, placas, cabeças, banners: escondidos atrás de paredes também não são desenhados. */
+    boolean hidden(World world, Vec3 eye, TileEntity tile) {
+        long key = tile.getPos().toLong();
+        int[] entry = tiles.get(key);
+        if (entry != null && ticks - entry[0] < RECHECK_TICKS) return entry[1] == 1;
+        AxisAlignedBB box = tile.getRenderBoundingBox();
+        // Caixa gigante (farol, por exemplo) ou sem caixa: sempre desenha.
+        boolean hidden = box != null && box.maxX - box.minX < 4 && box.maxY - box.minY < 4 && box.maxZ - box.minZ < 4 && compute(world, eye, box);
+        tiles.put(key, new int[]{ticks, hidden ? 1 : 0});
+        return hidden;
     }
 
     boolean hidden(World world, Vec3 eye, Entity entity) {
@@ -45,7 +63,10 @@ final class Oclusao {
     }
 
     private static boolean compute(World world, Vec3 eye, Entity entity) {
-        AxisAlignedBB box = entity.getEntityBoundingBox();
+        return compute(world, eye, entity.getEntityBoundingBox());
+    }
+
+    private static boolean compute(World world, Vec3 eye, AxisAlignedBB box) {
         double cx = (box.minX + box.maxX) / 2;
         double cz = (box.minZ + box.maxZ) / 2;
         Vec3 center = new Vec3(cx, (box.minY + box.maxY) / 2, cz);

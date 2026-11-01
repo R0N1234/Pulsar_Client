@@ -6,6 +6,7 @@ public final class MotorFlags {
     public static volatile boolean tiles;
     public static volatile boolean animations;
     public static volatile boolean particles;
+    public static volatile boolean blocks;
 
     private MotorFlags() {}
 
@@ -14,5 +15,6 @@ public final class MotorFlags {
         else if (label.equals("blocos especiais")) tiles = true;
         else if (label.equals("animações")) animations = true;
         else if (label.equals("partículas")) particles = true;
+        else if (label.equals("blocos")) blocks = true;
     }
 }
