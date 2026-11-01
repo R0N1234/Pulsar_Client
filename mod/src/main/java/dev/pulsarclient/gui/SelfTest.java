@@ -277,6 +277,12 @@ public class SelfTest {
                 log(GravidadeItens.desenhados() > 0 ? "itens" : "itens-falhou");
                 // Bonecos conferidos só aqui: com o OptiFine o boneco longe às vezes demora alguns quadros para aparecer.
                 System.out.println("[Pulsar] Bonecos: " + PulsarClient.get().motor().jogadoresVistos() + " desenhos de jogador, " + PulsarClient.get().motor().simplifiedPlayers() + " simplificados");
+                if (PulsarClient.get().motor().simplifiedPlayers() == 0) {
+                    net.minecraft.entity.Entity b2 = mc.theWorld.getEntityByID(-4243);
+                    System.out.println("[Pulsar] Boneco2: " + b2 + (b2 == null ? "" : ", morto " + b2.isDead + ", no mundo " + mc.theWorld.loadedEntityList.contains(b2)
+                            + ", distância " + b2.getDistanceToEntity(mc.thePlayer) + ", motor " + MotorHooks.shouldRenderEntity(b2)
+                            + ", desenho " + mc.getRenderManager().getEntityRenderObject(b2) + ", olho " + mc.thePlayer.getPositionEyes(1f)));
+                }
                 log(PulsarClient.get().motor().simplifiedPlayers() > 0 ? "bonecos" : "bonecos-falhou");
                 break;
             case 23:
