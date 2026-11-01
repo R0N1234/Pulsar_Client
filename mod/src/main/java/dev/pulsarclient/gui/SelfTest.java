@@ -160,6 +160,8 @@ public class SelfTest {
             case 2:
                 log("mundo");
                 testarFov(mc);
+                // Cedo, para dar tempo de os chunks serem montados de novo antes da conferência (passo 18).
+                montarBlocos(mc);
                 break;
             case 3:
                 PulsarClient.get().orbita().forceView(true, 150f);
@@ -230,7 +232,6 @@ public class SelfTest {
                 log(voltou ? "zoom-ok" : "zoom-falhou");
                 spawnBonecos(mc);
                 spawnMolduras(mc);
-                montarBlocos(mc);
                 // Com a rede no ar: os bonecos viram usuários do Pulsar (ícone PC e nível no nome) e chegam amigos de mentira.
                 if (Rede.noAr()) {
                     List<UUID> bonecos = new ArrayList<UUID>();
