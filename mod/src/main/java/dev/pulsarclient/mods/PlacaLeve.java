@@ -19,10 +19,15 @@ public class PlacaLeve extends TileEntitySignRenderer {
 
     private static Regra regra;
     private static long semTexto;
+    private static long chamadas;
     private final IChatComponent[] guardado = new IChatComponent[4];
 
     public static void usar(Regra r) {
         regra = r;
+    }
+
+    public static long chamadas() {
+        return chamadas;
     }
 
     /** Quantas placas já saíram sem texto (teste automático). */
@@ -32,6 +37,7 @@ public class PlacaLeve extends TileEntitySignRenderer {
 
     @Override
     public void renderTileEntityAt(TileEntitySign placa, double x, double y, double z, float partialTicks, int destroyStage) {
+        chamadas++;
         Regra r = regra;
         int max = r == null ? 0 : r.distanciaTexto();
         Entity view = Minecraft.getMinecraft().getRenderViewEntity();

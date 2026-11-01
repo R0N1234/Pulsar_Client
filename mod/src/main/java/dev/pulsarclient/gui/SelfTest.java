@@ -247,6 +247,13 @@ public class SelfTest {
                 log(MolduraLeve.desenhadas() > 0 ? "molduras-ok" : "molduras-falhou");
                 System.out.println("[Pulsar] Blocos fora dos chunks: " + MotorHooks.skippedBlocks + ", placas sem texto: " + PlacaLeve.semTexto());
                 log(MotorHooks.skippedBlocks > 0 ? "plantas-ok" : "plantas-falhou");
+                if (PlacaLeve.semTexto() == 0 && placaTeste != null) {
+                    TileEntity te = mc.theWorld.getTileEntity(placaTeste);
+                    System.out.println("[Pulsar] Placa de teste: bloco " + mc.theWorld.getBlockState(placaTeste) + ", te " + te
+                            + ", desenho " + (te == null ? null : net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher.instance.getSpecialRenderer(te))
+                            + ", caixa " + (te == null ? null : te.getRenderBoundingBox()) + ", motor " + (te == null ? null : MotorHooks.shouldRenderTile(te))
+                            + ", chamadas " + PlacaLeve.chamadas());
+                }
                 log(PlacaLeve.semTexto() > 0 ? "placas-ok" : "placas-falhou");
                 PulsarClient.get().mod("rastro_cometa").setEnabled(true);
                 // Rádio Pulsar: o jogo pede para o launcher tocar (o e2e confere o pedido na ponte).
@@ -355,12 +362,15 @@ public class SelfTest {
      * e uma placa com texto a 24 blocos (longe demais para o texto, perto o bastante para a placa).
      * Só no mundo do cliente, para não depender do servidor mandar a mudança.
      */
+    private BlockPos placaTeste;
+
     private void montarBlocos(Minecraft mc) {
         int bx = (int) Math.floor(mc.thePlayer.posX), by = (int) Math.floor(mc.thePlayer.posY), bz = (int) Math.floor(mc.thePlayer.posZ);
         mc.theWorld.setBlockState(new BlockPos(bx + 2, by, bz + 3), Blocks.tallgrass.getDefaultState().withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS));
         mc.theWorld.setBlockState(new BlockPos(bx + 3, by, bz + 3), Blocks.red_flower.getDefaultState());
         mc.theWorld.setBlockState(new BlockPos(bx + 4, by, bz + 3), Blocks.yellow_flower.getDefaultState());
         BlockPos placa = new BlockPos(bx, by, bz + 24);
+        placaTeste = placa;
         mc.theWorld.setBlockState(placa, Blocks.standing_sign.getDefaultState().withProperty(BlockStandingSign.ROTATION, 8));
         TileEntity te = mc.theWorld.getTileEntity(placa);
         if (te instanceof TileEntitySign) {
