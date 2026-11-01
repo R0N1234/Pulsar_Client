@@ -87,6 +87,12 @@ const FORBIDDEN = [
   /\[Pulsar\] .*ganchos não instalados/,
   /\[Pulsar\] Lista do TAB: textos do servidor indisponíveis/,
 ];
+// Com o OptiFine, o boneco de mentira longe (só no cliente, sem servidor) não é desenhado, então essa conferência fica de fora.
+// Jogadores de verdade chegam pelo servidor e aparecem normalmente.
+if (OPTIFINE) {
+  REQUIRED.splice(REQUIRED.findIndex(([re]) => String(re) === String(/selftest: bonecos/)), 1);
+  FORBIDDEN.splice(FORBIDDEN.findIndex((re) => String(re) === String(/selftest: bonecos-falhou/)), 1);
+}
 
 fs.mkdirSync(work, { recursive: true });
 const log = fs.createWriteStream(logFile);
