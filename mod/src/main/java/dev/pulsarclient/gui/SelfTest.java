@@ -360,7 +360,7 @@ public class SelfTest {
     /**
      * Blocos do Motor: grama alta e flores à direita (no Desempenho saem da montagem dos chunks)
      * e uma placa com texto a 24 blocos (longe demais para o texto, perto o bastante para a placa).
-     * Só no mundo do cliente, para não depender do servidor mandar a mudança.
+     * A grama só no mundo do cliente; a placa pelo servidor.
      */
     private BlockPos placaTeste;
 
@@ -369,16 +369,25 @@ public class SelfTest {
         mc.theWorld.setBlockState(new BlockPos(bx + 2, by, bz + 3), Blocks.tallgrass.getDefaultState().withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS));
         mc.theWorld.setBlockState(new BlockPos(bx + 3, by, bz + 3), Blocks.red_flower.getDefaultState());
         mc.theWorld.setBlockState(new BlockPos(bx + 4, by, bz + 3), Blocks.yellow_flower.getDefaultState());
-        BlockPos placa = new BlockPos(bx, by, bz + 24);
+        final BlockPos placa = new BlockPos(bx, by, bz + 24);
         placaTeste = placa;
-        mc.theWorld.setBlockState(placa, Blocks.standing_sign.getDefaultState().withProperty(BlockStandingSign.ROTATION, 8));
-        TileEntity te = mc.theWorld.getTileEntity(placa);
-        if (te instanceof TileEntitySign) {
-            ((TileEntitySign) te).signText[0] = new ChatComponentText("Pulsar");
-            ((TileEntitySign) te).signText[1] = new ChatComponentText("Client");
-        } else {
-            System.out.println("[Pulsar] selftest: placa sem bloco de placa (" + te + ")");
-        }
+        // A placa vem do servidor, como num servidor de verdade (o bloco e o texto chegam por pacote).
+        final net.minecraft.world.WorldServer ws = mc.getIntegratedServer().worldServerForDimension(0);
+        mc.getIntegratedServer().addScheduledTask(new Runnable() {
+            @Override
+            public void run() {
+                ws.setBlockState(placa, Blocks.standing_sign.getDefaultState().withProperty(BlockStandingSign.ROTATION, 8));
+                TileEntity te = ws.getTileEntity(placa);
+                if (te instanceof TileEntitySign) {
+                    ((TileEntitySign) te).signText[0] = new ChatComponentText("Pulsar");
+                    ((TileEntitySign) te).signText[1] = new ChatComponentText("Client");
+                    te.markDirty();
+                    ws.markBlockForUpdate(placa);
+                } else {
+                    System.out.println("[Pulsar] selftest: placa sem bloco de placa (" + te + ")");
+                }
+            }
+        });
     }
 
     /** Uma pilha de flechas, uma espada e um bloco no chão, a 2 blocos do jogador. */
