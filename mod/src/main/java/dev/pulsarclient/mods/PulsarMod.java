@@ -1,5 +1,6 @@
 package dev.pulsarclient.mods;
 
+import dev.pulsarclient.settings.BoolSetting;
 import dev.pulsarclient.settings.KeySetting;
 import dev.pulsarclient.settings.Setting;
 import net.minecraft.client.Minecraft;
@@ -21,6 +22,10 @@ public abstract class PulsarMod {
     private final List<Setting> settings = new ArrayList<Setting>();
     // Todo mod tem a sua: a pessoa escolhe a tecla no painel do mod (no começo, nenhuma).
     private final KeySetting toggleKey = add(new KeySetting("tecla_ligar", "Tecla para ligar e desligar", 0));
+    // Estrela no painel: favoritos aparecem primeiro. Guardado como opção escondida.
+    private final BoolSetting favorite = add(new BoolSetting("favorito", "Favorito", false) {
+        @Override public boolean visible() { return false; }
+    });
     private boolean enabled;
 
     protected PulsarMod(String id, String name, String description, Category category, boolean enabledByDefault) {
@@ -45,6 +50,8 @@ public abstract class PulsarMod {
     }
     public boolean isEnabled() { return enabled; }
     public KeySetting toggleKey() { return toggleKey; }
+    public boolean favorite() { return favorite.get(); }
+    public void toggleFavorite() { favorite.toggle(); }
 
     public void setEnabled(boolean enabled) {
         if (this.enabled == enabled) return;

@@ -42,6 +42,8 @@ public class GanchosTransformer implements IClassTransformer {
             if (transformedName.equals("net.minecraft.client.gui.FontRenderer")) return patch(bytes, transformedName, 0);
             if (transformedName.equals("net.minecraft.client.renderer.ItemRenderer")) return patch(bytes, transformedName, 1);
             if (transformedName.equals("net.minecraft.client.renderer.entity.RendererLivingEntity")) return patch(bytes, transformedName, 2);
+            if (transformedName.equals("net.minecraft.client.renderer.entity.RenderItem")) return patch(bytes, transformedName, 3);
+            if (transformedName.equals("net.minecraft.client.renderer.entity.layers.LayerArmorBase")) return patch(bytes, transformedName, 4);
         } catch (Throwable t) {
             System.err.println("[Pulsar] Não deu para instalar os ganchos em " + transformedName + ": " + t);
         }
@@ -55,7 +57,9 @@ public class GanchosTransformer implements IClassTransformer {
         boolean ok;
         if (which == 0) ok = fonte(node, frames);
         else if (which == 1) ok = balanco(node);
-        else ok = corDano(node);
+        else if (which == 2) ok = corDano(node);
+        else if (which == 3) ok = encantoItem(node);
+        else ok = encantoArmadura(node);
         if (!ok) return bytes;
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         node.accept(writer);
@@ -239,6 +243,60 @@ public class GanchosTransformer implements IClassTransformer {
         }
         System.err.println("[Pulsar] Impacto: FloatBuffer.flip não achado em " + m.name);
         return false;
+    }
+
+    // ---------- brilho de encantamento (Aura de Encanto) ----------
+
+    /** RenderItem.renderEffect: depois de pôr a cor roxa (-8372020) na pilha, passa por Ganchos.corEncantoItem. */
+    private static boolean encantoItem(ClassNode node) {
+        MethodNode m = method(node, "(Lnet/minecraft/client/resources/model/IBakedModel;)V", "renderEffect", "func_180451_a");
+        if (m == null) {
+            System.err.println("[Pulsar] Aura de Encanto: renderEffect não achado:" + listMethods(node));
+            return false;
+        }
+        int count = 0;
+        for (AbstractInsnNode in = m.instructions.getFirst(); in != null; in = in.getNext()) {
+            if (!(in instanceof LdcInsnNode) || !Integer.valueOf(-8372020).equals(((LdcInsnNode) in).cst)) continue;
+            m.instructions.insert(in, new MethodInsnNode(Opcodes.INVOKESTATIC, G, "corEncantoItem", "(I)I", false));
+            count++;
+        }
+        if (count == 0) {
+            System.err.println("[Pulsar] Aura de Encanto: cor do brilho não achada em " + m.name);
+            return false;
+        }
+        Ganchos.ganchoEncantoItem = true;
+        System.out.println("[Pulsar] Aura de Encanto: gancho dos itens instalado (" + m.name + ", " + count + " lugares)");
+        return true;
+    }
+
+    /** LayerArmorBase.renderGlint: depois de GlStateManager.color(0.38, 0.19, 0.608, 1), chama Ganchos.corEncantoArmadura. */
+    private static boolean encantoArmadura(ClassNode node) {
+        MethodNode m = null;
+        for (MethodNode x : node.methods) {
+            if (x.desc.endsWith("FFFFFFF)V") && (x.name.equals("renderGlint") || x.name.equals("func_177183_a"))) m = x;
+        }
+        if (m == null) {
+            System.err.println("[Pulsar] Aura de Encanto: renderGlint não achado:" + listMethods(node));
+            return false;
+        }
+        int count = 0;
+        boolean viuRoxo = false;
+        for (AbstractInsnNode in = m.instructions.getFirst(); in != null; in = in.getNext()) {
+            if (in instanceof LdcInsnNode && Float.valueOf(0.608F).equals(((LdcInsnNode) in).cst)) viuRoxo = true;
+            if (viuRoxo && in instanceof MethodInsnNode && ((MethodInsnNode) in).desc.equals("(FFFF)V")
+                    && is(((MethodInsnNode) in).name, "color", "func_179131_c")) {
+                m.instructions.insert(in, new MethodInsnNode(Opcodes.INVOKESTATIC, G, "corEncantoArmadura", "()V", false));
+                viuRoxo = false;
+                count++;
+            }
+        }
+        if (count == 0) {
+            System.err.println("[Pulsar] Aura de Encanto: cor roxa da armadura não achada em " + m.name);
+            return false;
+        }
+        Ganchos.ganchoEncantoArmadura = true;
+        System.out.println("[Pulsar] Aura de Encanto: gancho da armadura instalado (" + m.name + ", " + count + " lugares)");
+        return true;
     }
 
     // ---------- utilidades ----------

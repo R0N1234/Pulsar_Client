@@ -76,7 +76,7 @@ import java.util.Set;
 @Mod(modid = PulsarClient.MODID, name = "Pulsar Client", version = PulsarClient.VERSION, clientSideOnly = true, acceptedMinecraftVersions = "[1.8.9]")
 public class PulsarClient {
     public static final String MODID = "pulsar";
-    public static final String VERSION = "0.7.4";
+    public static final String VERSION = "0.8.0";
     private static PulsarClient instance;
 
     private final List<PulsarMod> mods = new ArrayList<PulsarMod>();
@@ -111,6 +111,9 @@ public class PulsarClient {
         add(new SimpleHudMods.Bussola());
         add(new SimpleHudMods.Servidor());
         add(new SimpleHudMods.Saturacao());
+        add(new BarraPulsar());
+        add(new BarraChefe());
+        add(new PacoteAtivo());
         add(cronometro);
         add(propulsao);
         add(new MiraPulsar());
@@ -133,6 +136,7 @@ public class PulsarClient {
         add(poeira);
         add(new Supernova());
         add(new Contorno());
+        add(new AuraEncanto());
         add(new Atmosfera());
         add(new Placar());
         add(new ListaTab());
@@ -259,6 +263,7 @@ public class PulsarClient {
 
     /** Mantém o mod dentro da tela, mesmo depois de mudar o tamanho da janela ou a escala da interface. */
     public static void keepOnScreen(HudMod mod, ScaledResolution res) {
+        if (mod.x == HudMod.CENTRO) mod.x = (res.getScaledWidth() - mod.boxWidth()) / 2;
         mod.x = Math.max(2, Math.min(mod.x, res.getScaledWidth() - mod.boxWidth() - 2));
         mod.y = Math.max(2, Math.min(mod.y, res.getScaledHeight() - mod.boxHeight() - 2));
     }

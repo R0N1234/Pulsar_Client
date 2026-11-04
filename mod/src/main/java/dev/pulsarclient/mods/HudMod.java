@@ -11,6 +11,8 @@ import net.minecraft.client.renderer.GlStateManager;
 public abstract class HudMod extends PulsarMod {
     public static final int WHITE = 0xFFFFFFFF;
     public static final int BACKGROUND = 0x66000000;
+    /** Posição x de fábrica "no meio da tela" (vira um número de verdade quando a pessoa arrasta). */
+    public static final int CENTRO = -10000;
 
     public int x;
     public int y;

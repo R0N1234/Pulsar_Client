@@ -24,6 +24,9 @@ public final class Ganchos {
 
     public interface Balanco { boolean ativo(); }
 
+    /** Cor do brilho de encantamento (RGB), ou {@link #NAO} para a cor roxa do jogo. */
+    public interface Encanto { int cor(boolean armadura); }
+
     public static final int NAO = Integer.MIN_VALUE;
 
     /** Mesma tabela de caracteres da fonte do Minecraft 1.8.9 (índice usado por renderDefaultChar). */
@@ -42,14 +45,52 @@ public final class Ganchos {
     public static volatile Fonte fonte;
     public static volatile CorDano corDano;
     public static volatile Balanco balanco;
+    public static volatile Encanto encanto;
 
     // Quais ganchos entraram no jogo (preenchido pelo GanchosTransformer).
     public static volatile boolean ganchoFonte;
     public static volatile boolean ganchoAvanco;
     public static volatile boolean ganchoBalanco;
     public static volatile boolean ganchoCorDano;
+    public static volatile boolean ganchoEncantoItem;
+    public static volatile boolean ganchoEncantoArmadura;
+    // Quantas vezes a cor do brilho foi trocada (teste automático).
+    public static volatile long encantoItens;
+    public static volatile long encantoArmaduras;
 
     private Ganchos() {}
+
+    // ---------- brilho de encantamento (Aura de Encanto) ----------
+
+    private static int corEncanto(boolean armadura) {
+        Encanto e = encanto;
+        if (e == null) return NAO;
+        try {
+            return e.cor(armadura);
+        } catch (Throwable t) {
+            encanto = null;
+            System.err.println("[Pulsar] Aura de Encanto desligada por erro: " + t);
+            return NAO;
+        }
+    }
+
+    /** RenderItem.renderEffect: a cor roxa (0xFF8040CC) vira a cor escolhida. */
+    public static int corEncantoItem(int padrao) {
+        int c = corEncanto(false);
+        if (c == NAO) return padrao;
+        encantoItens++;
+        return 0xFF000000 | c;
+    }
+
+    /** LayerArmorBase.renderGlint: logo depois do jogo pôr a cor roxa da armadura, troca pela escolhida. */
+    public static void corEncantoArmadura() {
+        int c = corEncanto(true);
+        if (c == NAO) return;
+        encantoArmaduras++;
+        // A armadura usa uma versão mais escura da cor dos itens (0.38, 0.19, 0.608 contra 0.5, 0.25, 0.8).
+        float k = 0.76f / 255f;
+        net.minecraft.client.renderer.GlStateManager.color((c >> 16 & 255) * k, (c >> 8 & 255) * k, (c & 255) * k, 1f);
+    }
 
     // ---------- fonte ----------
 

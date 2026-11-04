@@ -35,6 +35,7 @@ const REQUIRED = [
   [/Tecla G: Telescópio ligado/, "a mesma tecla liga o mod de novo"],
   [/selftest: zoom-ok/, "sensibilidade do mouse igual depois do zoom"],
   [/selftest: bonecos/, "bonecos longe otimizados pelo Motor"],
+  [/selftest: bonecos-pele\b(?!-)/, "bonecos longe só com a skin"],
   [/selftest: barra-ok/, "barra de rolagem do painel arrastada com o mouse"],
   [/selftest: fov-ok/, "Propulsão sem zoom ao correr"],
   [/Motor: molduras leves instaladas/, "molduras leves do Motor"],
@@ -56,9 +57,20 @@ const REQUIRED = [
   [/Cores Vivas: shader carregado/, "shader do Cores Vivas"],
   [/Texturas: F8thful baixado/, "download de textura do catálogo"],
   [/Texturas: usando F8thful/, "textura ligada dentro do jogo"],
+  [/Aura de Encanto: gancho dos itens instalado/, "gancho do brilho dos itens (Aura de Encanto)"],
+  [/Aura de Encanto: gancho da armadura instalado/, "gancho do brilho da armadura (Aura de Encanto)"],
+  [/selftest: encanto-ok/, "Aura de Encanto pintando o brilho"],
+  [/selftest: pacote-ok/, "Pacote Ativo na tela"],
+  [/selftest: chefe-ok/, "Barra de Chefe na tela"],
+  [/Barra Pulsar: tocando Órbita Lenta/, "Barra Pulsar recebendo a música pela ponte"],
+  [/Barra Pulsar: capa 16x16/, "capa da música chegando na Barra Pulsar"],
+  [/selftest: musica-ok/, "Barra Pulsar mostrando a música"],
+  [/Universo: céu 360 girando/, "universo 360 no fundo do menu"],
+  [/selftest: universo-ok/, "universo desenhado"],
 ];
 // Com E2E_REDE=<endereço> (wrangler dev no CI), o jogo também conversa com a rede do Pulsar (ícone, nível e amigos).
 const REDE = process.env.E2E_REDE || "";
+const CAPA_TESTE = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAL0lEQVR4nGOssDnBAAPsq83h7J+hJ7GKMzGQCGivgYUYdyOLD0Y/EOPu0XiguQYAdbwXi7uh378AAAAASUVORK5CYII=";
 // Com E2E_OPTIFINE (caminho do jar do OptiFine 1.8.9), o jogo abre no modo Forge + OptiFine, igual ao de muita gente.
 const OPTIFINE = process.env.E2E_OPTIFINE ? path.resolve(process.env.E2E_OPTIFINE) : "";
 if (REDE) {
@@ -70,6 +82,7 @@ const FORBIDDEN = [
   /selftest: textura-falhou/,
   /selftest: zoom-(falhou|sem-mira-lenta)/,
   /selftest: bonecos-falhou/,
+  /selftest: bonecos-pele-falhou/,
   /selftest: barra-(falhou|sem-barra)/,
   /selftest: fov-falhou/,
   /selftest: molduras-falhou/,
@@ -77,6 +90,7 @@ const FORBIDDEN = [
   /Motor: placas leves indisponíveis/,
   /Motor: filtro de blocos desligado/,
   /selftest: (itens|nebulosa)-falhou/,
+  /selftest: (encanto|pacote|chefe|musica|universo)-falhou/,
   /Gravidade de Itens: não instalada/,
   /Motor: molduras leves indisponíveis/,
   /Motor: bonecos otimizados (indisponíveis|desligados)/,
@@ -92,6 +106,8 @@ const FORBIDDEN = [
 if (OPTIFINE) {
   REQUIRED.splice(REQUIRED.findIndex(([re]) => String(re) === String(/selftest: bonecos/)), 1);
   FORBIDDEN.splice(FORBIDDEN.findIndex((re) => String(re) === String(/selftest: bonecos-falhou/)), 1);
+  REQUIRED.splice(REQUIRED.findIndex(([re]) => String(re) === String(/selftest: bonecos-pele\b(?!-)/)), 1);
+  FORBIDDEN.splice(FORBIDDEN.findIndex((re) => String(re) === String(/selftest: bonecos-pele-falhou/)), 1);
 }
 
 fs.mkdirSync(work, { recursive: true });
@@ -177,6 +193,8 @@ setTimeout(() => finish(1, `FALHOU: tempo esgotado (pulsar=${pulsarLoaded}, jogo
           },
           onPresenca: (p) => onLog(`[e2e] Sinal Discord: ${p.ligado ? "ligado" : "desligado"} ${p.lugar} ${p.servidor || ""}`),
           onRadio: (p) => onLog(`[e2e] Rádio: ${p.tocando ? "tocando " + p.estacao + " " + p.volume + "%" : "parado"}`),
+          // Spotify de mentira: uma música com capa, para a Barra Pulsar mostrar no jogo.
+          onMusica: async (p) => ({ tocando: true, titulo: "Órbita Lenta", artista: "Pulsar", capaId: "teste", ...(p.capa && p.capaId !== "teste" ? { capa: CAPA_TESTE } : {}) }),
         })
       : null;
     const bridgeArgs = bridge ? [`-Dpulsar.ponte=${bridge.port}`, `-Dpulsar.chave=${bridge.key}`] : [];

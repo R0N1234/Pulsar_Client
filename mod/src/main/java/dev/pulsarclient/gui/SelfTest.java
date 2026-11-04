@@ -1,6 +1,11 @@
 package dev.pulsarclient.gui;
 
 import dev.pulsarclient.mods.PlacaLeve;
+import dev.pulsarclient.mods.AuraEncanto;
+import dev.pulsarclient.mods.BarraChefe;
+import dev.pulsarclient.mods.BarraPulsar;
+import dev.pulsarclient.mods.PacoteAtivo;
+import dev.pulsarclient.core.Ganchos;
 import dev.pulsarclient.core.MotorHooks;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.tileentity.TileEntitySign;
@@ -272,6 +277,18 @@ public class SelfTest {
                 mc.displayGuiScreen(null);
                 PulsarClient.get().mod("gravidade_itens").setEnabled(true);
                 spawnItens(mc);
+                // Mods novos da 0.8.0: Aura de Encanto (espada encantada na mão e a armadura do boneco),
+                // Pacote Ativo e Barra de Chefe (com um chefe de mentira). A Barra Pulsar já está ligada.
+                PulsarClient.get().mod("aura_encanto").setEnabled(true);
+                PulsarClient.get().mod("pacote_ativo").setEnabled(true);
+                PulsarClient.get().mod("barra_chefe").setEnabled(true);
+                ItemStack espada = new ItemStack(Items.diamond_sword);
+                espada.addEnchantment(Enchantment.sharpness, 1);
+                mc.thePlayer.inventory.setInventorySlotContents(mc.thePlayer.inventory.currentItem, espada);
+                net.minecraft.entity.boss.BossStatus.bossName = "Chefe de Teste";
+                net.minecraft.entity.boss.BossStatus.healthScale = 0.6f;
+                net.minecraft.entity.boss.BossStatus.statusBarTime = 100000;
+                log("hudnovo");
                 break;
             case 22:
                 log(GravidadeItens.desenhados() > 0 ? "itens" : "itens-falhou");
@@ -284,6 +301,18 @@ public class SelfTest {
                             + ", desenho " + mc.getRenderManager().getEntityRenderObject(b2) + ", olho " + mc.thePlayer.getPositionEyes(1f)));
                 }
                 log(PulsarClient.get().motor().simplifiedPlayers() > 0 ? "bonecos" : "bonecos-falhou");
+                // O boneco a 20 blocos passa da distância da armadura no Desempenho (16): sai só com a skin.
+                log(PulsarClient.get().motor().skinOnlyPlayers() > 0 ? "bonecos-pele" : "bonecos-pele-falhou");
+                System.out.println("[Pulsar] Aura de Encanto: " + AuraEncanto.ganchos() + ", itens " + Ganchos.encantoItens + ", armaduras " + Ganchos.encantoArmaduras);
+                log(Ganchos.encantoItens > 0 ? "encanto-ok" : "encanto-falhou");
+                log(PacoteAtivo.desenhos() > 0 ? "pacote-ok" : "pacote-falhou");
+                log(BarraChefe.desenhos() > 0 ? "chefe-ok" : "chefe-falhou");
+                log(BarraPulsar.desenhosComMusica() > 0 ? "musica-ok" : "musica-falhou");
+                log(Universo.quadros() > 0 ? "universo-ok" : "universo-falhou");
+                net.minecraft.entity.boss.BossStatus.statusBarTime = 0;
+                PulsarClient.get().mod("aura_encanto").setEnabled(false);
+                PulsarClient.get().mod("pacote_ativo").setEnabled(false);
+                PulsarClient.get().mod("barra_chefe").setEnabled(false);
                 break;
             case 23:
                 // Nebulosa: o menu do ESC com o mundo desfocado atrás.

@@ -91,6 +91,9 @@ public class MotorPulsar extends PulsarMod {
     private final SliderSetting framesDistance = add(new SliderSetting("molduras_dist", "Molduras e itens nelas até", 24, 8, 64, 4, " blocos"));
     private final BoolSetting players = add(new BoolSetting("bonecos", "Bonecos otimizados (a skin continua)", true));
     private final SliderSetting playerDetail = add(new SliderSetting("bonecos_dist", "Bonecos com todos os detalhes até", 8, 0, 64, 4, " blocos"));
+    // Muita gente perto (mina de PvP com 40 jogadores): só os mais perto saem completos; longe, só a skin.
+    private final SliderSetting playerCrowd = add(new SliderSetting("bonecos_perto", "Com muita gente, detalhe completo só nos", 6, 2, 20, 1, " mais perto"));
+    private final SliderSetting playerGear = add(new SliderSetting("bonecos_equip", "Armadura e item na mão dos bonecos até", 16, 8, 64, 4, " blocos"));
     private final BoolSetting limitNames = add(new BoolSetting("nomes", "Limitar distância dos nomes", false));
     private final SliderSetting nameDistance = add(new SliderSetting("nomes_dist", "Distância dos nomes", 32, 8, 64, 4, " blocos"));
     private final ModeSetting particles = add(new ModeSetting("particulas", "Partículas", 2, "Todas", "Menos", "Mínimas"));
@@ -104,6 +107,7 @@ public class MotorPulsar extends PulsarMod {
     private final TextSetting profileVersion = add(new TextSetting("perfil_versao", ""));
     private final TextSetting framesVersion = add(new TextSetting("molduras_versao", ""));
     private final TextSetting blocksVersion = add(new TextSetting("blocos_versao", ""));
+    private final TextSetting crowdVersion = add(new TextSetting("bonecos_versao", ""));
     private final ActionSetting freeMemory = add(new ActionSetting("memoria", "Liberar memória agora", new Runnable() {
         @Override public void run() { System.gc(); }
     }));
@@ -226,6 +230,15 @@ public class MotorPulsar extends PulsarMod {
             signText.set(p == 0 ? 16 : p == 1 ? 24 : 48);
             PulsarClient.get().save();
         }
+        if (crowdVersion.get().isEmpty()) {
+            // Primeira vez com os bonecos para muita gente (0.8.0): seguem o perfil que a pessoa já usa.
+            crowdVersion.set("0.8.0");
+            int p = profile.index();
+            playerCrowd.set(p == 0 ? 6 : p == 1 ? 10 : 20);
+            playerGear.set(p == 0 ? 16 : p == 1 ? 32 : 64);
+            PulsarClient.get().save();
+        }
+        contarJogadores();
         updatePlants();
         updateSky();
         if (!isEnabled()) return;
@@ -388,9 +401,41 @@ public class MotorPulsar extends PulsarMod {
         if (event.entity instanceof AbstractClientPlayer) jogadoresVistos++;
         Entity view = mc.getRenderViewEntity();
         if (!isEnabled() || !players.get() || !(event.entity instanceof AbstractClientPlayer) || view == null || event.entity == view) return;
+        double d2 = event.entity.getDistanceSqToEntity(view);
         double d = playerDetail.get();
-        if (event.entity.getDistanceSqToEntity(view) <= d * d) return;
-        bonecos.simplify(event.renderer, (AbstractClientPlayer) event.entity);
+        boolean perto = maisPerto == null || maisPerto.contains(event.entity.getEntityId());
+        if (d2 <= d * d && perto) return;
+        double g = playerGear.get();
+        bonecos.simplify(event.renderer, (AbstractClientPlayer) event.entity, d2 > g * g);
+    }
+
+    /** Ids dos jogadores mais perto quando tem mais gente que o limite; null = poucos jogadores, todos contam. */
+    private java.util.Set<Integer> maisPerto;
+
+    /** Uma vez por tick: com muita gente em volta, separa os mais perto (os únicos que saem completos). */
+    private void contarJogadores() {
+        maisPerto = null;
+        Entity view = mc.getRenderViewEntity();
+        if (!isEnabled() || !players.get() || mc.theWorld == null || view == null) return;
+        int limite = playerCrowd.getInt();
+        java.util.List<EntityPlayer> todos = mc.theWorld.playerEntities;
+        if (todos.size() - 1 <= limite) return;
+        final Entity v = view;
+        java.util.List<EntityPlayer> ordem = new java.util.ArrayList<EntityPlayer>(todos);
+        ordem.remove(v);
+        java.util.Collections.sort(ordem, new java.util.Comparator<EntityPlayer>() {
+            @Override public int compare(EntityPlayer a, EntityPlayer b) {
+                return Double.compare(a.getDistanceSqToEntity(v), b.getDistanceSqToEntity(v));
+            }
+        });
+        java.util.Set<Integer> ids = new java.util.HashSet<Integer>();
+        for (int i = 0; i < limite && i < ordem.size(); i++) ids.add(ordem.get(i).getEntityId());
+        maisPerto = ids;
+    }
+
+    /** Quantos bonecos saíram só com a skin (teste automático). */
+    public long skinOnlyPlayers() {
+        return bonecos.skinOnlyCount();
     }
 
     @SubscribeEvent
@@ -457,6 +502,8 @@ public class MotorPulsar extends PulsarMod {
         framesDistance.set(p == 0 ? 16 : p == 1 ? 32 : 64);
         players.set(true);
         playerDetail.set(p == 0 ? 8 : p == 1 ? 24 : 48);
+        playerCrowd.set(p == 0 ? 6 : p == 1 ? 10 : 20);
+        playerGear.set(p == 0 ? 16 : p == 1 ? 32 : 64);
         limitNames.set(p == 0);
         nameDistance.set(32);
         particleLimit.set(p == 0 ? 2 : p == 1 ? 1 : 0);

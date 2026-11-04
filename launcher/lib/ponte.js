@@ -5,6 +5,7 @@
 //   POST /conta/usar     {"conta": "microsoft" | nick} e devolve a sessão dessa conta
 //   POST /conta/offline  {"nick": "..."} cria o nick offline e devolve a sessão dele
 //   POST /radio          {"tocando", "estacao", "volume"} para o Rádio Pulsar
+//   POST /musica         {"capa", "capaId"} e devolve a música tocando no Spotify (Barra Pulsar)
 //   POST /presenca       {"ligado", "lugar": "menu" | "sozinho" | "servidor", "servidor"} para o Sinal Discord
 const http = require("http");
 const crypto = require("crypto");
@@ -28,7 +29,7 @@ function lerCorpo(req) {
   });
 }
 
-function startBridge({ onSwitchAccount, onList, onUse, onAddOffline, onPresenca, onRadio }) {
+function startBridge({ onSwitchAccount, onList, onUse, onAddOffline, onPresenca, onRadio, onMusica }) {
   const key = crypto.randomBytes(24).toString("hex");
   let busy = false;
   const server = http.createServer(async (req, res) => {
@@ -50,6 +51,7 @@ function startBridge({ onSwitchAccount, onList, onUse, onAddOffline, onPresenca,
     if (req.url === "/conta/usar" && onUse) return responder(() => onUse(String(corpo.conta || "")));
     if (req.url === "/conta/offline" && onAddOffline) return responder(() => onAddOffline(String(corpo.nick || "")));
     if (req.url === "/presenca" && onPresenca) return responder(async () => (onPresenca(corpo), {}));
+    if (req.url === "/musica" && onMusica) return responder(() => onMusica(corpo));
     if (req.url === "/radio" && onRadio) return responder(async () => (onRadio(corpo), {}));
     if (req.url !== "/conta/trocar") return reply(404, { ok: false, erro: "Pedido desconhecido." });
     if (busy) return reply(409, { ok: false, erro: "A janela de login já está aberta." });

@@ -31,27 +31,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Painel do Pulsar (Shift direito): categorias à esquerda, mods em cartões e as opções de cada mod.
- * Feito só com retângulos e texto, sem texturas nem sombras, para não pesar no FPS.
+ * Painel do Pulsar (Shift direito): categorias à esquerda, mods em cartões com ícone e as opções de cada mod.
+ * Feito com caixas arredondadas, ícones de uma imagem só e texto: nada de sombra ou desfoque, para não pesar no FPS.
  */
 public class GuiPulsarPanel extends GuiScreen {
     private static final int BG = 0xF20A0F1E;
     private static final int SIDEBAR = 0xF2060A14;
     private static final int CARD = 0xFF111A2D;
-    private static final int CARD_HOVER = 0xFF18233C;
+    private static final int CARD_HOVER = 0xFF182440;
+    private static final int FIELD = 0xFF0B1222;
+    private static final int BUTTON_OFF = 0xFF1C2540;
     private static final int LINE = 0x337FE7FF;
     private static final int BEAM = 0xFF7FE7FF;
     private static final int TEXT = 0xFFE6ECFF;
     private static final int MUTED = 0xFF8892B0;
+    private static final int DIM = 0xFF4A5578;
+    private static final int DARK = 0xFF0A1020;
     private static final int OFF = 0xFF353E5A;
     private static final int AMBER = 0xFFFFB347;
-    private static final int CARD_H = 44;
-    private static final int ROW_H = 22;
+    private static final int GOLD = 0xFFFFD84A;
+    private static final int CARD_H = 74;
+    private static final int CARD_MIN_W = 92;
+    private static final int ROW_H = 24;
     private static final int GAP = 6;
-    private static final int SIDE_W = 96;
 
     private final GuiScreen parent;
     private Category category;
+    private boolean favorites;
     private PulsarMod open;
     private GuiTextField search;
     private int scroll;
@@ -60,6 +66,7 @@ public class GuiPulsarPanel extends GuiScreen {
     private int ultimoMouseX, ultimoMouseY;
     private int contentHeight;
     private SliderSetting dragging;
+    private int dragX, dragW;
     private ActionSetting flashed;
     private long flashUntil;
     private KeySetting listening;
@@ -73,7 +80,7 @@ public class GuiPulsarPanel extends GuiScreen {
     private boolean direct;
 
     // Painel calculado em initGui
-    private int px, py, pw, ph;
+    private int px, py, pw, ph, sideW;
     private int mx, mw, top, bottom;
 
     public GuiPulsarPanel(GuiScreen parent) {
@@ -96,16 +103,16 @@ public class GuiPulsarPanel extends GuiScreen {
     @Override
     public void initGui() {
         Keyboard.enableRepeatEvents(true);
-        pw = Math.min(460, width - 16);
-        ph = Math.min(280, height - 16);
+        pw = Math.min(540, width - 16);
+        ph = Math.min(320, height - 16);
         px = (width - pw) / 2;
         py = (height - ph) / 2;
-        mx = px + SIDE_W + 10;
-        mw = pw - SIDE_W - 20;
-        top = py + 30;
-        bottom = py + ph - 8;
+        sideW = pw >= 400 ? 104 : 90;
+        mx = px + sideW + 10;
+        mw = pw - sideW - 22;
+        layout();
         String text = search == null ? "" : search.getText();
-        search = new GuiTextField(0, fontRendererObj, px + pw - 118, py + 10, 104, 10);
+        search = new GuiTextField(0, fontRendererObj, px + pw - 134, py + 12, 118, 10);
         search.setEnableBackgroundDrawing(false);
         search.setMaxStringLength(24);
         search.setText(text);
@@ -115,6 +122,12 @@ public class GuiPulsarPanel extends GuiScreen {
         field.setMaxStringLength(editing == null ? 100 : editing.maxLength());
         field.setText(typing);
         field.setFocused(editing != null);
+    }
+
+    /** A lista de mods tem um rodapé com a descrição; as opções têm um cabeçalho mais alto. */
+    private void layout() {
+        top = open == null ? py + 32 : py + 46;
+        bottom = open == null ? py + ph - 22 : py + ph - 8;
     }
 
     @Override
@@ -129,10 +142,11 @@ public class GuiPulsarPanel extends GuiScreen {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         ultimoMouseX = mouseX;
         ultimoMouseY = mouseY;
+        layout();
         if (mc.theWorld == null) Universo.draw(width, height);
         drawRect(0, 0, width, height, 0x66000000);
-        drawRect(px, py, px + pw, py + ph, BG);
-        outline(px, py, px + pw, py + ph, LINE);
+        Desenho.caixa(px, py, px + pw, py + ph, BG, 8);
+        Desenho.borda(px, py, px + pw, py + ph, LINE, 8);
         drawSidebar(mouseX, mouseY);
 
         if (open == null) drawGrid(mouseX, mouseY);
@@ -141,78 +155,84 @@ public class GuiPulsarPanel extends GuiScreen {
     }
 
     private void drawSidebar(int mouseX, int mouseY) {
-        drawRect(px + 1, py + 1, px + SIDE_W, py + ph - 1, SIDEBAR);
-        drawRect(px + SIDE_W, py + 1, px + SIDE_W + 1, py + ph - 1, LINE);
+        Desenho.caixa(px + 4, py + 4, px + sideW, py + ph - 4, SIDEBAR, 6);
+        Universo.logo(px + 9, py + 8, 26);
+        fontRendererObj.drawString("Pulsar", px + 38, py + 11, TEXT);
+        fontRendererObj.drawString("client 1.8.9", px + 38, py + 21, MUTED);
 
-        // Logo "PC" do client.
-        int cx = px + SIDE_W / 2;
-        Universo.logo(cx - 20, py + 4, 40);
-        drawCenteredString(fontRendererObj, "PULSAR", cx, py + 46, TEXT);
-        drawCenteredString(fontRendererObj, "client 1.8.9", cx, py + 56, MUTED);
-
-        int y = py + 74;
-        y = sideItem("Todos", category == null && open == null, y, mouseX, mouseY);
+        boolean naLista = open == null;
+        int y = py + 42;
+        y = sideItem("Todos", Icones.GRADE, naLista && category == null && !favorites, y, mouseX, mouseY);
+        y = sideItem("Favoritos", Icones.ESTRELA, naLista && favorites, y, mouseX, mouseY);
         for (Category c : Category.values()) {
-            y = sideItem(c.label, category == c && open == null, y, mouseX, mouseY);
+            y = sideItem(c.label, Icones.daCategoria(c), naLista && !favorites && category == c, y, mouseX, mouseY);
         }
-        drawRect(px + 10, y + 1, px + SIDE_W - 10, y + 2, LINE);
-        int fim = sideItem("Texturas  >", false, y + 4, mouseX, mouseY);
+        drawRect(px + 12, y + 1, px + sideW - 8, y + 2, LINE);
+        int fim = sideItem("Texturas", Icones.QUADRO, false, y + 4, mouseX, mouseY);
 
+        int by = py + ph - 26;
         // Em telas baixas a contagem sai para não encostar na lista.
-        if (fim + 2 <= py + ph - 42) {
+        if (fim + 2 <= by - 12) {
             int on = 0;
             for (PulsarMod m : PulsarClient.get().mods()) if (m.isEnabled()) on++;
-            drawCenteredString(fontRendererObj, on + " ligados", cx, py + ph - 42, MUTED);
+            drawCenteredString(fontRendererObj, on + " ligados", px + 4 + (sideW - 4) / 2, by - 12, MUTED);
         }
-        int by = py + ph - 28;
-        boolean hover = inside(mouseX, mouseY, px + 8, by, px + SIDE_W - 8, by + 18);
-        drawRect(px + 8, by, px + SIDE_W - 8, by + 18, hover ? 0xFF1C2A48 : CARD);
-        outline(px + 8, by, px + SIDE_W - 8, by + 18, hover ? BEAM : LINE);
-        drawCenteredString(fontRendererObj, "Editar HUD", cx, by + 5, TEXT);
+        boolean hover = inside(mouseX, mouseY, px + 10, by, px + sideW - 6, by + 17);
+        Desenho.caixa(px + 10, by, px + sideW - 6, by + 17, hover ? 0xFF1C2A48 : CARD, 4);
+        Desenho.borda(px + 10, by, px + sideW - 6, by + 17, hover ? BEAM : LINE, 4);
+        drawCenteredString(fontRendererObj, "Editar HUD", px + 2 + sideW / 2, by + 5, TEXT);
     }
 
     /** Altura de cada item da barra lateral: menor em telas baixas, para caber tudo. */
     private int sideStep() {
-        return ph >= 260 ? 17 : 15;
+        return ph >= 270 ? 17 : 15;
     }
 
-    private int sideItem(String label, boolean selected, int y, int mouseX, int mouseY) {
-        int h = sideStep() - 1;
-        boolean hover = inside(mouseX, mouseY, px + 1, y, px + SIDE_W, y + h);
-        if (selected) {
-            drawRect(px + 1, y, px + SIDE_W, y + h, 0x227FE7FF);
-            drawRect(px + 1, y, px + 3, y + h, BEAM);
-        } else if (hover) {
-            drawRect(px + 1, y, px + SIDE_W, y + h, 0x11FFFFFF);
-        }
-        fontRendererObj.drawString(label, px + 10, y + (h - 8) / 2, selected ? BEAM : hover ? TEXT : MUTED);
+    private int sideItem(String label, int icon, boolean selected, int y, int mouseX, int mouseY) {
+        int h = sideStep() - 2;
+        boolean hover = inside(mouseX, mouseY, px + 8, y, px + sideW - 4, y + h);
+        if (selected) Desenho.caixa(px + 8, y, px + sideW - 4, y + h, 0x2E7FE7FF, 4);
+        else if (hover) Desenho.caixa(px + 8, y, px + sideW - 4, y + h, 0x14FFFFFF, 4);
+        int c = selected ? BEAM : hover ? TEXT : MUTED;
+        Icones.desenhar(icon, px + 13, y + (h - 9) / 2f, 9, c);
+        fontRendererObj.drawString(fontRendererObj.trimStringToWidth(label, sideW - 32), px + 27, y + (h - 8) / 2 + 1, c);
         return y + sideStep();
     }
 
     private List<PulsarMod> visibleMods() {
         String q = search.getText().trim().toLowerCase();
+        List<PulsarMod> fav = new ArrayList<PulsarMod>();
         List<PulsarMod> out = new ArrayList<PulsarMod>();
         for (PulsarMod m : PulsarClient.get().mods()) {
-            if (category != null && m.category() != category) continue;
+            if (favorites && !m.favorite()) continue;
+            if (!favorites && category != null && m.category() != category) continue;
             if (!q.isEmpty() && !(m.name() + " " + m.description()).toLowerCase().contains(q)) continue;
-            out.add(m);
+            (m.favorite() ? fav : out).add(m);
         }
-        return out;
+        // Favoritos sempre primeiro.
+        fav.addAll(out);
+        return fav;
     }
 
     private int columns() {
-        return mw >= 300 ? 3 : 2;
+        return Math.max(2, Math.min(5, (mw + GAP) / (CARD_MIN_W + GAP)));
     }
 
     private int cardWidth() {
         return (mw - GAP * (columns() - 1)) / columns();
     }
 
+    private String gridTitle() {
+        return favorites ? "Favoritos" : category == null ? "Todos os mods" : category.label;
+    }
+
     private void drawGrid(int mouseX, int mouseY) {
-        fontRendererObj.drawString(category == null ? "Todos os mods" : category.label, mx, py + 11, TEXT);
-        drawRect(px + pw - 122, py + 7, px + pw - 10, py + 21, CARD);
-        outline(px + pw - 122, py + 7, px + pw - 10, py + 21, search.isFocused() ? BEAM : LINE);
-        if (search.getText().isEmpty() && !search.isFocused()) fontRendererObj.drawString("Buscar mod...", px + pw - 118, py + 10, MUTED);
+        fontRendererObj.drawString(gridTitle(), mx, py + 12, TEXT);
+        int sx = px + pw - 150;
+        Desenho.caixa(sx, py + 8, px + pw - 12, py + 24, FIELD, 5);
+        Desenho.borda(sx, py + 8, px + pw - 12, py + 24, search.isFocused() ? BEAM : LINE, 5);
+        Icones.desenhar(Icones.LUPA, sx + 5, py + 11.5f, 9, search.isFocused() ? BEAM : MUTED);
+        if (search.getText().isEmpty() && !search.isFocused()) fontRendererObj.drawString("Buscar mod...", sx + 16, py + 12, MUTED);
         search.drawTextBox();
 
         List<PulsarMod> mods = visibleMods();
@@ -222,81 +242,171 @@ public class GuiPulsarPanel extends GuiScreen {
         contentHeight = rows * (CARD_H + GAP) - GAP;
         clampScroll();
 
+        PulsarMod hovered = null;
         if (mods.isEmpty()) {
-            drawCenteredString(fontRendererObj, "Nenhum mod encontrado", mx + mw / 2, top + 30, MUTED);
-            return;
+            String vazio = favorites ? "Nenhum favorito ainda: clique na estrela de um mod" : "Nenhum mod encontrado";
+            drawCenteredString(fontRendererObj, vazio, mx + mw / 2, top + 30, MUTED);
+        } else {
+            boolean inView = mouseY >= top && mouseY < bottom;
+            scissor(mx, top, mw, bottom - top);
+            for (int i = 0; i < mods.size(); i++) {
+                int x = mx + (i % cols) * (cw + GAP);
+                int y = top + (i / cols) * (CARD_H + GAP) - scroll;
+                if (y + CARD_H < top || y > bottom) continue;
+                boolean hover = inView && inside(mouseX, mouseY, x, y, x + cw, y + CARD_H);
+                if (hover) hovered = mods.get(i);
+                drawCard(mods.get(i), x, y, cw, hover, mouseX, mouseY);
+            }
+            GL11.glDisable(GL11.GL_SCISSOR_TEST);
+            drawScrollbar();
         }
-        boolean inView = mouseY >= top && mouseY < bottom;
-        scissor(mx, top, mw, bottom - top);
-        for (int i = 0; i < mods.size(); i++) {
-            int x = mx + (i % cols) * (cw + GAP);
-            int y = top + (i / cols) * (CARD_H + GAP) - scroll;
-            if (y + CARD_H < top || y > bottom) continue;
-            drawCard(mods.get(i), x, y, cw, inView && inside(mouseX, mouseY, x, y, x + cw, y + CARD_H), mouseX, mouseY);
+        // Rodapé: a descrição do mod embaixo do mouse.
+        String rodape;
+        if (hovered != null) {
+            rodape = hovered.description();
+        } else {
+            int on = 0;
+            for (PulsarMod m : mods) if (m.isEnabled()) on++;
+            rodape = on + " de " + mods.size() + " ligados  ·  botão direito ou engrenagem abre as opções";
         }
-        GL11.glDisable(GL11.GL_SCISSOR_TEST);
-        drawScrollbar();
+        drawRect(mx, py + ph - 20, mx + mw, py + ph - 19, LINE);
+        fontRendererObj.drawString(caber(rodape, mw), mx, py + ph - 14, hovered != null ? TEXT : MUTED);
     }
 
     private void drawCard(PulsarMod mod, int x, int y, int w, boolean hover, int mouseX, int mouseY) {
-        drawRect(x, y, x + w, y + CARD_H, hover ? CARD_HOVER : CARD);
-        drawRect(x, y, x + w, y + 1, categoryColor(mod.category()));
-        fontRendererObj.drawString(fontRendererObj.trimStringToWidth(mod.name(), w - 12), x + 6, y + 6, TEXT);
-        fontRendererObj.drawString(caber(mod.description(), w - 12), x + 6, y + 18, MUTED);
-        toggle(x + 6, y + 31, mod.isEnabled());
-        fontRendererObj.drawString(mod.isEnabled() ? "Ligado" : "Desligado", x + 32, y + 32, mod.isEnabled() ? BEAM : MUTED);
-        if (!mod.panelSettings().isEmpty()) {
-            boolean gear = hover && inside(mouseX, mouseY, x + w - 20, y + 28, x + w - 4, y + 42);
-            int c = gear ? BEAM : MUTED;
-            // Ícone de opções: três barras.
-            drawRect(x + w - 16, y + 31, x + w - 6, y + 32, c);
-            drawRect(x + w - 16, y + 34, x + w - 6, y + 35, c);
-            drawRect(x + w - 16, y + 37, x + w - 6, y + 38, c);
+        boolean on = mod.isEnabled();
+        Desenho.caixa(x, y, x + w, y + CARD_H, hover ? CARD_HOVER : CARD, 5);
+        if (on) Desenho.borda(x, y, x + w, y + CARD_H, 0x447FE7FF, 5);
+        boolean star = hover && inside(mouseX, mouseY, x, y, x + 18, y + 18);
+        Icones.desenhar(mod.favorite() ? Icones.ESTRELA : Icones.ESTRELA_VAZIA, x + 5, y + 5, 9,
+                mod.favorite() ? GOLD : star ? TEXT : hover ? MUTED : DIM);
+        boolean gear = hover && inside(mouseX, mouseY, x + w - 18, y, x + w, y + 18);
+        Icones.desenhar(Icones.ENGRENAGEM, x + w - 14, y + 5, 9, gear ? BEAM : hover ? MUTED : DIM);
+        Icones.desenhar(Icones.doMod(mod), x + w / 2f - 11, y + 8, 22, on ? categoryColor(mod.category()) : MUTED);
+        String nome = caber(mod.name(), w - 8);
+        fontRendererObj.drawString(nome, x + (w - fontRendererObj.getStringWidth(nome)) / 2, y + 36, on ? TEXT : MUTED);
+        int by = y + CARD_H - 21;
+        boolean bh = hover && inside(mouseX, mouseY, x + 5, by, x + w - 5, by + 15);
+        Desenho.caixa(x + 5, by, x + w - 5, by + 15, on ? (bh ? 0xFFA6F0FF : BEAM) : bh ? 0xFF26304F : BUTTON_OFF, 4);
+        String t = on ? "Ligado" : "Desligado";
+        fontRendererObj.drawString(t, x + (w - fontRendererObj.getStringWidth(t)) / 2, by + 4, on ? DARK : MUTED);
+    }
+
+    /** Opções do mod mostradas nas linhas (a tecla de ligar fica no cabeçalho). */
+    private List<Setting> rows() {
+        List<Setting> out = new ArrayList<Setting>();
+        for (Setting s : open.panelSettings()) if (s != open.toggleKey()) out.add(s);
+        return out;
+    }
+
+    private boolean wide(Setting s) {
+        return s instanceof SliderSetting || s instanceof TextSetting || s instanceof ActionSetting || mw < 260;
+    }
+
+    /** Linha de aviso em cima das opções (tecla do cabeçalho esperando ou repetida), ou null. */
+    private String headerNote() {
+        if (listening == open.toggleKey()) return "Aperte a tecla para ligar e desligar. Esc cancela, Backspace deixa sem tecla";
+        String other = conflict(open.toggleKey());
+        return other == null ? null : "A tecla de ligar e desligar já é usada em: " + other;
+    }
+
+    /** Posição de cada opção: {x, y, largura} relativos ao começo da lista. Pequenas em duas colunas, sliders inteiros. */
+    private List<int[]> rowRects(List<Setting> list) {
+        List<int[]> out = new ArrayList<int[]>();
+        int half = (mw - GAP) / 2;
+        int y = headerNote() != null ? 14 : 0;
+        int col = 0;
+        for (Setting s : list) {
+            if (wide(s)) {
+                if (col == 1) {
+                    y += ROW_H + GAP;
+                    col = 0;
+                }
+                out.add(new int[]{0, y, mw});
+                y += ROW_H + GAP;
+            } else {
+                out.add(new int[]{col * (half + GAP), y, half});
+                if (col == 1) {
+                    col = 0;
+                    y += ROW_H + GAP;
+                } else {
+                    col = 1;
+                }
+            }
         }
+        if (col == 1) y += ROW_H + GAP;
+        contentHeight = Math.max(0, y - GAP);
+        return out;
     }
 
     private void drawSettings(int mouseX, int mouseY) {
-        boolean backHover = inside(mouseX, mouseY, mx, py + 8, mx + 50, py + 22);
-        fontRendererObj.drawString("< Voltar", mx, py + 11, backHover ? BEAM : MUTED);
-        fontRendererObj.drawString(open.name(), mx + 56, py + 11, TEXT);
-        toggle(px + pw - 36, py + 10, open.isEnabled());
+        // Cabeçalho: voltar, ícone, nome e descrição, a tecla de ligar e o botão Ligado/Desligado.
+        boolean backHover = inside(mouseX, mouseY, mx, py + 10, mx + 20, py + 30);
+        Desenho.caixa(mx, py + 10, mx + 20, py + 30, backHover ? CARD_HOVER : CARD, 5);
+        Icones.desenhar(Icones.VOLTAR, mx + 5, py + 15, 10, backHover ? BEAM : TEXT);
+        Desenho.caixa(mx + 26, py + 8, mx + 50, py + 32, CARD, 5);
+        Icones.desenhar(Icones.doMod(open), mx + 30, py + 12, 16, categoryColor(open.category()));
+        int kx = mx + mw - 138;
+        fontRendererObj.drawString(caber(open.name(), kx - mx - 60), mx + 56, py + 10, TEXT);
+        fontRendererObj.drawString(caber(open.description(), kx - mx - 60), mx + 56, py + 22, MUTED);
 
-        List<Setting> settings = open.panelSettings();
-        contentHeight = 14 + settings.size() * (ROW_H + 4);
+        KeySetting tecla = open.toggleKey();
+        boolean waiting = listening == tecla;
+        boolean keyHover = inside(mouseX, mouseY, kx, py + 11, kx + 62, py + 29);
+        Desenho.caixa(kx, py + 11, kx + 62, py + 29, keyHover ? CARD_HOVER : FIELD, 5);
+        Desenho.borda(kx, py + 11, kx + 62, py + 29, waiting ? GOLD : conflict(tecla) != null ? AMBER : keyHover ? BEAM : LINE, 5);
+        String kt = waiting ? "..." : tecla.get() == 0 ? "NENHUMA" : tecla.display().toUpperCase();
+        kt = caber(kt, 56);
+        fontRendererObj.drawString(kt, kx + 31 - fontRendererObj.getStringWidth(kt) / 2, py + 16, waiting ? GOLD : tecla.get() == 0 ? MUTED : BEAM);
+        int ex = mx + mw - 70;
+        boolean on = open.isEnabled();
+        boolean enHover = inside(mouseX, mouseY, ex, py + 11, ex + 70, py + 29);
+        Desenho.caixa(ex, py + 11, ex + 70, py + 29, on ? (enHover ? 0xFFA6F0FF : BEAM) : enHover ? 0xFF26304F : BUTTON_OFF, 5);
+        String et = on ? "Ligado" : "Desligado";
+        fontRendererObj.drawString(et, ex + 35 - fontRendererObj.getStringWidth(et) / 2, py + 16, on ? DARK : MUTED);
+        drawRect(mx, py + 38, mx + mw, py + 39, LINE);
+
+        List<Setting> settings = rows();
+        List<int[]> rects = rowRects(settings);
         clampScroll();
         scissor(mx, top, mw, bottom - top);
-        int y = top - scroll;
-        fontRendererObj.drawString(caber(open.description(), mw), mx, y, MUTED);
-        y += 14;
+        String note = headerNote();
+        if (note != null) fontRendererObj.drawString(caber(note, mw), mx, top - scroll + 2, waiting ? GOLD : AMBER);
         if (settings.isEmpty()) {
-            fontRendererObj.drawString("Este mod não tem opções. Use o botão acima para ligar ou desligar.", mx, y + 6, MUTED);
+            fontRendererObj.drawString("Este mod não tem outras opções.", mx, top - scroll + (note != null ? 20 : 6), MUTED);
+            fontRendererObj.drawString("Use os botões acima para ligar, desligar ou escolher uma tecla.", mx, top - scroll + (note != null ? 32 : 18), MUTED);
         }
-        for (Setting s : settings) {
-            drawRow(s, y, mouseX, mouseY);
-            y += ROW_H + 4;
+        for (int i = 0; i < settings.size(); i++) {
+            int[] r = rects.get(i);
+            int y = top - scroll + r[1];
+            if (y + ROW_H < top || y > bottom) continue;
+            drawRow(settings.get(i), mx + r[0], y, r[2], mouseX, mouseY);
         }
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
         drawScrollbar();
     }
 
-    private void drawRow(Setting s, int y, int mouseX, int mouseY) {
-        boolean hover = mouseY >= top && mouseY < bottom && inside(mouseX, mouseY, mx, y, mx + mw, y + ROW_H);
-        drawRect(mx, y, mx + mw, y + ROW_H, hover ? CARD_HOVER : CARD);
-        int cx = mx + mw - 116;
-        int cy = y + 7;
+    private int sliderX(int x, int w) { return x + Math.max(90, w * 2 / 5); }
+    private int sliderW(int x, int w) { return x + w - 54 - sliderX(x, w); }
+
+    private void drawRow(Setting s, int x, int y, int w, int mouseX, int mouseY) {
+        boolean hover = mouseY >= top && mouseY < bottom && inside(mouseX, mouseY, x, y, x + w, y + ROW_H);
+        Desenho.caixa(x, y, x + w, y + ROW_H, hover ? CARD_HOVER : CARD, 5);
+        int cy = y + 8;
         if (s instanceof ActionSetting) {
             boolean done = flashed == s && System.currentTimeMillis() < flashUntil;
-            outline(mx, y, mx + mw, y + ROW_H, hover ? BEAM : LINE);
-            drawCenteredString(fontRendererObj, done ? "Feito!" : s.label(), mx + mw / 2, cy, done ? BEAM : TEXT);
+            Desenho.borda(x, y, x + w, y + ROW_H, hover ? BEAM : LINE, 5);
+            drawCenteredString(fontRendererObj, done ? "Feito!" : s.label(), x + w / 2, cy, done ? BEAM : TEXT);
             return;
         }
-        int room = s instanceof BoolSetting ? mw - 44 : s instanceof TextSetting ? mw - 186 : s instanceof KeySetting ? mw - 118
-                : s instanceof ColorSetting ? mw - 100 : mw - 130;
+        int room = s instanceof BoolSetting ? w - 42 : s instanceof TextSetting ? w - Math.min(180, w / 2) - 16
+                : s instanceof KeySetting ? w - 76 : s instanceof ColorSetting ? w - 44
+                : s instanceof SliderSetting ? sliderX(x, w) - x - 14 : w - Math.min(100, w / 2) - 14;
         // Teclas ganham uma segunda linha: como cancelar enquanto espera, ou onde mais a tecla já é usada.
         String note = null;
         int noteColor = MUTED;
         if (listening == s) {
-            note = "Esc cancela, Backspace deixa sem tecla";
+            note = "Esc cancela, Backspace limpa";
         } else if (s instanceof KeySetting) {
             String other = conflict((KeySetting) s);
             if (other != null) {
@@ -304,50 +414,56 @@ public class GuiPulsarPanel extends GuiScreen {
                 noteColor = AMBER;
             }
         }
-        fontRendererObj.drawString(fontRendererObj.trimStringToWidth(s.label(), room), mx + 6, note == null ? cy : y + 3, TEXT);
-        if (note != null) fontRendererObj.drawString(caber(note, room), mx + 6, y + 12, noteColor);
+        fontRendererObj.drawString(caber(s.label(), room), x + 8, note == null ? cy : y + 3, TEXT);
+        if (note != null) fontRendererObj.drawString(caber(note, room), x + 8, y + 13, noteColor);
         if (s instanceof BoolSetting) {
-            toggle(mx + mw - 28, y + 6, ((BoolSetting) s).get());
+            Desenho.chave(x + w - 30, y + 7, 22, 10, ((BoolSetting) s).get(), hover ? 1f : 0f, BEAM);
         } else if (s instanceof SliderSetting) {
             SliderSetting sl = (SliderSetting) s;
-            int tx = cx + 40;
-            int tw = 70;
-            String v = sl.display();
-            fontRendererObj.drawString(v, tx - 6 - fontRendererObj.getStringWidth(v), cy, BEAM);
-            drawRect(tx, y + 10, tx + tw, y + 12, OFF);
+            int tx = sliderX(x, w);
+            int tw = sliderW(x, w);
+            Desenho.caixa(tx, y + 11, tx + tw, y + 13, OFF, 1);
             int kx = tx + (int) Math.round(sl.fraction() * tw);
-            drawRect(tx, y + 10, kx, y + 12, BEAM);
-            drawRect(kx - 2, y + 6, kx + 2, y + 16, TEXT);
+            Desenho.caixa(tx, y + 11, kx, y + 13, BEAM, 1);
+            Desenho.caixa(kx - 4, y + 8, kx + 4, y + 16, TEXT, 4);
+            int vx = x + w - 46;
+            Desenho.caixa(vx, y + 5, vx + 40, y + ROW_H - 5, FIELD, 4);
+            String v = caber(sl.display(), 38);
+            fontRendererObj.drawString(v, vx + 20 - fontRendererObj.getStringWidth(v) / 2, cy, BEAM);
         } else if (s instanceof ColorSetting) {
             // Quadradinho com a cor; o clique abre a paleta.
             ColorSetting c = (ColorSetting) s;
-            int sx = mx + mw - 40;
-            fontRendererObj.drawString(c.hex(), sx - 6 - fontRendererObj.getStringWidth(c.hex()), cy, MUTED);
-            drawRect(sx, y + 4, sx + 34, y + ROW_H - 4, picking == s ? BEAM : 0xFF0B1222);
-            drawRect(sx + 2, y + 6, sx + 32, y + ROW_H - 6, c.argb(0xFF));
+            int sx = x + w - 36;
+            Desenho.caixa(sx, y + 6, sx + 28, y + ROW_H - 6, picking == s ? BEAM : FIELD, 3);
+            Desenho.caixa(sx + 2, y + 8, sx + 26, y + ROW_H - 8, c.argb(0xFF), 2);
         } else if (s instanceof ModeSetting) {
-            String v = "< " + ((ModeSetting) s).get() + " >";
-            drawRect(cx, y + 4, cx + 110, y + ROW_H - 4, 0xFF0B1222);
-            drawCenteredString(fontRendererObj, v, cx + 55, cy, BEAM);
+            int bw = Math.min(100, w / 2);
+            int bx = x + w - 6 - bw;
+            Desenho.caixa(bx, y + 4, bx + bw, y + ROW_H - 4, FIELD, 4);
+            String v = caber(((ModeSetting) s).get(), bw - 20);
+            drawCenteredString(fontRendererObj, v, bx + bw / 2, cy, BEAM);
+            fontRendererObj.drawString("<", bx + 4, cy, MUTED);
+            fontRendererObj.drawString(">", bx + bw - 9, cy, MUTED);
         } else if (s instanceof KeySetting) {
-            // Caixa da tecla mais estreita, para sobrar espaço para o aviso embaixo do nome.
             boolean waiting = listening == s;
-            int kx = mx + mw - 106;
-            drawRect(kx, y + 4, kx + 100, y + ROW_H - 4, 0xFF0B1222);
-            if (waiting) outline(kx, y + 4, kx + 100, y + ROW_H - 4, 0xFFFFD84A);
-            drawCenteredString(fontRendererObj, waiting ? "Aperte uma tecla" : ((KeySetting) s).display(), kx + 50, cy, waiting ? 0xFFFFD84A : BEAM);
+            int kx = x + w - 66;
+            Desenho.caixa(kx, y + 4, kx + 60, y + ROW_H - 4, FIELD, 4);
+            if (waiting) Desenho.borda(kx, y + 4, kx + 60, y + ROW_H - 4, GOLD, 4);
+            String kt = caber(waiting ? "..." : ((KeySetting) s).display(), 56);
+            drawCenteredString(fontRendererObj, kt, kx + 30, cy, waiting ? GOLD : BEAM);
         } else if (s instanceof TextSetting) {
-            int fx = mx + mw - 176;
-            drawRect(fx, y + 4, mx + mw - 6, y + ROW_H - 4, 0xFF0B1222);
-            outline(fx, y + 4, mx + mw - 6, y + ROW_H - 4, editing == s ? BEAM : LINE);
+            int fw = Math.min(180, w / 2);
+            int fx = x + w - 6 - fw;
+            Desenho.caixa(fx, y + 4, fx + fw, y + ROW_H - 4, FIELD, 4);
+            Desenho.borda(fx, y + 4, fx + fw, y + ROW_H - 4, editing == s ? BEAM : LINE, 4);
             if (editing == s) {
                 field.xPosition = fx + 4;
                 field.yPosition = cy;
                 field.drawTextBox();
             } else {
                 String t = ((TextSetting) s).get();
-                if (t.isEmpty()) fontRendererObj.drawString("Clique para escrever", fx + 4, cy, MUTED);
-                else fontRendererObj.drawString(fontRendererObj.trimStringToWidth(t, 160), fx + 4, cy, TEXT);
+                if (t.isEmpty()) fontRendererObj.drawString(caber("Clique para escrever", fw - 8), fx + 4, cy, MUTED);
+                else fontRendererObj.drawString(fontRendererObj.trimStringToWidth(t, fw - 8), fx + 4, cy, TEXT);
             }
         }
     }
@@ -398,8 +514,8 @@ public class GuiPulsarPanel extends GuiScreen {
 
     private void drawPicker() {
         int x = pickX(), y = pickY();
-        drawRect(x, y, x + PICK_W, y + PICK_H, 0xFA0B1222);
-        outline(x, y, x + PICK_W, y + PICK_H, BEAM);
+        Desenho.caixa(x, y, x + PICK_W, y + PICK_H, 0xFA0B1222, 6);
+        Desenho.borda(x, y, x + PICK_W, y + PICK_H, BEAM, 6);
         fontRendererObj.drawString(caber(picking.label(), PICK_W - 60), x + 8, y + 7, TEXT);
         fontRendererObj.drawString(picking.hex(), x + PICK_W - 8 - fontRendererObj.getStringWidth(picking.hex()), y + 7, BEAM);
 
@@ -497,11 +613,6 @@ public class GuiPulsarPanel extends GuiScreen {
         wr.pos(x, y, 0).color(argb >> 16 & 255, argb >> 8 & 255, argb & 255, argb >>> 24).endVertex();
     }
 
-    private void toggle(int x, int y, boolean on) {
-        drawRect(x, y, x + 20, y + 10, on ? 0xFF2D6F80 : OFF);
-        drawRect(on ? x + 11 : x + 1, y + 1, on ? x + 19 : x + 9, y + 9, on ? BEAM : MUTED);
-    }
-
     private int barraAltura() {
         int view = bottom - top;
         return Math.max(16, view * view / Math.max(1, contentHeight));
@@ -543,8 +654,8 @@ public class GuiPulsarPanel extends GuiScreen {
         int bh = barraAltura();
         int by = barraTopo();
         boolean sobre = barraAgarrada >= 0 || naBarra(ultimoMouseX, ultimoMouseY);
-        drawRect(px + pw - 7, top, px + pw - 3, bottom, sobre ? 0x227FE7FF : 0x117FE7FF);
-        drawRect(px + pw - 7, by, px + pw - 3, by + bh, barraAgarrada >= 0 ? 0xFF7FE7FF : sobre ? 0xCC7FE7FF : 0x887FE7FF);
+        Desenho.caixa(px + pw - 8, top, px + pw - 4, bottom, sobre ? 0x227FE7FF : 0x117FE7FF, 2);
+        Desenho.caixa(px + pw - 8, by, px + pw - 4, by + bh, barraAgarrada >= 0 ? 0xFF7FE7FF : sobre ? 0xCC7FE7FF : 0x887FE7FF, 2);
     }
 
     /** Move a lista para a barra ficar com o ponto agarrado embaixo do mouse. */
@@ -583,6 +694,7 @@ public class GuiPulsarPanel extends GuiScreen {
             return;
         }
         if (editing != null) commitText();
+        layout();
         if (button == 0 && naBarra(mouseX, mouseY)) {
             int by = barraTopo();
             // Clicou fora da parte clara: ela pula para o mouse e já fica agarrada no meio.
@@ -592,26 +704,30 @@ public class GuiPulsarPanel extends GuiScreen {
         }
         if (open == null) search.mouseClicked(mouseX, mouseY, button);
         if (clickSidebar(mouseX, mouseY)) return;
-        if (mouseY < py + 26) {
+        if (mouseY < top) {
             if (open != null && button == 0) {
-                if (inside(mouseX, mouseY, mx, py + 8, mx + 50, py + 22)) back();
-                else if (inside(mouseX, mouseY, px + pw - 40, py + 6, px + pw - 10, py + 24)) open.toggle();
+                int kx = mx + mw - 138, ex = mx + mw - 70;
+                if (inside(mouseX, mouseY, mx, py + 8, mx + 22, py + 32)) back();
+                else if (inside(mouseX, mouseY, kx, py + 11, kx + 62, py + 29)) listening = open.toggleKey();
+                else if (inside(mouseX, mouseY, ex, py + 11, ex + 70, py + 29)) open.toggle();
             }
             return;
         }
-        if (mouseY < top || mouseY >= bottom || mouseX < mx || mouseX >= mx + mw) return;
+        if (mouseY >= bottom || mouseX < mx || mouseX >= mx + mw) return;
         if (open == null) clickGrid(mouseX, mouseY, button);
         else clickSettings(mouseX, mouseY, button);
     }
 
     private boolean clickSidebar(int mouseX, int mouseY) {
-        if (mouseX < px || mouseX >= px + SIDE_W || mouseY < py || mouseY >= py + ph) return false;
-        int y = py + 74;
+        if (mouseX < px || mouseX >= px + sideW || mouseY < py || mouseY >= py + ph) return false;
+        int y = py + 42;
         int step = sideStep();
-        if (mouseY >= y && mouseY < y + step) { select(null); return true; }
+        if (mouseY >= y && mouseY < y + step) { select(null, false); return true; }
+        y += step;
+        if (mouseY >= y && mouseY < y + step) { select(null, true); return true; }
         for (Category c : Category.values()) {
             y += step;
-            if (mouseY >= y && mouseY < y + step) { select(c); return true; }
+            if (mouseY >= y && mouseY < y + step) { select(c, false); return true; }
         }
         y += step + 4;
         if (mouseY >= y && mouseY < y + step) {
@@ -619,15 +735,16 @@ public class GuiPulsarPanel extends GuiScreen {
             mc.displayGuiScreen(new GuiTexturas(this));
             return true;
         }
-        int by = py + ph - 28;
-        if (inside(mouseX, mouseY, px + 8, by, px + SIDE_W - 8, by + 18)) {
+        int by = py + ph - 26;
+        if (inside(mouseX, mouseY, px + 10, by, px + sideW - 6, by + 17)) {
             mc.displayGuiScreen(new GuiHudEditor(this));
         }
         return true;
     }
 
-    private void select(Category c) {
+    private void select(Category c, boolean fav) {
         commitText();
+        favorites = fav;
         listening = null;
         picking = null;
         direct = false;
@@ -645,10 +762,12 @@ public class GuiPulsarPanel extends GuiScreen {
             int y = top + (i / cols) * (CARD_H + GAP) - scroll;
             if (!inside(mouseX, mouseY, x, y, x + cw, y + CARD_H)) continue;
             PulsarMod mod = mods.get(i);
-            boolean gear = inside(mouseX, mouseY, x + cw - 20, y + 28, x + cw, y + CARD_H);
-            if ((button == 1 || gear) && !mod.panelSettings().isEmpty()) {
+            if (button == 0 && inside(mouseX, mouseY, x, y, x + 18, y + 18)) {
+                mod.toggleFavorite();
+            } else if (button == 1 || inside(mouseX, mouseY, x + cw - 18, y, x + cw, y + 18)) {
                 open = mod;
                 scroll = 0;
+                layout();
             } else if (button == 0) {
                 mod.toggle();
             }
@@ -657,13 +776,16 @@ public class GuiPulsarPanel extends GuiScreen {
     }
 
     private void clickSettings(int mouseX, int mouseY, int button) {
-        int y = top - scroll + 14;
-        for (Setting s : open.panelSettings()) {
-            if (mouseY >= y && mouseY < y + ROW_H) {
-                clickSetting(s, mouseX, button);
-                return;
-            }
-            y += ROW_H + 4;
+        List<Setting> settings = rows();
+        List<int[]> rects = rowRects(settings);
+        for (int i = 0; i < settings.size(); i++) {
+            int[] r = rects.get(i);
+            int x = mx + r[0], y = top - scroll + r[1];
+            if (!inside(mouseX, mouseY, x, y, x + r[2], y + ROW_H)) continue;
+            dragX = sliderX(x, r[2]);
+            dragW = sliderW(x, r[2]);
+            clickSetting(settings.get(i), mouseX, button);
+            return;
         }
     }
 
@@ -700,8 +822,7 @@ public class GuiPulsarPanel extends GuiScreen {
     }
 
     private void drag(int mouseX) {
-        int tx = mx + mw - 116 + 40;
-        dragging.setFraction(Math.max(0, Math.min(1, (mouseX - tx) / 70.0)));
+        dragging.setFraction(Math.max(0, Math.min(1, (mouseX - dragX) / (double) Math.max(1, dragW))));
     }
 
     @Override
@@ -781,6 +902,7 @@ public class GuiPulsarPanel extends GuiScreen {
         }
         open = null;
         scroll = 0;
+        layout();
     }
 
     @Override

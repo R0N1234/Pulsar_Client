@@ -7,6 +7,7 @@ const { Config } = require("./lib/config");
 const { Accounts, describeError } = require("./lib/auth");
 const { launch } = require("./lib/launch");
 const { startBridge } = require("./lib/ponte");
+const musica = require("./lib/musica");
 const texturas = require("./lib/texturas");
 const usermods = require("./lib/usermods");
 const i18n = require("./src/i18n");
@@ -350,6 +351,7 @@ app.whenReady().then(() => {
         },
         onAddOffline: async (nick) => contaDoJogo(() => accounts.adicionarOffline(nick)),
         onPresenca: (p) => presenca.atualizar(p),
+        onMusica: (p) => musica.agora(p),
         onRadio: (p) => {
           const c = radio.comando(p);
           pushLog(c.tocando ? `[Pulsar] Rádio: tocando ${c.nome} (volume ${c.volume}%)` : "[Pulsar] Rádio: parado");
@@ -370,6 +372,7 @@ app.whenReady().then(() => {
         onClose: (code) => {
           game = null;
           presenca.parar();
+          musica.parar();
           send("radio:comando", { tocando: false });
           closeBridge();
           flushLogs();
@@ -380,6 +383,7 @@ app.whenReady().then(() => {
     } catch (err) {
       game = null;
       presenca.parar();
+      musica.parar();
       closeBridge();
       throw err;
     } finally {
