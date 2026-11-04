@@ -35,6 +35,12 @@ public final class Desenho {
         terminar();
     }
 
+    /** Caixa arredondada com borda de 1 pixel: a borda é uma caixa um pouco maior por baixo (cantos lisos). */
+    public static void caixaBorda(float l, float t, float r, float b, int fill, int border, int raio) {
+        caixa(l, t, r, b, border, raio);
+        caixa(l + 1, t + 1, r - 1, b - 1, fill, Math.max(0, raio - 1));
+    }
+
     /** Só a borda de uma caixa arredondada, com 1 pixel de espessura. */
     public static void borda(float l, float t, float r, float b, int argb, int raio) {
         if (r <= l || b <= t) return;

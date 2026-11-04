@@ -88,8 +88,7 @@ public class BarraPulsar extends HudMod {
         int y0 = y + (y < 24 && !preview && bossDoJogo() ? 22 : 0);
         int w = width();
         if (background.get()) {
-            Desenho.caixa(x0, y0, x0 + w, y0 + H, 0xD00A0F1E, 5);
-            Desenho.borda(x0, y0, x0 + w, y0 + H, SEP, 5);
+            Desenho.caixaBorda(x0, y0, x0 + w, y0 + H, 0xD00A0F1E, SEP, 5);
         }
         int cx = x0 + 5;
         int ty = y0 + 4;

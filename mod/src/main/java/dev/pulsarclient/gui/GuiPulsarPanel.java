@@ -145,8 +145,7 @@ public class GuiPulsarPanel extends GuiScreen {
         layout();
         if (mc.theWorld == null) Universo.draw(width, height);
         drawRect(0, 0, width, height, 0x66000000);
-        Desenho.caixa(px, py, px + pw, py + ph, BG, 8);
-        Desenho.borda(px, py, px + pw, py + ph, LINE, 8);
+        Desenho.caixaBorda(px, py, px + pw, py + ph, BG, LINE, 8);
         drawSidebar(mouseX, mouseY);
 
         if (open == null) drawGrid(mouseX, mouseY);
@@ -178,8 +177,7 @@ public class GuiPulsarPanel extends GuiScreen {
             drawCenteredString(fontRendererObj, on + " ligados", px + 4 + (sideW - 4) / 2, by - 12, MUTED);
         }
         boolean hover = inside(mouseX, mouseY, px + 10, by, px + sideW - 6, by + 17);
-        Desenho.caixa(px + 10, by, px + sideW - 6, by + 17, hover ? 0xFF1C2A48 : CARD, 4);
-        Desenho.borda(px + 10, by, px + sideW - 6, by + 17, hover ? BEAM : LINE, 4);
+        Desenho.caixaBorda(px + 10, by, px + sideW - 6, by + 17, hover ? 0xFF1C2A48 : CARD, hover ? BEAM : LINE, 4);
         drawCenteredString(fontRendererObj, "Editar HUD", px + 2 + sideW / 2, by + 5, TEXT);
     }
 
@@ -229,8 +227,7 @@ public class GuiPulsarPanel extends GuiScreen {
     private void drawGrid(int mouseX, int mouseY) {
         fontRendererObj.drawString(gridTitle(), mx, py + 12, TEXT);
         int sx = px + pw - 150;
-        Desenho.caixa(sx, py + 8, px + pw - 12, py + 24, FIELD, 5);
-        Desenho.borda(sx, py + 8, px + pw - 12, py + 24, search.isFocused() ? BEAM : LINE, 5);
+        Desenho.caixaBorda(sx, py + 8, px + pw - 12, py + 24, FIELD, search.isFocused() ? BEAM : LINE, 5);
         Icones.desenhar(Icones.LUPA, sx + 5, py + 11.5f, 9, search.isFocused() ? BEAM : MUTED);
         if (search.getText().isEmpty() && !search.isFocused()) fontRendererObj.drawString("Buscar mod...", sx + 16, py + 12, MUTED);
         search.drawTextBox();
@@ -275,8 +272,8 @@ public class GuiPulsarPanel extends GuiScreen {
 
     private void drawCard(PulsarMod mod, int x, int y, int w, boolean hover, int mouseX, int mouseY) {
         boolean on = mod.isEnabled();
-        Desenho.caixa(x, y, x + w, y + CARD_H, hover ? CARD_HOVER : CARD, 5);
-        if (on) Desenho.borda(x, y, x + w, y + CARD_H, 0x447FE7FF, 5);
+        if (on) Desenho.caixaBorda(x, y, x + w, y + CARD_H, hover ? CARD_HOVER : CARD, 0x557FE7FF, 5);
+        else Desenho.caixa(x, y, x + w, y + CARD_H, hover ? CARD_HOVER : CARD, 5);
         boolean star = hover && inside(mouseX, mouseY, x, y, x + 18, y + 18);
         Icones.desenhar(mod.favorite() ? Icones.ESTRELA : Icones.ESTRELA_VAZIA, x + 5, y + 5, 9,
                 mod.favorite() ? GOLD : star ? TEXT : hover ? MUTED : DIM);
@@ -300,7 +297,8 @@ public class GuiPulsarPanel extends GuiScreen {
     }
 
     private boolean wide(Setting s) {
-        return s instanceof SliderSetting || s instanceof TextSetting || s instanceof ActionSetting || mw < 260;
+        // Em telas estreitas tudo fica numa coluna só, para os nomes das opções caberem.
+        return s instanceof SliderSetting || s instanceof TextSetting || s instanceof ActionSetting || mw < 360;
     }
 
     /** Linha de aviso em cima das opções (tecla do cabeçalho esperando ou repetida), ou null. */
@@ -353,8 +351,7 @@ public class GuiPulsarPanel extends GuiScreen {
         KeySetting tecla = open.toggleKey();
         boolean waiting = listening == tecla;
         boolean keyHover = inside(mouseX, mouseY, kx, py + 11, kx + 62, py + 29);
-        Desenho.caixa(kx, py + 11, kx + 62, py + 29, keyHover ? CARD_HOVER : FIELD, 5);
-        Desenho.borda(kx, py + 11, kx + 62, py + 29, waiting ? GOLD : conflict(tecla) != null ? AMBER : keyHover ? BEAM : LINE, 5);
+        Desenho.caixaBorda(kx, py + 11, kx + 62, py + 29, keyHover ? CARD_HOVER : FIELD, waiting ? GOLD : conflict(tecla) != null ? AMBER : keyHover ? BEAM : LINE, 5);
         String kt = waiting ? "..." : tecla.get() == 0 ? "NENHUMA" : tecla.display().toUpperCase();
         kt = caber(kt, 56);
         fontRendererObj.drawString(kt, kx + 31 - fontRendererObj.getStringWidth(kt) / 2, py + 16, waiting ? GOLD : tecla.get() == 0 ? MUTED : BEAM);
@@ -391,14 +388,14 @@ public class GuiPulsarPanel extends GuiScreen {
 
     private void drawRow(Setting s, int x, int y, int w, int mouseX, int mouseY) {
         boolean hover = mouseY >= top && mouseY < bottom && inside(mouseX, mouseY, x, y, x + w, y + ROW_H);
-        Desenho.caixa(x, y, x + w, y + ROW_H, hover ? CARD_HOVER : CARD, 5);
         int cy = y + 8;
         if (s instanceof ActionSetting) {
             boolean done = flashed == s && System.currentTimeMillis() < flashUntil;
-            Desenho.borda(x, y, x + w, y + ROW_H, hover ? BEAM : LINE, 5);
+            Desenho.caixaBorda(x, y, x + w, y + ROW_H, hover ? CARD_HOVER : CARD, hover ? BEAM : LINE, 5);
             drawCenteredString(fontRendererObj, done ? "Feito!" : s.label(), x + w / 2, cy, done ? BEAM : TEXT);
             return;
         }
+        Desenho.caixa(x, y, x + w, y + ROW_H, hover ? CARD_HOVER : CARD, 5);
         int room = s instanceof BoolSetting ? w - 42 : s instanceof TextSetting ? w - Math.min(180, w / 2) - 16
                 : s instanceof KeySetting ? w - 76 : s instanceof ColorSetting ? w - 44
                 : s instanceof SliderSetting ? sliderX(x, w) - x - 14 : w - Math.min(100, w / 2) - 14;
@@ -447,15 +444,14 @@ public class GuiPulsarPanel extends GuiScreen {
         } else if (s instanceof KeySetting) {
             boolean waiting = listening == s;
             int kx = x + w - 66;
-            Desenho.caixa(kx, y + 4, kx + 60, y + ROW_H - 4, FIELD, 4);
-            if (waiting) Desenho.borda(kx, y + 4, kx + 60, y + ROW_H - 4, GOLD, 4);
+            if (waiting) Desenho.caixaBorda(kx, y + 4, kx + 60, y + ROW_H - 4, FIELD, GOLD, 4);
+            else Desenho.caixa(kx, y + 4, kx + 60, y + ROW_H - 4, FIELD, 4);
             String kt = caber(waiting ? "..." : ((KeySetting) s).display(), 56);
             drawCenteredString(fontRendererObj, kt, kx + 30, cy, waiting ? GOLD : BEAM);
         } else if (s instanceof TextSetting) {
             int fw = Math.min(180, w / 2);
             int fx = x + w - 6 - fw;
-            Desenho.caixa(fx, y + 4, fx + fw, y + ROW_H - 4, FIELD, 4);
-            Desenho.borda(fx, y + 4, fx + fw, y + ROW_H - 4, editing == s ? BEAM : LINE, 4);
+            Desenho.caixaBorda(fx, y + 4, fx + fw, y + ROW_H - 4, FIELD, editing == s ? BEAM : LINE, 4);
             if (editing == s) {
                 field.xPosition = fx + 4;
                 field.yPosition = cy;
@@ -514,8 +510,7 @@ public class GuiPulsarPanel extends GuiScreen {
 
     private void drawPicker() {
         int x = pickX(), y = pickY();
-        Desenho.caixa(x, y, x + PICK_W, y + PICK_H, 0xFA0B1222, 6);
-        Desenho.borda(x, y, x + PICK_W, y + PICK_H, BEAM, 6);
+        Desenho.caixaBorda(x, y, x + PICK_W, y + PICK_H, 0xFA0B1222, BEAM, 6);
         fontRendererObj.drawString(caber(picking.label(), PICK_W - 60), x + 8, y + 7, TEXT);
         fontRendererObj.drawString(picking.hex(), x + PICK_W - 8 - fontRendererObj.getStringWidth(picking.hex()), y + 7, BEAM);
 
