@@ -269,7 +269,7 @@ public class GanchosTransformer implements IClassTransformer {
         return true;
     }
 
-    /** LayerArmorBase.renderGlint: depois de GlStateManager.color(0.38, 0.19, 0.608, 1), chama Ganchos.corEncantoArmadura. */
+    /** LayerArmorBase.renderGlint: depois de GlStateManager.color(0.5 * 0.76, 0.25 * 0.76, 0.8 * 0.76, 1), chama Ganchos.corEncantoArmadura. */
     private static boolean encantoArmadura(ClassNode node) {
         MethodNode m = null;
         for (MethodNode x : node.methods) {
@@ -282,7 +282,8 @@ public class GanchosTransformer implements IClassTransformer {
         int count = 0;
         boolean viuRoxo = false;
         for (AbstractInsnNode in = m.instructions.getFirst(); in != null; in = in.getNext()) {
-            if (in instanceof LdcInsnNode && Float.valueOf(0.608F).equals(((LdcInsnNode) in).cst)) viuRoxo = true;
+            // O azul do roxo: 0.608 se o compilador juntou a conta, ou 0.8 (vezes 0.76 numa variável) no jar do 1.8.9.
+            if (in instanceof LdcInsnNode && (Float.valueOf(0.608F).equals(((LdcInsnNode) in).cst) || Float.valueOf(0.8F).equals(((LdcInsnNode) in).cst))) viuRoxo = true;
             if (viuRoxo && in instanceof MethodInsnNode && ((MethodInsnNode) in).desc.equals("(FFFF)V")
                     && is(((MethodInsnNode) in).name, "color", "func_179131_c")) {
                 m.instructions.insert(in, new MethodInsnNode(Opcodes.INVOKESTATIC, G, "corEncantoArmadura", "()V", false));
