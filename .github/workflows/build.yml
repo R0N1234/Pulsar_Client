@@ -39,22 +39,20 @@ jobs:
             git push -f origin ci-log
             exit 1
           fi
-      - uses: actions/upload-artifact@v5
-        with:
-          name: pulsar-mod
-          retention-days: 3
-          path: mod/build/libs/pulsar-client-*.jar
       - name: Versão anterior do mod (aba Versões do launcher)
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: .github/scripts/anterior.sh "$(grep -oP 'VERSION = "\K[^"]+' mod/src/main/java/dev/pulsarclient/PulsarClient.java)"
-      - uses: actions/upload-artifact@v5
+      # O jar passa para os outros jobs pelo cache (a cota de artefatos do GitHub enche fácil com os instaladores).
+      - run: mkdir -p mod/build/anterior
+      - uses: actions/cache/save@v4
         with:
-          name: pulsar-mod-anterior
-          retention-days: 3
-          path: mod/build/anterior/pulsar-client-*.jar
-          if-no-files-found: ignore
+          path: |
+            mod/build/libs
+            mod/build/anterior
+          key: pulsar-mod-${{ github.sha }}-${{ github.run_attempt }}
+          enableCrossOsArchive: true
       - name: Assinaturas da API do Minecraft para consulta (ramo ci-api)
         if: always()
         shell: bash
@@ -86,17 +84,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v5
+      - uses: actions/cache/restore@v4
         with:
-          name: pulsar-mod
-          retention-days: 3
-          path: mod/build/libs
-      - uses: actions/download-artifact@v5
-        continue-on-error: true
-        with:
-          name: pulsar-mod-anterior
-          retention-days: 3
-          path: mod/build/anterior
+          path: |
+            mod/build/libs
+            mod/build/anterior
+          key: pulsar-mod-${{ github.sha }}-${{ github.run_attempt }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -141,11 +136,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v5
+      - uses: actions/cache/restore@v4
         with:
-          name: pulsar-mod
-          retention-days: 3
-          path: mod/build/libs
+          path: |
+            mod/build/libs
+            mod/build/anterior
+          key: pulsar-mod-${{ github.sha }}-${{ github.run_attempt }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -194,11 +192,14 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v5
+      - uses: actions/cache/restore@v4
         with:
-          name: pulsar-mod
-          retention-days: 3
-          path: mod/build/libs
+          path: |
+            mod/build/libs
+            mod/build/anterior
+          key: pulsar-mod-${{ github.sha }}-${{ github.run_attempt }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -249,17 +250,14 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v5
+      - uses: actions/cache/restore@v4
         with:
-          name: pulsar-mod
-          retention-days: 3
-          path: mod/build/libs
-      - uses: actions/download-artifact@v5
-        continue-on-error: true
-        with:
-          name: pulsar-mod-anterior
-          retention-days: 3
-          path: mod/build/anterior
+          path: |
+            mod/build/libs
+            mod/build/anterior
+          key: pulsar-mod-${{ github.sha }}-${{ github.run_attempt }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -341,6 +339,7 @@ jobs:
           git commit -qm "Prints do Windows ${GITHUB_SHA}"
           git push -qf origin ci-windows || true
       - uses: actions/upload-artifact@v5
+        continue-on-error: true
         with:
           name: pulsar-launcher-windows
           retention-days: 3

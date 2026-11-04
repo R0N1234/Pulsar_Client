@@ -31,36 +31,35 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew build --no-daemon
-      - uses: actions/upload-artifact@v5
-        with:
-          name: pulsar-mod
-          path: mod/build/libs/pulsar-client-*.jar
       - name: Versão anterior do mod (aba Versões do launcher)
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           VERSAO: ${{ inputs.versao }}
         run: .github/scripts/anterior.sh "$VERSAO"
-      - uses: actions/upload-artifact@v5
+      # O jar passa para o outro job pelo cache (a cota de artefatos do GitHub enche fácil com os instaladores).
+      - run: mkdir -p mod/build/anterior
+      - uses: actions/cache/save@v4
         with:
-          name: pulsar-mod-anterior
-          path: mod/build/anterior/pulsar-client-*.jar
-          if-no-files-found: ignore
+          path: |
+            mod/build/libs
+            mod/build/anterior
+          key: pulsar-release-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          enableCrossOsArchive: true
 
   publicar:
     needs: mod
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v5
+      - uses: actions/cache/restore@v4
         with:
-          name: pulsar-mod
-          path: mod/build/libs
-      - uses: actions/download-artifact@v5
-        continue-on-error: true
-        with:
-          name: pulsar-mod-anterior
-          path: mod/build/anterior
+          path: |
+            mod/build/libs
+            mod/build/anterior
+          key: pulsar-release-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
       - uses: actions/setup-node@v5
         with:
           node-version: 22
