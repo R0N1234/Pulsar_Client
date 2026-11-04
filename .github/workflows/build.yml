@@ -214,16 +214,20 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $mesa = Join-Path $env:RUNNER_TEMP "mesa"
-          gh release download -R pal1000/mesa-dist-win -p "mesa3d-*-release-msvc.7z" -D $mesa
-          $pacote = Get-ChildItem "$mesa\*.7z" | Select-Object -First 1
-          Write-Host "Mesa: $($pacote.Name)"
-          7z x $pacote.FullName "-o$mesa\x" -y | Out-Null
-          # Acha a pasta de 64 bits pelo opengl32.dll (o pacote do Mesa já mudou de organização entre versões).
-          $dll = Get-ChildItem "$mesa\x" -Recurse -Filter opengl32.dll | Where-Object { $_.DirectoryName -match "x64" } | Select-Object -First 1
-          if (-not $dll) {
-            Get-ChildItem "$mesa\x" -Recurse -Filter *.dll | ForEach-Object { $_.FullName }
-            throw "opengl32.dll de 64 bits do Mesa não achado"
+          # A partir do Mesa 26.2 o pacote msvc veio sem o opengl32.dll: usa a versão mais nova que ainda tem.
+          $dll = $null
+          $tags = gh release list -R pal1000/mesa-dist-win -L 20 --json tagName --jq '.[].tagName'
+          foreach ($t in $tags) {
+            Remove-Item -Recurse -Force $mesa -ErrorAction SilentlyContinue
+            gh release download $t -R pal1000/mesa-dist-win -p "mesa3d-*-release-msvc.7z" -D $mesa
+            $pacote = Get-ChildItem "$mesa\*.7z" -ErrorAction SilentlyContinue | Select-Object -First 1
+            if (-not $pacote) { continue }
+            7z x $pacote.FullName "-o$mesa\x" -y | Out-Null
+            $dll = Get-ChildItem "$mesa\x" -Recurse -Filter opengl32.dll | Where-Object { $_.DirectoryName -match "x64" } | Select-Object -First 1
+            if ($dll) { Write-Host "Mesa: usando $($pacote.Name)"; break }
+            Write-Host "Mesa: $($pacote.Name) não tem opengl32.dll, tentando a versão anterior"
           }
+          if (-not $dll) { throw "Nenhum pacote do Mesa com opengl32.dll de 64 bits" }
           Write-Host "Mesa: copiando de $($dll.DirectoryName)"
           Copy-Item "$($dll.DirectoryName)\*.dll" (Join-Path $env:JAVA_HOME "bin")
           Get-ChildItem (Join-Path $env:JAVA_HOME "bin") -Filter *.dll | Where-Object { $_.Name -match "opengl|gallium|glapi" } | ForEach-Object { $_.Name }
