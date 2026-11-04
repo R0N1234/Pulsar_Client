@@ -215,8 +215,17 @@ jobs:
         run: |
           $mesa = Join-Path $env:RUNNER_TEMP "mesa"
           gh release download -R pal1000/mesa-dist-win -p "mesa3d-*-release-msvc.7z" -D $mesa
-          7z x (Get-ChildItem "$mesa\*.7z" | Select-Object -First 1).FullName "-o$mesa\x" -y | Out-Null
-          Copy-Item "$mesa\x\x64\*.dll" (Join-Path $env:JAVA_HOME "bin")
+          $pacote = Get-ChildItem "$mesa\*.7z" | Select-Object -First 1
+          Write-Host "Mesa: $($pacote.Name)"
+          7z x $pacote.FullName "-o$mesa\x" -y | Out-Null
+          # Acha a pasta de 64 bits pelo opengl32.dll (o pacote do Mesa já mudou de organização entre versões).
+          $dll = Get-ChildItem "$mesa\x" -Recurse -Filter opengl32.dll | Where-Object { $_.DirectoryName -match "x64" } | Select-Object -First 1
+          if (-not $dll) {
+            Get-ChildItem "$mesa\x" -Recurse -Filter *.dll | ForEach-Object { $_.FullName }
+            throw "opengl32.dll de 64 bits do Mesa não achado"
+          }
+          Write-Host "Mesa: copiando de $($dll.DirectoryName)"
+          Copy-Item "$($dll.DirectoryName)\*.dll" (Join-Path $env:JAVA_HOME "bin")
           Get-ChildItem (Join-Path $env:JAVA_HOME "bin") -Filter *.dll | Where-Object { $_.Name -match "opengl|gallium|glapi" } | ForEach-Object { $_.Name }
       - name: Abrir o Minecraft 1.8.9 com o Pulsar no Windows
         working-directory: launcher
