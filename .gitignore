@@ -8,3 +8,6 @@ mod/.idea/
 .DS_Store
 launcher/build/atualizador/
 __pycache__/
+wtap/build/
+wtap/.gradle/
+wtap/run/

@@ -1,0 +1,31 @@
+name: Problema
+description: Algo não funcionou, travou ou ficou estranho no Pulsar Client
+title: "[Problema] "
+labels: ["problema"]
+body:
+  - type: textarea
+    id: oque
+    attributes:
+      label: O que aconteceu?
+      description: Conta o que você fez e o que apareceu. Prints ajudam muito (é só colar aqui).
+    validations:
+      required: true
+  - type: input
+    id: versao
+    attributes:
+      label: Versão do Pulsar
+      placeholder: "0.8.1"
+  - type: dropdown
+    id: modo
+    attributes:
+      label: Modo do jogo
+      options:
+        - Pulsar (Forge)
+        - Pulsar + OptiFine
+        - Só OptiFine
+  - type: textarea
+    id: log
+    attributes:
+      label: Registro do jogo (opcional)
+      description: No launcher, em "Registro do jogo", clique em "copiar" e cole aqui.
+      render: text

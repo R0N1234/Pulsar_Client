@@ -138,20 +138,19 @@ const presenca = {
   },
 };
 
-// Atualização automática: as versões saem nos Releases do repositório privado Pulsar_Client.
-// Para baixar de um repositório privado, o launcher usa uma chave de leitura que o dono
-// cola em Ajustes (nenhuma chave vai dentro do instalador). Sem chave, não procura atualização.
-const UPDATE_REPO = { provider: "github", owner: "R0N1234", repo: "Pulsar_Client", private: true };
+// Atualização automática: as versões saem nos Releases do repositório Pulsar_Client, que é público.
+// Quem colou uma chave de leitura em Ajustes (da época em que o repositório era privado) continua usando ela.
+const UPDATE_REPO = { provider: "github", owner: "R0N1234", repo: "Pulsar_Client" };
 let updatesWired = false;
 let updateTimer = null;
 
 function checkUpdates() {
+  if (!app.isPackaged) return;
   const token = decrypt(config.get().updateTokenEnc);
-  if (!app.isPackaged || !token) return;
-  autoUpdater.setFeedURL({ ...UPDATE_REPO, token });
+  autoUpdater.setFeedURL(token ? { ...UPDATE_REPO, private: true, token } : UPDATE_REPO);
   autoUpdater.checkForUpdates().catch((e) => {
     console.error("[updater]", e);
-    send("update:status", { state: "error", text: "Não consegui procurar atualização. Confira a chave em Ajustes." });
+    send("update:status", { state: "error", text: "Não consegui procurar atualização agora. Tento de novo daqui a pouco." });
   });
 }
 

@@ -1,0 +1,10 @@
+[
+  {
+    "modid": "pulsarwtap",
+    "name": "Pulsar W-Tap e Blockhit",
+    "description": "Solta o correr (W-Tap) e levanta a espada (Blockhit) a cada hit. Teclas em Opções > Controles.",
+    "version": "${version}",
+    "mcversion": "1.8.9",
+    "authorList": ["Rick"]
+  }
+]

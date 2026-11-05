@@ -28,7 +28,11 @@ import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Painel do Pulsar (Shift direito): categorias à esquerda, mods em cartões com ícone e as opções de cada mod.
@@ -151,6 +155,9 @@ public class GuiPulsarPanel extends GuiScreen {
         if (open == null) drawGrid(mouseX, mouseY);
         else drawSettings(mouseX, mouseY);
         if (picking != null) drawPicker();
+        // Texto que saiu de baixo do mouse volta do começo na próxima vez.
+        letreiros.keySet().retainAll(letreirosNoQuadro);
+        letreirosNoQuadro.clear();
     }
 
     private void drawSidebar(int mouseX, int mouseY) {
@@ -267,7 +274,7 @@ public class GuiPulsarPanel extends GuiScreen {
             rodape = on + " de " + mods.size() + " ligados  ·  botão direito ou engrenagem abre as opções";
         }
         drawRect(mx, py + ph - 20, mx + mw, py + ph - 19, LINE);
-        fontRendererObj.drawString(caber(rodape, mw), mx, py + ph - 14, hovered != null ? TEXT : MUTED);
+        fontRendererObj.drawString(letreiro(rodape, mw, hovered != null), mx, py + ph - 14, hovered != null ? TEXT : MUTED);
     }
 
     private void drawCard(PulsarMod mod, int x, int y, int w, boolean hover, int mouseX, int mouseY) {
@@ -280,7 +287,7 @@ public class GuiPulsarPanel extends GuiScreen {
         boolean gear = hover && inside(mouseX, mouseY, x + w - 18, y, x + w, y + 18);
         Icones.desenhar(Icones.ENGRENAGEM, x + w - 14, y + 5, 9, gear ? BEAM : hover ? MUTED : DIM);
         Icones.desenhar(Icones.doMod(mod), x + w / 2f - 11, y + 8, 22, on ? categoryColor(mod.category()) : MUTED);
-        String nome = caber(mod.name(), w - 8);
+        String nome = letreiro(mod.name(), w - 8, hover);
         fontRendererObj.drawString(nome, x + (w - fontRendererObj.getStringWidth(nome)) / 2, y + 36, on ? TEXT : MUTED);
         int by = y + CARD_H - 21;
         boolean bh = hover && inside(mouseX, mouseY, x + 5, by, x + w - 5, by + 15);
@@ -345,8 +352,10 @@ public class GuiPulsarPanel extends GuiScreen {
         Desenho.caixa(mx + 26, py + 8, mx + 50, py + 32, CARD, 5);
         Icones.desenhar(Icones.doMod(open), mx + 30, py + 12, 16, categoryColor(open.category()));
         int kx = mx + mw - 138;
-        fontRendererObj.drawString(caber(open.name(), kx - mx - 60), mx + 56, py + 10, TEXT);
-        fontRendererObj.drawString(caber(open.description(), kx - mx - 60), mx + 56, py + 22, MUTED);
+        // Nome e descrição: com o mouse em cima do cabeçalho, o que não cabe vai passando.
+        boolean headHover = inside(mouseX, mouseY, mx + 50, py + 6, kx - 4, py + 34);
+        fontRendererObj.drawString(letreiro(open.name(), kx - mx - 60, headHover), mx + 56, py + 10, TEXT);
+        fontRendererObj.drawString(letreiro(open.description(), kx - mx - 60, headHover), mx + 56, py + 22, MUTED);
 
         KeySetting tecla = open.toggleKey();
         boolean waiting = listening == tecla;
@@ -411,8 +420,21 @@ public class GuiPulsarPanel extends GuiScreen {
                 noteColor = AMBER;
             }
         }
-        fontRendererObj.drawString(caber(s.label(), room), x + 8, note == null ? cy : y + 3, TEXT);
-        if (note != null) fontRendererObj.drawString(caber(note, room), x + 8, y + 13, noteColor);
+        if (note != null) {
+            fontRendererObj.drawString(letreiro(s.label(), room, hover), x + 8, y + 3, TEXT);
+            fontRendererObj.drawString(letreiro(note, room, hover), x + 8, y + 13, noteColor);
+        } else if (fontRendererObj.getStringWidth(s.label()) <= room) {
+            fontRendererObj.drawString(s.label(), x + 8, cy, TEXT);
+        } else if (hover) {
+            // Mouse em cima: o nome inteiro vai passando numa linha só.
+            fontRendererObj.drawString(letreiro(s.label(), room, true), x + 8, cy, TEXT);
+        } else {
+            // Nome comprido: quebra em duas linhas (a segunda termina com "..." se ainda faltar espaço).
+            List<String> linhas = fontRendererObj.listFormattedStringToWidth(s.label(), room);
+            fontRendererObj.drawString(linhas.get(0), x + 8, y + 3, TEXT);
+            String resto = s.label().substring(Math.min(s.label().length(), linhas.get(0).length())).trim();
+            fontRendererObj.drawString(caber(resto, room), x + 8, y + 13, TEXT);
+        }
         if (s instanceof BoolSetting) {
             Desenho.chave(x + w - 30, y + 7, 22, 10, ((BoolSetting) s).get(), hover ? 1f : 0f, BEAM);
         } else if (s instanceof SliderSetting) {
@@ -437,7 +459,7 @@ public class GuiPulsarPanel extends GuiScreen {
             int bw = Math.min(100, w / 2);
             int bx = x + w - 6 - bw;
             Desenho.caixa(bx, y + 4, bx + bw, y + ROW_H - 4, FIELD, 4);
-            String v = caber(((ModeSetting) s).get(), bw - 20);
+            String v = letreiro(((ModeSetting) s).get(), bw - 20, hover);
             drawCenteredString(fontRendererObj, v, bx + bw / 2, cy, BEAM);
             fontRendererObj.drawString("<", bx + 4, cy, MUTED);
             fontRendererObj.drawString(">", bx + bw - 9, cy, MUTED);
@@ -918,6 +940,30 @@ public class GuiPulsarPanel extends GuiScreen {
         int f = new ScaledResolution(mc).getScaleFactor();
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GL11.glScissor(x * f, mc.displayHeight - (y + h) * f, w * f, h * f);
+    }
+
+    // Textos que estão passando (letreiro) e desde quando, para começar do início a cada vez que o mouse chega.
+    private final Map<String, Long> letreiros = new HashMap<String, Long>();
+    private final Set<String> letreirosNoQuadro = new HashSet<String>();
+
+    /**
+     * Texto que não cabe: sem o mouse termina com "..."; com o mouse em cima ele vai passando
+     * (para meio segundo no começo e anda umas 12 letras por segundo), para dar para ler tudo.
+     */
+    private String letreiro(String s, int w, boolean hover) {
+        if (fontRendererObj.getStringWidth(s) <= w) return s;
+        if (!hover) return caber(s, w);
+        long agora = System.currentTimeMillis();
+        Long desde = letreiros.get(s);
+        if (desde == null) {
+            desde = agora;
+            letreiros.put(s, desde);
+        }
+        letreirosNoQuadro.add(s);
+        String volta = s + "     ";
+        long t = agora - desde;
+        int passo = t < 600 ? 0 : (int) ((t - 600) / 80 % volta.length());
+        return fontRendererObj.trimStringToWidth(volta.substring(passo) + volta.substring(0, passo), w);
     }
 
     /** Corta o texto com "..." quando não cabe. */

@@ -132,6 +132,7 @@ public class SelfTest {
             case 13:
                 mc.displayGuiScreen(menu);
                 Conta.trocar();
+                show("sugestoes", new GuiSugestoes(menu));
                 break;
             case 14: show("conta", menu); break;
             case 15: mc.displayGuiScreen(new GuiContas(menu)); break;

@@ -1,0 +1,26 @@
+name: Sugestão
+description: Uma ideia de mod, HUD ou melhoria para o Pulsar Client
+title: "[Sugestão] "
+labels: ["sugestão"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Valeu por ajudar a melhorar o Pulsar! Conta a sua ideia do jeito que for mais fácil.
+  - type: textarea
+    id: ideia
+    attributes:
+      label: Sua ideia
+      description: O que você gostaria que o Pulsar tivesse ou fizesse diferente?
+    validations:
+      required: true
+  - type: textarea
+    id: motivo
+    attributes:
+      label: Por que ajudaria?
+      description: Em que servidor ou situação isso faria diferença (FullPvP, Bedwars, PC fraco...)?
+  - type: input
+    id: versao
+    attributes:
+      label: Versão do Pulsar
+      placeholder: "0.8.1"

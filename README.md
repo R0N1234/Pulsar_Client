@@ -1,86 +1,102 @@
-# Pulsar Client
+<p align="center">
+  <img src="launcher/build/icon.png" width="140" alt="Logo do Pulsar Client">
+</p>
 
-Client de PVP para Minecraft 1.8.9 com tema espacial. O projeto tem duas partes:
+<h1 align="center">Pulsar Client</h1>
+
+<p align="center">
+  <b>O client de PvP para Minecraft 1.8.9 feito para PC fraco e para o FullPvP.</b><br>
+  Mais FPS no meio da treta, HUD limpa e mods pensados para quem vive de combo, pote e caixa.
+</p>
+
+<p align="center">
+  <a href="https://github.com/R0N1234/Pulsar_Client/releases/latest"><b>⬇️ Baixar para Windows</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/R0N1234/Pulsar_Client/issues/new?template=sugestao.yml">💡 Mandar sugestão</a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/R0N1234/Pulsar_Client/issues/new?template=problema.yml">🐞 Avisar de um problema</a>
+</p>
+
+<p align="center">
+  <img src="docs/menu.png" width="49%" alt="Menu do Pulsar com o universo girando atrás">
+  <img src="docs/painel.png" width="49%" alt="Painel de mods do Pulsar (Shift direito)">
+</p>
+
+---
+
+## 🚀 Por que o Pulsar?
+
+**Feito para PC fraco.** O **Motor Pulsar** é um otimizador próprio que entra dentro do jogo: não desenha o que está atrás de parede, deixa leve quem está longe, corta grama alta, flores e partículas em excesso e segura o FPS quando o jogo fica em segundo plano. Numa mina de FullPvP com 40 jogadores, só os mais perto de você ficam com todos os detalhes. Os de longe continuam com a skin, mas sem o peso da armadura e do item na mão.
+
+**Feito para o FullPvP.** CPS, combo, alcance, durabilidade da armadura, contador de potes e pérolas, tempo de recarga das maçãs, TNT, zoom, mira personalizada e a Barra Pulsar no topo da tela com FPS, ping e hora. Tudo arrastável no editor de HUD.
+
+**Bonito sem pesar.** Tema espacial do começo ao fim: menu com um universo 360° girando devagar (Andrômeda, os planetas e um pulsar), painel com ícones e favoritos, fonte própria. Tudo desenhado para custar quase nada de FPS.
+
+**Fácil de usar.** Um launcher só: entra com a conta Microsoft, baixa o Java e o Forge sozinho, atualiza sozinho e funciona com ou sem OptiFine.
+
+<p align="center">
+  <img src="docs/hud.png" width="49%" alt="HUD do Pulsar dentro do jogo">
+  <img src="docs/opcoes.png" width="49%" alt="Opções do Motor Pulsar">
+</p>
+
+## 🧩 Mods
+
+**HUD**
+- **Barra Pulsar**: mini painel no topo com o client, FPS, ms, hora e a música que está tocando no Spotify (com capa)
+- **Teclas Pulse** e **Frequência CPS**: WASD, cliques e CPS na tela
+- **FPS**, **Latência**, **Coordenadas**, **Bússola**, **Relógio**, **Memória**, **Servidor**, **Saturação** e **Cronômetro**
+- **Placar** (sem os números vermelhos), **Lista do TAB** (cabeça da skin e ping em número), **Barra de Chefe** e **Pacote Ativo**
+
+**Combate**
+- **Combo**, **Alcance**, **Blindagem**, **Efeitos**, **Contador de Itens**, **Recargas** e **Contador TNT**
+- **Mira de Pulsar** (formato, cor, tamanho e contorno), **Impacto**, **Campo de Colisão** e **Tremor de Dano**
+- **Animações Clássicas** (bloqueio e swing da 1.7), **Propulsão** (correr fixo) e **Inventário** (trava itens contra drop)
+
+**Visual**
+- **Telescópio** (zoom), **Órbita Livre** (câmera 360° em volta do personagem), **Fonte do Pulsar** e **Cores Vivas**
+- **Aura de Encanto** (cor do brilho de encantamento, até arco-íris), **Contorno**, **Supernova**, **Atmosfera**, **Poeira Estelar**, **Rastro de Cometa**, **Gravidade de Itens**, **Nebulosa** e **Meu Nick**
+
+**Servidores e social**
+- **Atalhos de Texto** (uma tecla manda /lobby, /home...), **GG Automático**, **Sinal Discord** e **Capturas**
+
+**Motor Pulsar**
+- Perfis **Desempenho**, **Desempenho + Qualidade** e **Qualidade+**, com cada parte ajustável
+
+## 📥 Como instalar
+
+1. Baixe o **Pulsar-Client-Instalador** na [página de lançamentos](https://github.com/R0N1234/Pulsar_Client/releases/latest).
+2. Abra o instalador. Ele instala e abre o launcher sozinho.
+3. Entre com a sua conta Microsoft (a que tem o Minecraft) e clique em **JOGAR**.
+
+No jogo, aperte **Shift direito** para abrir o painel de mods. O launcher atualiza sozinho quando sai versão nova.
+
+## ❓ Perguntas rápidas
+
+**Posso usar em qualquer servidor?** O Pulsar é feito de HUD, visual e desempenho, como os clients conhecidos. Mesmo assim, cada servidor tem as suas regras: na dúvida, confira quais mods são permitidos lá.
+
+**Funciona com OptiFine?** Sim. No launcher, escolha o modo **Pulsar + OptiFine**.
+
+**A Barra Pulsar mostra a música de que jeito?** Ela lê a música pelos controles de mídia do Windows, sem login e sem pedir senha do Spotify. A capa vem da busca pública do iTunes, e dá para desligar a capa nas opções da barra.
+
+**Achei um problema ou tenho uma ideia.** Use o botão **Sugestões** no menu do jogo ou abra uma [sugestão](https://github.com/R0N1234/Pulsar_Client/issues/new?template=sugestao.yml) ou um [problema](https://github.com/R0N1234/Pulsar_Client/issues/new?template=problema.yml) aqui no GitHub.
+
+---
+
+<details>
+<summary><b>Para quem quer mexer no código</b></summary>
 
 | Pasta | O que é | Tecnologia |
 |---|---|---|
-| `launcher/` | O programa que você abre no PC: login Microsoft, tela inicial, aba de mods, ajustes e o botão JOGAR | Electron (Node.js) |
-| `mod/` | O que roda dentro do Minecraft: HUD, Teclas Pulse, CPS e os outros mods | Forge 1.8.9 (Java 8) |
+| `launcher/` | O programa que abre no PC: login, mods, ajustes e o botão JOGAR | Electron (Node.js) |
+| `mod/` | O que roda dentro do Minecraft: HUD, mods, painel e o Motor Pulsar | Forge 1.8.9 (Java 8) |
+| `wtap/` | W-Tap e Blockhit como um mod Forge separado | Forge 1.8.9 (Java 8) |
+| `tools/` | Geradores da arte (universo, planetas, ícones e logo) | Python + Pillow |
 
-O launcher instala o Forge 1.8.9 e o jar do mod numa pasta própria (`%APPDATA%\.pulsar` no Windows), separada da sua `.minecraft`.
+Compilar o mod: `cd mod && ./gradlew build` (precisa do Java 21 para o Gradle e do Java 8 para o jogo).
+Abrir o launcher: `cd launcher && npm install && npm start`.
 
-## O que já funciona (versão 0.5)
+Cada push roda o jogo de verdade no CI (Linux, Windows e com OptiFine), passa por todas as telas e mods e confere o log.
+Para lançar uma versão: **Actions** > **Lançar versão** > **Run workflow**, com o número da versão e o que mudou.
+</details>
 
-Launcher:
-- Tela inicial no estilo Núcleo (pulsar no centro, 1.8.9 e botão JOGAR) e o logo PC com um pulsar atrás
-- Aba Mods no estilo Painel, com o catálogo, busca, filtros e prévia da HUD
-- Login com conta Microsoft em português (o token fica salvo criptografado pelo sistema e é renovado antes de jogar)
-- Usa a `.minecraft` com uma instância própria (`.minecraft/pulsar/instancia-1.8.9`), baixa o Java 8 sozinho
-- Modos Forge + Pulsar, OptiFine + Forge + Pulsar e Só OptiFine (o jar do OptiFine é escolhido pelo jogador)
-- **Console do Pulsar**: janela própria com o registro do jogo, cores, filtro e copiar (abre ao clicar em Jogar; dá para desligar em Ajustes)
-- Ponte local (`lib/ponte.js`, só 127.0.0.1 e com chave nova a cada jogo) para trocar de conta Microsoft pelo menu do Minecraft
-- Atualização automática pelos Releases
-
-Mod (30 prontos):
-- HUD: **Teclas Pulse**, **Frequência CPS**, **FPS**, **Latência**, **Coordenadas**, **Relógio**, **Memória**, **Bússola**, **Servidor**, **Saturação**, **Cronômetro** (tecla P)
-- Combate: **Propulsão** (correr fixo, tecla R), **Mira de Pulsar**, **Blindagem**, **Efeitos**, **Combo**, **Alcance**, **Tremor de Dano**, **Campo de Colisão**, **Contador de Itens**, **Contador TNT**, **Inventário** (trava itens com L para não dropar nem tirar do lugar; inventário centralizado com efeitos)
-- Visual: **Telescópio** (zoom no C), **Órbita Livre** (segurando Alt, a câmera gira 360° em volta do personagem), **Meu Nick** (seu nick no F5), **Supernova**, **Contorno**, **Atmosfera**, **Poeira Estelar**
-- **Motor Pulsar**: otimizador próprio com perfis **Desempenho**, **Desempenho + Qualidade** e **Qualidade+**. Tem ganchos dentro do jogo (`core/MotorTransformer`): não desenha entidades escondidas atrás de paredes ou longe (nem a sombra e o nome delas), baús/placas/cabeças longe, pode desligar a animação de água/lava/fogo e limitar partículas novas. Também segura o FPS em segundo plano e esconde suportes de armadura (mantém hologramas)
-
-Menu principal: caixinha no canto de cima com a sua conta. Clicar nela abre o login da Microsoft por cima do jogo e troca de conta sem fechar o Minecraft.
-
-Tela de carregamento e menu: o jar também é um coremod (`dev.pulsarclient.core`) que troca a tela de carregamento do Forge pela do Pulsar (universo de fundo, "PC" no círculo e uma barra). Se der qualquer erro, a tela normal do Forge aparece. O menu principal do jogo é trocado pelo do Pulsar, com o mesmo fundo. A arte sai de `tools/arte_espaco.py`.
-
-Painel do Pulsar: aperte **Shift direito** no jogo. Categorias à esquerda, busca, cartões dos mods (clique liga ou desliga, as três barras ou o botão direito abrem as opções) e o botão **Editar HUD**. O painel também abre pelo botão **Pulsar Client** no menu do Esc, pelo botão **Motor Pulsar** em Opções > Vídeo e pelo botão **Pulsar** no menu inicial.
-
-Tudo fica em `.minecraft/pulsar/instancia-1.8.9/pulsar/config.json`: o launcher grava se cada mod está ligado, e o jogo grava as posições da HUD e as opções de cada mod.
-
-## Como rodar no seu PC
-
-Você precisa de:
-- **Java 21** (para compilar) e **Java 8** (para jogar a 1.8.9). Recomendo o Temurin: https://adoptium.net
-- **Node.js 22**: https://nodejs.org
-
-1. Compile o mod:
-   ```
-   cd mod
-   gradlew build        (no Windows)
-   ./gradlew build      (Linux/Mac)
-   ```
-   O jar sai em `mod/build/libs/pulsar-client-0.3.0.jar`. A primeira compilação demora porque baixa o Minecraft e o Forge.
-
-2. Abra o launcher:
-   ```
-   cd launcher
-   npm install
-   npm start
-   ```
-
-3. Entre com a Microsoft, confira em **Ajustes** o caminho do Java 8 (por exemplo `C:\Program Files\Eclipse Adoptium\jre-8.0.432.6-hotspot\bin\javaw.exe`) e clique em **JOGAR**.
-
-Para gerar o instalador do Windows: `npm run dist` dentro de `launcher/` (compile o mod antes, o instalador leva o jar junto).
-
-## Atualizações automáticas
-
-As versões saem nos **Releases** deste repositório, que continua privado. O launcher procura versão nova ao abrir e a cada 30 minutos, baixa em segundo plano e mostra no topo o botão **Atualizar e reiniciar**.
-
-Como o repositório é privado, cada launcher precisa de uma **chave de leitura** colada em Ajustes. A chave fica só naquele computador, criptografada; nenhuma chave vai dentro do instalador.
-
-### Para lançar uma versão
-1. Aba **Actions** > **Lançar versão** > **Run workflow**.
-2. Digite a versão nova, sempre maior que a anterior (ex.: `0.3.0`), e o que mudou.
-3. Em alguns minutos a versão aparece em Releases e os launchers com chave atualizam sozinhos.
-
-### Criar a chave de leitura (uma vez só)
-GitHub > foto > Settings > Developer settings > Personal access tokens > **Fine-grained tokens** > Generate new token. Em Repository access escolha só o `Pulsar_Client`; em Permissions, **Contents: Read-only**. Copie a chave e cole no launcher em Ajustes > Chave de atualização.
-
-## Próximos passos sugeridos
-
-- Animações Clássicas (bloqueio estilo 1.7), que precisa de mais ganchos no jogo
-- Motor Pulsar: carregamento de chunks mais rápido e culling de partículas fora da tela
-- Cosméticos (Hangar), que precisam de um servidor próprio
-
-## Observações
-
-- Os nomes e a marca são do Pulsar. A coluna "equivale no Lunar" no catálogo é só referência de função; nada da marca ou dos arquivos do Lunar Client é usado.
-- O login usa a biblioteca `msmc`, que usa o app de login padrão do Minecraft. Para lançar publicamente, o ideal é registrar um app próprio no Azure e pedir aprovação da Mojang para usar a API do Minecraft.
+<p align="center"><sub>Pulsar Client não é afiliado à Mojang nem à Microsoft. Minecraft é marca da Mojang AB.</sub></p>

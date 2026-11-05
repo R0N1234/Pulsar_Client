@@ -185,6 +185,38 @@ jobs:
           git push -qf origin ci-optifine || true
           exit $status
 
+  wtap:
+    # W-Tap e Blockhit separado do client (pulsar-wtap-X.jar, para a pasta mods). O jar fica no ramo ci-wtap.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: |
+            8
+            21
+      - name: Compilar o W-Tap e Blockhit
+        working-directory: wtap
+        shell: bash
+        run: |
+          chmod +x gradlew
+          ./gradlew build --no-daemon
+          ls -la build/libs
+      - name: Publicar o jar no ramo ci-wtap
+        shell: bash
+        run: |
+          mkdir -p /tmp/wtap && cp wtap/build/libs/pulsar-wtap-*.jar /tmp/wtap/
+          rm -f /tmp/wtap/*-sources.jar /tmp/wtap/*-dev*.jar
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git checkout -q --orphan ci-wtap
+          git rm -rfq --cached .
+          cp /tmp/wtap/*.jar .
+          git add -f pulsar-wtap-*.jar
+          git commit -qm "W-Tap e Blockhit ${GITHUB_SHA}"
+          git push -qf origin ci-wtap
+
   e2e-windows:
     # O mesmo teste do jogo (todas as telas e mods) rodando no Windows, com OpenGL por software (Mesa),
     # porque a máquina do GitHub não tem placa de vídeo. Prints e log no ramo ci-windows-jogo.
@@ -231,6 +263,11 @@ jobs:
           Write-Host "Mesa: copiando de $($dll.DirectoryName)"
           Copy-Item "$($dll.DirectoryName)\*.dll" (Join-Path $env:JAVA_HOME "bin")
           Get-ChildItem (Join-Path $env:JAVA_HOME "bin") -Filter *.dll | Where-Object { $_.Name -match "opengl|gallium|glapi" } | ForEach-Object { $_.Name }
+      - name: Leitor de música do Spotify (Barra Pulsar) roda no PowerShell
+        working-directory: launcher
+        shell: pwsh
+        run: |
+          node -e "require('./lib/musica').testar().then((r) => { console.log(r.saida); console.log(r.erros); if (r.erro || !/T:/.test(r.saida) || /ParserError|Exception/.test(r.erros)) process.exit(1); })"
       - name: Abrir o Minecraft 1.8.9 com o Pulsar no Windows
         working-directory: launcher
         shell: pwsh

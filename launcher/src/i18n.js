@@ -68,6 +68,12 @@
     "mods do Pulsar ligados": ["Pulsar mods on", "модов Pulsar включено", "Pulsar-Mods an"],
     "{n0} de {n1}": ["{0} of {1}", "{0} из {1}", "{0} von {1}"],
     Novidades: ["What's new", "Что нового", "Neuigkeiten"],
+    "Versão 0.8.1:": ["Version 0.8.1:", "Версия 0.8.1:", "Version 0.8.1:"],
+    "Textos compridos do painel agora quebram em duas linhas e passam sozinhos com o mouse em cima. A Barra Pulsar lê a música do Spotify pelos controles de mídia do Windows, sem login. Novo botão Sugestões no menu do jogo. O W-Tap e Blockhit saiu do client e virou um mod separado.": [
+      "Long texts in the panel now wrap into two lines and scroll when you hover them. The Pulsar Bar reads your Spotify song from the Windows media controls, no login needed. New Suggestions button in the game menu. W-Tap and Blockhit left the client and became a separate mod.",
+      "Длинные тексты в панели теперь переносятся на две строки и прокручиваются при наведении мыши. Панель Pulsar читает песню из Spotify через медиа-управление Windows, без входа. Новая кнопка «Предложения» в меню игры. W-Tap и Blockhit убраны из клиента и стали отдельным модом.",
+      "Lange Texte im Panel brechen jetzt in zwei Zeilen um und laufen durch, wenn die Maus darauf ist. Die Pulsar-Leiste liest deinen Spotify-Song über die Mediensteuerung von Windows, ohne Login. Neuer Vorschläge-Knopf im Spielmenü. W-Tap und Blockhit sind aus dem Client raus und jetzt ein eigener Mod.",
+    ],
     "Versão 0.8.0:": ["Version 0.8.0:", "Версия 0.8.0:", "Version 0.8.0:"],
     "Barra Pulsar no topo da tela com FPS, ms, hora e a música do Spotify (com capa). O fundo do menu virou um universo 360° girando, com Andrômeda, os planetas e um pulsar. Painel do Shift direito e opções dos mods com visual novo, ícones e favoritos. No Motor Pulsar, com muita gente perto, só os mais próximos ficam com detalhe completo e os de longe ficam só com a skin. Novos mods: Pacote Ativo, Barra de Chefe e Aura de Encanto.": [
       "Pulsar Bar at the top of the screen with FPS, ms, time and your Spotify song (with cover). The menu background is now a slowly turning 360° universe with Andromeda, the planets and a pulsar. New look for the Right Shift panel and mod options, with icons and favorites. In the Pulsar Engine, with a crowd nearby, only the closest players keep full detail and far ones keep just the skin. New mods: Active Pack, Boss Bar and Enchant Aura.",
@@ -582,6 +588,11 @@
       "Couldn't check for updates. Check the key in Settings.",
       "Не удалось проверить обновления. Проверьте ключ в настройках.",
       "Update-Suche fehlgeschlagen. Prüfe den Schlüssel in den Einstellungen.",
+    ],
+    "Não consegui procurar atualização agora. Tento de novo daqui a pouco.": [
+      "Couldn't check for updates right now. I'll try again soon.",
+      "Сейчас не удалось проверить обновления. Попробую позже.",
+      "Konnte gerade nicht nach Updates suchen. Ich versuche es gleich nochmal.",
     ],
     "A atualização falhou. O launcher tenta de novo daqui a pouco.": [
       "The update failed. The launcher will try again shortly.",

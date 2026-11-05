@@ -79,7 +79,8 @@ body.playing .pulsar .beams{animation-duration:1.2s}
 .card h4,.preview h4{margin:0 0 6px;font-family:var(--f-mono);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--beam);text-transform:uppercase}
 .card p{margin:0;font-size:13px;color:var(--mute)}
 .card p b{color:var(--ink)}
-.news{left:24px}
+.news{left:24px;max-height:38vh;overflow-y:auto}
+.news p+p{margin-top:8px}
 .log{right:24px}
 .log pre{margin:0;max-height:88px;overflow:auto;font-family:var(--f-mono);font-size:10.5px;color:var(--dim);white-space:pre-wrap;user-select:text}
 @media (max-width:1150px){.card{width:260px}}
