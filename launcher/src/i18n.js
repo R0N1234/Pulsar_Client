@@ -68,7 +68,7 @@
     "mods do Pulsar ligados": ["Pulsar mods on", "модов Pulsar включено", "Pulsar-Mods an"],
     "{n0} de {n1}": ["{0} of {1}", "{0} из {1}", "{0} von {1}"],
     Novidades: ["What's new", "Что нового", "Neuigkeiten"],
-    "Versão 0.8.2:": ["Version 0.8.2:", "Версия 0.8.2:", "Version 0.8.2:"],
+    "Versão 0.8.3:": ["Version 0.8.3:", "Версия 0.8.3:", "Version 0.8.3:"],
     "Textos compridos do painel agora quebram em duas linhas e passam sozinhos com o mouse em cima. A Barra Pulsar lê a música do Spotify pelos controles de mídia do Windows, sem login. Novo botão Sugestões no menu do jogo. O W-Tap e Blockhit saiu do client e virou um mod separado.": [
       "Long texts in the panel now wrap into two lines and scroll when you hover them. The Pulsar Bar reads your Spotify song from the Windows media controls, no login needed. New Suggestions button in the game menu. W-Tap and Blockhit left the client and became a separate mod.",
       "Длинные тексты в панели теперь переносятся на две строки и прокручиваются при наведении мыши. Панель Pulsar читает песню из Spotify через медиа-управление Windows, без входа. Новая кнопка «Предложения» в меню игры. W-Tap и Blockhit убраны из клиента и стали отдельным модом.",
@@ -82,6 +82,7 @@
     ],
     "Registro do jogo": ["Game log", "Журнал игры", "Spielprotokoll"],
     console: ["console", "консоль", "Konsole"],
+    "sugestões": ["suggestions", "предложения", "Vorschläge"],
     copiar: ["copy", "копировать", "kopieren"],
     copiado: ["copied", "скопировано", "kopiert"],
     "não deu para copiar": ["couldn't copy", "не удалось скопировать", "Kopieren fehlgeschlagen"],

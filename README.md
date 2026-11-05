@@ -12,6 +12,8 @@
 <p align="center">
   <a href="https://github.com/R0N1234/Pulsar_Client/releases/latest"><b>⬇️ Baixar para Windows</b></a>
   &nbsp;·&nbsp;
+  <a href="https://discord.gg/UUW5jTfDKH">💬 Discord do Pulsar</a>
+  &nbsp;·&nbsp;
   <a href="https://github.com/R0N1234/Pulsar_Client/issues/new?template=sugestao.yml">💡 Mandar sugestão</a>
   &nbsp;·&nbsp;
   <a href="https://github.com/R0N1234/Pulsar_Client/issues/new?template=problema.yml">🐞 Avisar de um problema</a>
@@ -78,7 +80,7 @@ No jogo, aperte **Shift direito** para abrir o painel de mods. O launcher atuali
 
 **A Barra Pulsar mostra a música de que jeito?** Ela lê a música pelos controles de mídia do Windows, sem login e sem pedir senha do Spotify. A capa vem da busca pública do iTunes, e dá para desligar a capa nas opções da barra.
 
-**Achei um problema ou tenho uma ideia.** Use o botão **Sugestões** no menu do jogo ou abra uma [sugestão](https://github.com/R0N1234/Pulsar_Client/issues/new?template=sugestao.yml) ou um [problema](https://github.com/R0N1234/Pulsar_Client/issues/new?template=problema.yml) aqui no GitHub.
+**Achei um problema ou tenho uma ideia.** Chame no [Discord do Pulsar](https://discord.gg/UUW5jTfDKH), use o botão **Sugestões** no menu do jogo ou abra uma [sugestão](https://github.com/R0N1234/Pulsar_Client/issues/new?template=sugestao.yml) ou um [problema](https://github.com/R0N1234/Pulsar_Client/issues/new?template=problema.yml) aqui no GitHub.
 
 ---
 

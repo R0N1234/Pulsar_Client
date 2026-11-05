@@ -19,7 +19,7 @@ import java.util.List;
 public class GuiSugestoes extends GuiScreen {
     public static final String REPO = "https://github.com/R0N1234/Pulsar_Client";
     /** Convite do grupo do Discord do Pulsar (vazio = ainda não tem; o botão aparece desligado). */
-    public static final String DISCORD = "";
+    public static final String DISCORD = "https://discord.gg/UUW5jTfDKH";
     private static final int ENVIAR = 1, DISCORD_BTN = 2, VOLTAR = 3;
     private static final int W = 320, H = 196;
 

@@ -261,7 +261,7 @@ app.whenReady().then(() => {
     return publicConfig();
   });
   ipcMain.handle("link:open", (_e, url) => {
-    if (/^https:\/\/(optifine\.net|adoptium\.net|modrinth\.com)\//.test(String(url))) shell.openExternal(url);
+    if (/^https:\/\/(optifine\.net|adoptium\.net|modrinth\.com|discord\.gg|github\.com\/R0N1234\/Pulsar_Client)\//.test(String(url))) shell.openExternal(url);
   });
   ipcMain.handle("versoes:list", () => listaVersoes());
   ipcMain.handle("versoes:escolher", (_e, qual) => {

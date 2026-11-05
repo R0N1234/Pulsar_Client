@@ -656,6 +656,8 @@ $("btnUpdToken").onclick = async () => {
 };
 $("btnPickOf").onclick = async () => renderOptifine(await api.pickOptifine());
 $("btnOfSite").onclick = () => api.openLink("https://optifine.net/downloads");
+$("btnDiscord").onclick = () => api.openLink("https://discord.gg/UUW5jTfDKH");
+$("btnSugestao").onclick = () => api.openLink("https://github.com/R0N1234/Pulsar_Client/issues/new?template=sugestao.yml");
 $("loader").addEventListener("change", async () => {
   const cfg = await api.setConfig({ loader: $("loader").value });
   updateCounts();
