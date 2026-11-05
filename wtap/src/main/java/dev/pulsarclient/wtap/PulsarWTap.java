@@ -10,6 +10,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.fml.client.config.GuiConfigEntries;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -27,13 +28,13 @@ import org.lwjgl.input.Keyboard;
  * - Blockhit levanta a espada por alguns ticks logo depois do hit (o mesmo que apertar o botão direito).
  *
  * Tudo é feito pelas teclas do próprio jogo (correr e usar item), então o cliente e o servidor ficam de acordo.
- * Teclas para ligar e desligar cada parte em Opções > Controles; o resto em Mods > Pulsar W-Tap > Config.
+ * Teclas para ligar e desligar cada parte e para abrir as opções em Opções > Controles; as opções também ficam em Mods > Pulsar W-Tap > Config.
  */
 @Mod(modid = PulsarWTap.MODID, name = "Pulsar W-Tap e Blockhit", version = PulsarWTap.VERSION,
         acceptedMinecraftVersions = "[1.8.9]", guiFactory = "dev.pulsarclient.wtap.Fabrica")
 public class PulsarWTap {
     public static final String MODID = "pulsarwtap";
-    public static final String VERSION = "1.0.0";
+    public static final String VERSION = "1.1.0";
     static final String CATEGORIA = "geral";
 
     static Configuration config;
@@ -42,6 +43,7 @@ public class PulsarWTap {
     private final Minecraft mc = Minecraft.getMinecraft();
     private final KeyBinding wtapKey = new KeyBinding("Ligar/desligar W-Tap", Keyboard.KEY_NONE, "Pulsar W-Tap e Blockhit");
     private final KeyBinding blockhitKey = new KeyBinding("Ligar/desligar Blockhit", Keyboard.KEY_NONE, "Pulsar W-Tap e Blockhit");
+    private final KeyBinding opcoesKey = new KeyBinding("Abrir opções (ticks)", Keyboard.KEY_NONE, "Pulsar W-Tap e Blockhit");
 
     // Ticks que faltam: -1 = parado; 0 = acabou agora e precisa devolver a tecla.
     private int semCorrer = -1;
@@ -62,6 +64,9 @@ public class PulsarWTap {
         blockhit = config.get(CATEGORIA, "blockhit", true, "Blockhit: levanta a espada a cada hit");
         blockTicks = config.get(CATEGORIA, "blockhit_ticks", 1, "Ticks bloqueando depois do hit (1 a 5)", 1, 5);
         soEspada = config.get(CATEGORIA, "so_espada", true, "Blockhit só com espada na mão");
+        // Barra de arrastar no lugar da caixa de texto: digitar "3" depois do "1" virava "13" e a tela recusava.
+        wtapTicks.setConfigEntryClass(GuiConfigEntries.NumberSliderEntry.class);
+        blockTicks.setConfigEntryClass(GuiConfigEntries.NumberSliderEntry.class);
         if (config.hasChanged()) config.save();
     }
 
@@ -69,6 +74,7 @@ public class PulsarWTap {
     public void init(FMLInitializationEvent event) {
         ClientRegistry.registerKeyBinding(wtapKey);
         ClientRegistry.registerKeyBinding(blockhitKey);
+        ClientRegistry.registerKeyBinding(opcoesKey);
         MinecraftForge.EVENT_BUS.register(this);
         System.out.println("[Pulsar W-Tap] carregado (W-Tap " + wtap.getBoolean() + ", Blockhit " + blockhit.getBoolean() + ")");
     }
@@ -142,6 +148,8 @@ public class PulsarWTap {
         if (mc.thePlayer == null) return;
         if (wtapKey.isPressed()) alternar("W-Tap", wtap);
         if (blockhitKey.isPressed()) alternar("Blockhit", blockhit);
+        // Abre as mesmas opções da lista de mods, sem sair do jogo; ao fechar, volta para o jogo.
+        if (opcoesKey.isPressed() && mc.currentScreen == null) mc.displayGuiScreen(new Fabrica.Tela(null));
     }
 
     private void alternar(String nome, Property p) {
