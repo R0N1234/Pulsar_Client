@@ -68,6 +68,12 @@
     "mods do Pulsar ligados": ["Pulsar mods on", "модов Pulsar включено", "Pulsar-Mods an"],
     "{n0} de {n1}": ["{0} of {1}", "{0} из {1}", "{0} von {1}"],
     Novidades: ["What's new", "Что нового", "Neuigkeiten"],
+    "Versão 0.8.4:": ["Version 0.8.4:", "Версия 0.8.4:", "Version 0.8.4:"],
+    "Som no Windows com o driver de áudio novo (o mesmo do Minecraft atual), para quem ficava sem som com alguns fones e placas de som.": [
+      "Sound on Windows with the new audio driver (the same as current Minecraft), for anyone who had no sound with some headsets and sound cards.",
+      "Звук в Windows с новым аудиодрайвером (как в современном Minecraft) — для тех, у кого не было звука с некоторыми наушниками и звуковыми картами.",
+      "Ton unter Windows mit dem neuen Audiotreiber (wie im aktuellen Minecraft), für alle, die mit manchen Headsets und Soundkarten keinen Ton hatten.",
+    ],
     "Versão 0.8.3:": ["Version 0.8.3:", "Версия 0.8.3:", "Version 0.8.3:"],
     "Textos compridos do painel agora quebram em duas linhas e passam sozinhos com o mouse em cima. A Barra Pulsar lê a música do Spotify pelos controles de mídia do Windows, sem login. Novo botão Sugestões no menu do jogo. O W-Tap e Blockhit saiu do client e virou um mod separado.": [
       "Long texts in the panel now wrap into two lines and scroll when you hover them. The Pulsar Bar reads your Spotify song from the Windows media controls, no login needed. New Suggestions button in the game menu. W-Tap and Blockhit left the client and became a separate mod.",

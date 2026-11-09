@@ -16,6 +16,11 @@ const FORGE_URL = `https://maven.minecraftforge.net/net/minecraftforge/forge/${F
 const MANIFEST_URL = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
 const OPTIFINE_VERSION_ID = "1.8.9-OptiFine-Pulsar";
 const OPTIFINE_MOD_NAME = "OptiFine-pulsar.jar";
+// Som no Windows: o OpenAL que vem com o 1.8.9 é de 2015 e fica mudo com vários fones e placas de som atuais
+// (Lunar, Silent e cia. trazem um mais novo). Usamos o OpenAL Soft 1.23.1, o mesmo do Minecraft atual, e o antigo fica de reserva.
+const OPENAL_VERSAO = "1.23.1";
+const OPENAL_URL = "https://repo1.maven.org/maven2/org/lwjgl/lwjgl-openal/3.3.3/lwjgl-openal-3.3.3-natives-windows.jar";
+const OPENAL_SHA1 = "cf83862ae95d98496b26915024c7e666d8ab1c8f";
 
 // Flags de JVM para menos travadas (coleta de lixo curta e previsível).
 const JVM_FLAGS = [
@@ -51,6 +56,24 @@ async function ensureForge(root) {
   const jar = path.join(root, "pulsar", "forge", `forge-${FORGE_VERSION}-universal.jar`);
   if (!fs.existsSync(jar)) await download(FORGE_URL, jar);
   return jar;
+}
+
+/** Pasta com o OpenAL64.dll novo (só Windows 64 bits). Baixa uma vez e confere pelo SHA-1. */
+async function ensureOpenAL(root) {
+  const dir = path.join(root, "pulsar", "openal", OPENAL_VERSAO);
+  const dll = path.join(dir, "OpenAL64.dll");
+  if (fs.existsSync(dll) && fs.statSync(dll).size > 100000) return dir;
+  const res = await fetch(OPENAL_URL);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const jar = Buffer.from(await res.arrayBuffer());
+  const sha1 = require("crypto").createHash("sha1").update(jar).digest("hex");
+  if (sha1 !== OPENAL_SHA1) throw new Error("arquivo diferente do esperado");
+  const entry = new AdmZip(jar).getEntry("windows/x64/org/lwjgl/openal/OpenAL.dll");
+  if (!entry) throw new Error("OpenAL.dll não veio no pacote");
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(dll + ".part", entry.getData());
+  fs.renameSync(dll + ".part", dll);
+  return dir;
 }
 
 // Jar do Minecraft 1.8.9 puro, necessário para preparar o OptiFine.
@@ -178,13 +201,26 @@ async function launch({ config, authorization, modSourceDir, runtimeDir, onStatu
 
   const java = await ensureJava({ javaPath: config.javaPath, runtimeDir, onStatus });
 
+  // O jogo procura o OpenAL na ordem das pastas: primeiro o novo, depois o original (nativos do 1.8.9).
+  // O -Djava.library.path daqui vem depois do que o launcher-core põe, e o último é o que vale.
+  const somArgs = [];
+  if (process.platform === "win32" && process.arch === "x64") {
+    try {
+      const oal = await ensureOpenAL(root);
+      somArgs.push(`-Djava.library.path=${oal}${path.delimiter}${path.resolve(root, "natives", MC_VERSION)}`);
+      onLog(`[Pulsar] Som: OpenAL Soft ${OPENAL_VERSAO} pronto`);
+    } catch (e) {
+      onLog(`[Pulsar] Som: fiquei com o OpenAL original (${e.message})`);
+    }
+  }
+
   const options = {
     authorization,
     root,
     version: { number: MC_VERSION, type: "release" },
     memory: { max: `${config.memoryMaxGb}G`, min: "1G" },
     javaPath: java,
-    customArgs: [...JVM_FLAGS, ...extraJvmArgs],
+    customArgs: [...JVM_FLAGS, ...somArgs, ...extraJvmArgs],
     overrides: { assetIndex: ASSET_INDEX, gameDirectory: gameDir },
   };
 

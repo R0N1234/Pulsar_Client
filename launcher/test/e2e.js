@@ -73,6 +73,7 @@ const REDE = process.env.E2E_REDE || "";
 const CAPA_TESTE = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAL0lEQVR4nGOssDnBAAPsq83h7J+hJ7GKMzGQCGivgYUYdyOLD0Y/EOPu0XiguQYAdbwXi7uh378AAAAASUVORK5CYII=";
 // Com E2E_OPTIFINE (caminho do jar do OptiFine 1.8.9), o jogo abre no modo Forge + OptiFine, igual ao de muita gente.
 const OPTIFINE = process.env.E2E_OPTIFINE ? path.resolve(process.env.E2E_OPTIFINE) : "";
+if (process.platform === "win32") REQUIRED.push([/Som: OpenAL Soft [\d.]+ pronto/, "OpenAL novo para o som no Windows"]);
 if (REDE) {
   REQUIRED.push([/Rede: conectado como \w+ \(offline\)/, "rede do Pulsar respondendo (conta offline)"]);
   REQUIRED.push([/selftest: amigos/, "tela de Amigos"]);
