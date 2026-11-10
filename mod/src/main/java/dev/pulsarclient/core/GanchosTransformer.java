@@ -28,6 +28,8 @@ import java.util.List;
  *   se faltar qualquer método, a fonte fica desligada, para desenho e medida nunca discordarem.
  * - ItemRenderer.renderItemInFirstPerson: balanço do braço enquanto bloqueia com a espada (Animações Clássicas).
  * - RendererLivingEntity.setBrightness: cor de quando a entidade leva dano (Impacto).
+ * - ModelBiped.setRotationAngles: a pose dos emotes do Pulsar, depois da pose normal do jogo
+ *   (a armadura e as camadas da skin copiam a mesma pose, então tudo se mexe junto).
  *
  * Os nomes no jogo publicado são os nomes SRG (func_..., field_...); os outros são do ambiente de desenvolvimento.
  */
@@ -44,6 +46,7 @@ public class GanchosTransformer implements IClassTransformer {
             if (transformedName.equals("net.minecraft.client.renderer.entity.RendererLivingEntity")) return patch(bytes, transformedName, 2);
             if (transformedName.equals("net.minecraft.client.renderer.entity.RenderItem")) return patch(bytes, transformedName, 3);
             if (transformedName.equals("net.minecraft.client.renderer.entity.layers.LayerArmorBase")) return patch(bytes, transformedName, 4);
+            if (transformedName.equals("net.minecraft.client.model.ModelBiped")) return patch(bytes, transformedName, 5);
         } catch (Throwable t) {
             System.err.println("[Pulsar] Não deu para instalar os ganchos em " + transformedName + ": " + t);
         }
@@ -59,7 +62,8 @@ public class GanchosTransformer implements IClassTransformer {
         else if (which == 1) ok = balanco(node);
         else if (which == 2) ok = corDano(node);
         else if (which == 3) ok = encantoItem(node);
-        else ok = encantoArmadura(node);
+        else if (which == 4) ok = encantoArmadura(node);
+        else ok = poseEmote(node);
         if (!ok) return bytes;
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         node.accept(writer);
@@ -297,6 +301,31 @@ public class GanchosTransformer implements IClassTransformer {
         }
         Ganchos.ganchoEncantoArmadura = true;
         System.out.println("[Pulsar] Aura de Encanto: gancho da armadura instalado (" + m.name + ", " + count + " lugares)");
+        return true;
+    }
+
+    // ---------- emotes ----------
+
+    private static boolean poseEmote(ClassNode node) {
+        MethodNode m = method(node, "(FFFFFFLnet/minecraft/entity/Entity;)V", "setRotationAngles", "func_78087_a");
+        if (m == null) {
+            System.err.println("[Pulsar] Emotes: setRotationAngles não achado:" + listMethods(node));
+            return false;
+        }
+        int count = 0;
+        for (AbstractInsnNode in = m.instructions.getFirst(); in != null; in = in.getNext()) {
+            if (in.getOpcode() != Opcodes.RETURN) continue;
+            InsnList call = new InsnList();
+            call.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            call.add(new VarInsnNode(Opcodes.ALOAD, 7));
+            call.add(new MethodInsnNode(Opcodes.INVOKESTATIC, G, "poseEmote",
+                    "(Lnet/minecraft/client/model/ModelBiped;Lnet/minecraft/entity/Entity;)V", false));
+            m.instructions.insertBefore(in, call);
+            count++;
+        }
+        if (count == 0) return false;
+        Ganchos.ganchoEmote = true;
+        System.out.println("[Pulsar] Emotes: gancho instalado em ModelBiped (" + m.name + ", " + count + " saídas)");
         return true;
     }
 

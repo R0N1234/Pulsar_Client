@@ -27,6 +27,9 @@ public final class Ganchos {
     /** Cor do brilho de encantamento (RGB), ou {@link #NAO} para a cor roxa do jogo. */
     public interface Encanto { int cor(boolean armadura); }
 
+    /** Emotes do Pulsar: mexe nas partes do modelo depois da pose normal do jogo. */
+    public interface Emote { void pose(net.minecraft.client.model.ModelBiped modelo, net.minecraft.entity.Entity entidade); }
+
     public static final int NAO = Integer.MIN_VALUE;
 
     /** Mesma tabela de caracteres da fonte do Minecraft 1.8.9 (índice usado por renderDefaultChar). */
@@ -46,6 +49,7 @@ public final class Ganchos {
     public static volatile CorDano corDano;
     public static volatile Balanco balanco;
     public static volatile Encanto encanto;
+    public static volatile Emote emote;
 
     // Quais ganchos entraram no jogo (preenchido pelo GanchosTransformer).
     public static volatile boolean ganchoFonte;
@@ -54,6 +58,7 @@ public final class Ganchos {
     public static volatile boolean ganchoCorDano;
     public static volatile boolean ganchoEncantoItem;
     public static volatile boolean ganchoEncantoArmadura;
+    public static volatile boolean ganchoEmote;
     // Quantas vezes a cor do brilho foi trocada (teste automático).
     public static volatile long encantoItens;
     public static volatile long encantoArmaduras;
@@ -211,6 +216,20 @@ public final class Ganchos {
         } catch (Throwable t) {
             corDano = null;
             System.err.println("[Pulsar] Impacto desligado por erro: " + t);
+        }
+    }
+
+    // ---------- emotes ----------
+
+    /** ModelBiped.setRotationAngles, no fim: a pose do emote por cima da pose do jogo. */
+    public static void poseEmote(net.minecraft.client.model.ModelBiped modelo, net.minecraft.entity.Entity entidade) {
+        Emote e = emote;
+        if (e == null || entidade == null) return;
+        try {
+            e.pose(modelo, entidade);
+        } catch (Throwable t) {
+            emote = null;
+            System.err.println("[Pulsar] Emotes desligados por erro: " + t);
         }
     }
 }

@@ -20,6 +20,7 @@ public class GuiPulsarMenu extends GuiScreen {
     private static final int QUIT = 7;
     private static final int TEXTURES = 8;
     private static final int SUGESTOES = 9;
+    private static final int COSMETICOS = 10;
     private static final int ACCOUNT_W = 132;
     private static final int ACCOUNT_H = 26;
 
@@ -44,6 +45,7 @@ public class GuiPulsarMenu extends GuiScreen {
         buttonList.add(new PulsarButton(QUIT, x + 153, y + 72, 47, 20, "Sair"));
         // Canto de cima, do outro lado da conta: sugestões e o grupo do Discord.
         buttonList.add(new PulsarButton(SUGESTOES, width - 104, 4, 100, 20, "Sugestões"));
+        buttonList.add(new PulsarButton(COSMETICOS, width - 208, 4, 100, 20, "Cosméticos"));
     }
 
     @Override
@@ -86,6 +88,7 @@ public class GuiPulsarMenu extends GuiScreen {
             case MODS: mc.displayGuiScreen(new GuiModList(this)); break;
             case TEXTURES: mc.displayGuiScreen(new GuiTexturas(this)); break;
             case SUGESTOES: mc.displayGuiScreen(new GuiSugestoes(this)); break;
+            case COSMETICOS: mc.displayGuiScreen(new dev.pulsarclient.cosmeticos.GuiCosmeticos(this, null)); break;
             case QUIT: mc.shutdown(); break;
             default: break;
         }

@@ -335,12 +335,44 @@ public class SelfTest {
                 show("capturas", new GuiChat());
                 break;
             case 26:
+                // Cosméticos: a loja com o próprio boneco usando a Órbita Pulsar.
+                dev.pulsarclient.cosmeticos.Cosmeticos.get().liberarTudoParaTeste();
+                dev.pulsarclient.cosmeticos.Cosmeticos.get().usarAcessorio("orbita");
+                show("cosmeticos", new dev.pulsarclient.cosmeticos.GuiCosmeticos(null, null));
+                break;
+            case 27:
+                // Supernova: o print sai no meio do emote, com os braços para cima e as estrelas.
+                mc.displayGuiScreen(null);
+                log(dev.pulsarclient.cosmeticos.Cosmeticos.get().tocar("supernova") ? "emote" : "emote-falhou");
+                break;
+            case 28:
+                dev.pulsarclient.cosmeticos.Cosmeticos.get().usarAcessorio("coroa");
+                dev.pulsarclient.cosmeticos.Cosmeticos.get().tocar("facepalm");
+                log("coroa");
+                break;
+            case 29:
+                // As asas ficam nas costas: câmera por trás.
+                dev.pulsarclient.cosmeticos.Cosmeticos.get().usarAcessorio("asas");
+                dev.pulsarclient.cosmeticos.Cosmeticos.get().tocar("danca");
+                mc.gameSettings.thirdPersonView = 1;
+                log("asas");
+                break;
+            case 30:
+                System.out.println("[Pulsar] Cosméticos: " + dev.pulsarclient.cosmeticos.Cosmeticos.poses() + " poses de emote, "
+                        + dev.pulsarclient.cosmeticos.Cosmeticos.desenhos() + " acessórios desenhados, gancho " + Ganchos.ganchoEmote);
+                log(Ganchos.ganchoEmote && dev.pulsarclient.cosmeticos.Cosmeticos.poses() > 0 ? "emote-ok" : "emote-falhou");
+                log(dev.pulsarclient.cosmeticos.Cosmeticos.desenhos() > 0 ? "acessorio-ok" : "acessorio-falhou");
+                dev.pulsarclient.cosmeticos.Cosmeticos.get().parar();
+                dev.pulsarclient.cosmeticos.Cosmeticos.get().usarAcessorio("orbita");
+                mc.gameSettings.thirdPersonView = 0;
+                break;
+            case 31:
                 // Desliga o rádio um passo antes do fim: o pedido de parar sai em até meio segundo.
                 PulsarClient.get().mod("rastro_cometa").setEnabled(false);
                 PulsarClient.get().mod("radio_pulsar").setEnabled(false);
                 mc.displayGuiScreen(null);
                 break;
-            case 27:
+            case 32:
                 finish(mc);
                 break;
             default: break;

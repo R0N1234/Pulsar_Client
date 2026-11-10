@@ -19,6 +19,10 @@ const READY = /Sound engine started|Created: \d+x\d+ textures-atlas/;
 const TIMEOUT_MS = 10 * 60 * 1000;
 // Com os prints ligados, o teste também confere estas linhas no log (cada uma prova uma parte funcionando).
 const REQUIRED = [
+  [/Emotes: gancho instalado em ModelBiped/, "gancho dos emotes"],
+  [/Cosméticos: camada de acessórios em \d+ bonecos/, "camada dos acessórios"],
+  [/selftest: emote-ok/, "emote mexendo no boneco"],
+  [/selftest: acessorio-ok/, "acessório desenhado"],
   [/Tela de carregamento do Pulsar instalada/, "tela de carregamento"],
   [/Motor: gancho de entidades instalado/, "gancho de entidades do Motor"],
   [/Motor: gancho de blocos especiais instalado/, "gancho de baús e placas do Motor"],
@@ -92,6 +96,8 @@ const FORBIDDEN = [
   /Motor: filtro de blocos desligado/,
   /selftest: (itens|nebulosa)-falhou/,
   /selftest: (encanto|pacote|chefe|musica|universo)-falhou/,
+  /selftest: (emote|acessorio)-falhou/,
+  /Emotes desligados por erro/,
   /Gravidade de Itens: não instalada/,
   /Motor: molduras leves indisponíveis/,
   /Motor: bonecos otimizados (indisponíveis|desligados)/,

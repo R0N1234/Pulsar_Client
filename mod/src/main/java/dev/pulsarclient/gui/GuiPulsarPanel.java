@@ -175,6 +175,7 @@ public class GuiPulsarPanel extends GuiScreen {
         }
         drawRect(px + 12, y + 1, px + sideW - 8, y + 2, LINE);
         int fim = sideItem("Texturas", Icones.QUADRO, false, y + 4, mouseX, mouseY);
+        fim = sideItem("Cosméticos", Icones.MEDALHA, false, fim, mouseX, mouseY);
 
         int by = py + ph - 26;
         // Em telas baixas a contagem sai para não encostar na lista.
@@ -750,6 +751,12 @@ public class GuiPulsarPanel extends GuiScreen {
         if (mouseY >= y && mouseY < y + step) {
             commitText();
             mc.displayGuiScreen(new GuiTexturas(this));
+            return true;
+        }
+        y += step;
+        if (mouseY >= y && mouseY < y + step) {
+            commitText();
+            mc.displayGuiScreen(new dev.pulsarclient.cosmeticos.GuiCosmeticos(this, null));
             return true;
         }
         int by = py + ph - 26;

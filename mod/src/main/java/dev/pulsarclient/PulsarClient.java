@@ -1,6 +1,7 @@
 package dev.pulsarclient;
 
 import dev.pulsarclient.config.PulsarConfig;
+import dev.pulsarclient.cosmeticos.Cosmeticos;
 import dev.pulsarclient.gui.GuiPulsarPanel;
 import dev.pulsarclient.gui.Janela;
 import dev.pulsarclient.gui.MenuButtons;
@@ -168,6 +169,9 @@ public class PulsarClient {
         ClientRegistry.registerKeyBinding(orbita.key);
         ClientRegistry.registerKeyBinding(inventario.lockKey);
         ClientRegistry.registerKeyBinding(cronometro.key);
+        Cosmeticos cosmeticos = Cosmeticos.iniciar(Minecraft.getMinecraft().mcDataDir);
+        ClientRegistry.registerKeyBinding(cosmeticos.teclaEmotes);
+        MinecraftForge.EVENT_BUS.register(cosmeticos);
         CombatTracker.listen(poeira);
         Janela.aplicar(VERSION);
         MinecraftForge.EVENT_BUS.register(this);
