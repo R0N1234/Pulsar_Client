@@ -68,6 +68,12 @@
     "mods do Pulsar ligados": ["Pulsar mods on", "модов Pulsar включено", "Pulsar-Mods an"],
     "{n0} de {n1}": ["{0} of {1}", "{0} из {1}", "{0} von {1}"],
     Novidades: ["What's new", "Что нового", "Neuigkeiten"],
+    "Versão 0.8.5:": ["Version 0.8.5:", "Версия 0.8.5:", "Version 0.8.5:"],
+    "Cosméticos do Pulsar: a Órbita Pulsar (acessório) e a Supernova (emote) são grátis, e os outros chegam em breve. Aperte B no jogo para os emotes. O Telescópio virou um zoom igual ao do OptiFine (segure C). Mais FPS: a fonte e o Motor Pulsar param de esperar a placa de vídeo a cada quadro.": [
+      "Pulsar cosmetics: the Pulsar Orbit (accessory) and Supernova (emote) are free, and the others are coming soon. Press B in game for emotes. The Telescope is now an OptiFine-style zoom (hold C). More FPS: the font and Pulsar Engine no longer wait on the graphics card every frame.",
+      "Косметика Pulsar: «Орбита Pulsar» (аксессуар) и «Сверхновая» (эмоция) бесплатны, остальное скоро. Нажмите B в игре для эмоций. Телескоп теперь — зум как в OptiFine (удерживайте C). Больше FPS: шрифт и Движок Pulsar больше не ждут видеокарту каждый кадр.",
+      "Pulsar-Kosmetik: der Pulsar-Orbit (Accessoire) und die Supernova (Emote) sind kostenlos, der Rest kommt bald. Drücke B im Spiel für Emotes. Das Teleskop ist jetzt ein Zoom wie bei OptiFine (C gedrückt halten). Mehr FPS: Schrift und Pulsar-Motor warten nicht mehr jedes Bild auf die Grafikkarte.",
+    ],
     "Versão 0.8.4:": ["Version 0.8.4:", "Версия 0.8.4:", "Version 0.8.4:"],
     "Som no Windows com o driver de áudio novo (o mesmo do Minecraft atual), para quem ficava sem som com alguns fones e placas de som.": [
       "Sound on Windows with the new audio driver (the same as current Minecraft), for anyone who had no sound with some headsets and sound cards.",
