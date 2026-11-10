@@ -77,6 +77,7 @@ public class SelfTest {
     private int loadTicks;
     private int inWorld;
     private float sensibilidade;
+    private boolean cinemaAntes;
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
@@ -228,17 +229,19 @@ public class SelfTest {
                 // Zoom do Telescópio segurando a tecla; a sensibilidade do jogo não pode mudar em nenhum momento.
                 PulsarClient.get().pressToggleKey(Keyboard.KEY_G);
                 sensibilidade = mc.gameSettings.mouseSensitivity;
+                cinemaAntes = mc.gameSettings.smoothCamera;
                 KeyBinding.setKeyBindState(telescopio().key.getKeyCode(), true);
                 break;
             case 15:
-                boolean lenta = telescopio().mouseScale() < 0.99 && mc.gameSettings.mouseSensitivity == sensibilidade;
+                // Igual ao OptiFine: com zoom, a câmera cinematográfica liga para a mira ficar suave.
+                boolean lenta = telescopio().zoomAtivo() && mc.gameSettings.smoothCamera && mc.gameSettings.mouseSensitivity == sensibilidade;
                 log(lenta ? "zoom" : "zoom-sem-mira-lenta");
                 break;
             case 16:
                 KeyBinding.setKeyBindState(telescopio().key.getKeyCode(), false);
                 break;
             case 17:
-                boolean voltou = telescopio().mouseScale() >= 0.999 && mc.gameSettings.mouseSensitivity == sensibilidade;
+                boolean voltou = !telescopio().zoomAtivo() && mc.gameSettings.smoothCamera == cinemaAntes && mc.gameSettings.mouseSensitivity == sensibilidade;
                 log(voltou ? "zoom-ok" : "zoom-falhou");
                 spawnBonecos(mc);
                 spawnMolduras(mc);

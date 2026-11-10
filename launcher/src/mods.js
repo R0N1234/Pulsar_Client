@@ -45,7 +45,7 @@ window.PULSAR_MODS = [
   ["chat_plus", "Chat+", "Chat com histórico, filtros e mensagens empilhadas", "HUD"],
   ["fonte_pulsar", "Fonte do Pulsar", "Troca a fonte de todo o jogo pela fonte do Pulsar (ou volta a do Minecraft)", "Visual", true],
   ["cores_vivas", "Cores Vivas", "Contraste e saturação para deixar o jogo mais vivo", "Visual", "off"],
-  ["telescopio", "Telescópio", "Zoom suave segurando uma tecla (padrão C), a roda do mouse ajusta", "Visual", true],
+  ["telescopio", "Telescópio", "Zoom igual ao do OptiFine segurando uma tecla (padrão C)", "Visual", true],
   ["orbita_livre", "Órbita Livre", "Segurando uma tecla (padrão Alt), a câmera gira 360° em volta do personagem (Perspective)", "Visual", true],
   ["rastro_cometa", "Rastro de Cometa", "Desfoque de movimento: a imagem deixa um rastro quando você vira", "Visual", "off"],
   ["meu_nick", "Meu Nick", "Mostra o seu nick em cima do personagem no F5", "Visual", true],

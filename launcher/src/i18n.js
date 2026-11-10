@@ -289,10 +289,10 @@
       "Ersetzt die Schrift im ganzen Spiel durch die Pulsar-Schrift (oder zurück zur Minecraft-Schrift)",
     ],
     "Contraste e saturação para deixar o jogo mais vivo": ["Contrast and saturation for a more vivid game", "Контраст и насыщенность для более яркой игры", "Kontrast und Sättigung für ein lebendigeres Spiel"],
-    "Zoom suave segurando uma tecla (padrão C), a roda do mouse ajusta": [
-      "Smooth zoom while holding a key (default C), the mouse wheel adjusts it",
-      "Плавный зум при удержании клавиши (по умолчанию C), колесо мыши регулирует",
-      "Sanfter Zoom beim Halten einer Taste (Standard C), das Mausrad stellt ihn ein",
+    "Zoom igual ao do OptiFine segurando uma tecla (padrão C)": [
+      "OptiFine-style zoom while holding a key (default C)",
+      "Зум как в OptiFine при удержании клавиши (по умолчанию C)",
+      "Zoom wie bei OptiFine beim Halten einer Taste (Standard C)",
     ],
     "Segurando uma tecla (padrão Alt), a câmera gira 360° em volta do personagem (Perspective)": [
       "While holding a key (default Alt), the camera spins 360° around your character (Perspective)",
