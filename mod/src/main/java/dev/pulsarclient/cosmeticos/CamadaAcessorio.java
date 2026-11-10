@@ -149,19 +149,36 @@ final class CamadaAcessorio implements LayerRenderer<AbstractClientPlayer> {
         GlStateManager.depthMask(true);
     }
 
-    /** Uma asa em leque: cinco penas saindo da raiz, roxas perto do corpo e azuis nas pontas. */
+    /** Uma asa em leque: penas saindo da raiz, roxas perto do corpo e azuis nas pontas, com o contorno claro. */
     private static void asa(int lado) {
+        float[][] pontas = {{0.2f, -0.62f}, {0.62f, -0.6f}, {1.02f, -0.42f}, {1.08f, -0.12f}, {0.92f, 0.16f}, {0.66f, 0.42f}, {0.36f, 0.6f}};
         Tessellator tess = Tessellator.getInstance();
         WorldRenderer wr = tess.getWorldRenderer();
         wr.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_COLOR);
-        float[][] pontas = {{0.95f, -0.45f}, {0.98f, -0.15f}, {0.85f, 0.15f}, {0.62f, 0.4f}, {0.35f, 0.55f}};
         for (int i = 0; i < pontas.length - 1; i++) {
             float[] a = pontas[i], b = pontas[i + 1];
-            vertice(wr, 0, 0, 0, 0x9B7CFF, 0.75f);
-            vertice(wr, lado * a[0], a[1], 0.12f * a[0], 0x7FE7FF, 0.35f);
-            vertice(wr, lado * b[0], b[1], 0.12f * b[0], 0x7FE7FF, 0.35f);
+            vertice(wr, 0, 0, 0, 0x6A4BFF, 0.92f);
+            vertice(wr, lado * a[0], a[1], 0.14f * a[0], i % 2 == 0 ? 0x7FE7FF : 0x9B7CFF, 0.72f);
+            vertice(wr, lado * b[0], b[1], 0.14f * b[0], i % 2 == 0 ? 0x9B7CFF : 0x7FE7FF, 0.72f);
         }
         tess.draw();
+        // Contorno e as linhas das penas, somando luz.
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+        GL11.glLineWidth(2f);
+        wr.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
+        for (int i = 0; i < pontas.length; i++) {
+            float[] a = pontas[i];
+            vertice(wr, 0, 0, 0, 0xBFF6FF, 0.5f);
+            vertice(wr, lado * a[0], a[1], 0.14f * a[0], 0xBFF6FF, 0.9f);
+            if (i + 1 < pontas.length) {
+                float[] b = pontas[i + 1];
+                vertice(wr, lado * a[0], a[1], 0.14f * a[0], 0xBFF6FF, 0.9f);
+                vertice(wr, lado * b[0], b[1], 0.14f * b[0], 0xBFF6FF, 0.9f);
+            }
+        }
+        tess.draw();
+        GL11.glLineWidth(1f);
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
     }
 
     // ---------- formas ----------

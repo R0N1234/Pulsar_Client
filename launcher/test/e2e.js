@@ -20,6 +20,7 @@ const TIMEOUT_MS = 10 * 60 * 1000;
 // Com os prints ligados, o teste também confere estas linhas no log (cada uma prova uma parte funcionando).
 const REQUIRED = [
   [/Emotes: gancho instalado em ModelBiped/, "gancho dos emotes"],
+  [/Fonte: estado do OpenGL lido do jogo/, "fonte sem perguntar ao driver a cada letra"],
   [/Cosméticos: camada de acessórios em \d+ bonecos/, "camada dos acessórios"],
   [/selftest: emote-ok/, "emote mexendo no boneco"],
   [/selftest: acessorio-ok/, "acessório desenhado"],
