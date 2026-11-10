@@ -195,7 +195,6 @@ public class MotorPulsar extends PulsarMod {
                 + " animações=" + MotorFlags.animations + " partículas=" + MotorFlags.particles;
     }
 
-    @Override
     private static java.lang.reflect.Field conferenciaGl;
     private static boolean conferenciaProcurada;
     private Boolean conferenciaAplicada;
@@ -225,6 +224,7 @@ public class MotorPulsar extends PulsarMod {
         }
     }
 
+    @Override
     public void tick() {
         instalarMolduras();
         semConferenciaGl(isEnabled());
