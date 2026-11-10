@@ -196,8 +196,38 @@ public class MotorPulsar extends PulsarMod {
     }
 
     @Override
+    private static java.lang.reflect.Field conferenciaGl;
+    private static boolean conferenciaProcurada;
+    private Boolean conferenciaAplicada;
+
+    /**
+     * O Minecraft pergunta ao driver "deu erro?" (glGetError) várias vezes em cada quadro. Cada pergunta faz a placa
+     * de vídeo parar e responder, e isso custa FPS. O OptiFine (e o CheatBreaker, que vem com ele) desliga essa
+     * conferência; o Motor faz o mesmo enquanto estiver ligado.
+     */
+    private void semConferenciaGl(boolean desligar) {
+        if (conferenciaAplicada != null && conferenciaAplicada == desligar) return;
+        if (!conferenciaProcurada) {
+            conferenciaProcurada = true;
+            try {
+                conferenciaGl = ReflectionHelper.findField(Minecraft.class, "enableGLErrorChecking", "field_175619_R");
+            } catch (Throwable t) {
+                System.err.println("[Pulsar] Motor: conferência de erros do OpenGL não achada: " + t);
+            }
+        }
+        conferenciaAplicada = desligar;
+        if (conferenciaGl == null) return;
+        try {
+            conferenciaGl.setBoolean(mc, !desligar);
+            System.out.println("[Pulsar] Motor: conferência de erros do OpenGL " + (desligar ? "desligada" : "ligada"));
+        } catch (Throwable t) {
+            System.err.println("[Pulsar] Motor: não deu para mudar a conferência de erros do OpenGL: " + t);
+        }
+    }
+
     public void tick() {
         instalarMolduras();
+        semConferenciaGl(isEnabled());
         MotorHooks.newTick();
         oclusao.tick();
         if (mc.theWorld != lastWorld) {

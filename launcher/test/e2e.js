@@ -21,6 +21,7 @@ const TIMEOUT_MS = 10 * 60 * 1000;
 const REQUIRED = [
   [/Emotes: gancho instalado em ModelBiped/, "gancho dos emotes"],
   [/Fonte: estado do OpenGL lido do jogo/, "fonte sem perguntar ao driver a cada letra"],
+  [/Motor: conferência de erros do OpenGL desligada/, "jogo sem perguntar ao driver por erros a cada quadro"],
   [/Cosméticos: camada de acessórios em \d+ bonecos/, "camada dos acessórios"],
   [/selftest: emote-ok/, "emote mexendo no boneco"],
   [/selftest: acessorio-ok/, "acessório desenhado"],
