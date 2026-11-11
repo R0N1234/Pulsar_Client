@@ -5,6 +5,7 @@ import dev.pulsarclient.settings.ActionSetting;
 import dev.pulsarclient.settings.BoolSetting;
 import dev.pulsarclient.settings.ModeSetting;
 import dev.pulsarclient.settings.TextSetting;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -19,8 +20,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.fml.client.config.GuiUtils;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.input.Mouse;
@@ -334,7 +337,27 @@ public class KitPvp extends PulsarMod {
                 }
             }
         }
-        if (sombra.get()) desenharSombras(gui);
+        if (sombra.get()) {
+            desenharSombras(gui);
+            redesenharNome(gui, e.mouseX, e.mouseY);
+        }
+    }
+
+    /**
+     * As sombras são desenhadas depois da tela inteira, inclusive do nome do item sob o mouse: a sombra de um espaço
+     * vazio ficava por cima do nome e ele saía apagado. O nome é desenhado de novo por cima, igual ao do jogo.
+     */
+    private void redesenharNome(GuiContainer gui, int mx, int my) {
+        Slot s = slotNoMouse(gui);
+        if (s == null || !s.getHasStack() || mc.thePlayer.inventory.getItemStack() != null) return;
+        ItemStack pilha = s.getStack();
+        List<String> linhas = pilha.getTooltip(mc.thePlayer, mc.gameSettings.advancedItemTooltips);
+        for (int i = 0; i < linhas.size(); i++) {
+            linhas.set(i, (i == 0 ? pilha.getRarity().rarityColor.toString() : EnumChatFormatting.GRAY.toString()) + linhas.get(i));
+        }
+        FontRenderer fonte = pilha.getItem().getFontRenderer(pilha);
+        GuiUtils.drawHoveringText(linhas, mx, my, gui.width, gui.height, -1, fonte == null ? mc.fontRendererObj : fonte);
+        GlStateManager.disableLighting();
     }
 
     /** O item do layout, apagadinho, nos espaços vazios do inventário. */
