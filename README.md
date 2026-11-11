@@ -53,6 +53,7 @@
 - **Combo**, **Alcance**, **Blindagem**, **Efeitos**, **Contador de Itens**, **Recargas** e **Contador TNT**
 - **Mira de Pulsar** (formato, cor, tamanho e contorno), **Impacto**, **Campo de Colisão** e **Tremor de Dano**
 - **Animações Clássicas** (bloqueio e swing da 1.7), **Propulsão** (correr fixo) e **Inventário** (trava itens contra drop)
+- **Anti-Batata** (contagem ou tela piscando quando a regeneração da maçã dourada vai acabar, e pode comer outra sozinho) e **Filtro de Coleta** (verde pega, vermelho descarta: escolha os itens de PvP que entram no inventário)
 
 **Visual**
 - **Telescópio** (zoom), **Órbita Livre** (câmera 360° em volta do personagem), **Fonte do Pulsar** e **Cores Vivas**
