@@ -9,8 +9,12 @@ const SHARED_DIRS = ["saves", "resourcepacks", "screenshots"];
 const SEED_FILES = ["options.txt", "servers.dat"];
 const OLD_FILES = /^(pulsar-client-.*|OptiFine-pulsar)\.jar$/;
 
-function instanceDir(root) {
-  return path.join(root, "pulsar", "instancia-1.8.9");
+// As versões de PvP sem o Pulsar (1.7.10, 1.16.5, 1.21) ficam em .minecraft/pulsar/instancia-<versão>.
+// Elas não dividem os mundos: abrir um mundo numa versão mais nova converte ele e a 1.8.9 não abre mais.
+const SHARED_VANILLA = ["resourcepacks", "screenshots"];
+
+function instanceDir(root, versao = "1.8.9") {
+  return path.join(root, "pulsar", `instancia-${versao}`);
 }
 
 function linkShared(target, link) {
@@ -33,8 +37,15 @@ function linkShared(target, link) {
   }
 }
 
-function prepareInstance(root) {
-  const dir = instanceDir(root);
+function prepareInstance(root, versao = "1.8.9") {
+  const dir = instanceDir(root, versao);
+  if (versao !== "1.8.9") {
+    fs.mkdirSync(dir, { recursive: true });
+    for (const name of SHARED_VANILLA) linkShared(path.join(root, name), path.join(dir, name));
+    const servers = path.join(dir, "servers.dat");
+    if (!fs.existsSync(servers) && fs.existsSync(path.join(root, "servers.dat"))) fs.copyFileSync(path.join(root, "servers.dat"), servers);
+    return dir;
+  }
   fs.mkdirSync(path.join(dir, "mods"), { recursive: true });
   for (const name of SHARED_DIRS) linkShared(path.join(root, name), path.join(dir, name));
   // Opções e lista de servidores começam iguais às da .minecraft; depois o Pulsar guarda as dele.
