@@ -295,6 +295,11 @@
       "Ersetzt die Schrift im ganzen Spiel durch die Pulsar-Schrift (oder zurück zur Minecraft-Schrift)",
     ],
     "Contraste e saturação para deixar o jogo mais vivo": ["Contrast and saturation for a more vivid game", "Контраст и насыщенность для более яркой игры", "Kontrast und Sättigung für ein lebendigeres Spiel"],
+    "Monte o inventário do PvP e pegue do baú com Shift + botão direito, cada item no seu lugar": [
+      "Set up your PvP inventory and take items from chests with Shift + right click, each in its place",
+      "Настройте инвентарь для PvP и берите вещи из сундука через Shift + правый клик — каждую на своё место",
+      "Richte dein PvP-Inventar ein und nimm Items aus Truhen mit Shift + Rechtsklick, jedes an seinen Platz",
+    ],
     "Zoom igual ao do OptiFine segurando uma tecla (padrão C)": [
       "OptiFine-style zoom while holding a key (default C)",
       "Зум как в OptiFine при удержании клавиши (по умолчанию C)",

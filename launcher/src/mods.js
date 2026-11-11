@@ -21,6 +21,7 @@ window.PULSAR_MODS = [
   ["blindagem", "Blindagem", "Durabilidade da armadura e do item na mão", "Combate", "off"],
   ["efeitos", "Efeitos", "Poções ativas com tempo restante", "Combate", "off"],
   ["inventario", "Inventário", "Protege a espada e outros itens contra drop, trava slots (tecla padrão L) e centraliza o inventário", "Combate", true],
+  ["kit_pvp", "Kit PvP", "Monte o inventário do PvP e pegue do baú com Shift + botão direito, cada item no seu lugar", "Combate", true],
   ["contador_itens", "Contador de Itens", "Flechas, pérolas, maçãs e poções no inventário", "Combate", "off"],
   ["propulsao", "Propulsão", "Correr fica ligado sem segurar a tecla (tecla padrão R para fixo ou manual)", "Combate", true],
   ["recargas", "Recargas", "Tempo de espera de pérolas e maçãs", "Combate", "off"],

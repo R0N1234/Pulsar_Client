@@ -54,6 +54,7 @@ import dev.pulsarclient.mods.SimpleHudMods;
 import dev.pulsarclient.mods.SinalDiscord;
 import dev.pulsarclient.mods.Supernova;
 import dev.pulsarclient.mods.TeclasPulse;
+import dev.pulsarclient.mods.KitPvp;
 import dev.pulsarclient.mods.Telescopio;
 import dev.pulsarclient.mods.TremorDano;
 import net.minecraft.client.Minecraft;
@@ -132,6 +133,7 @@ public class PulsarClient {
         add(new AnimacoesClassicas());
         add(new Impacto());
         add(inventario);
+        add(new KitPvp());
         add(telescopio);
         add(orbita);
         add(new MeuNick());

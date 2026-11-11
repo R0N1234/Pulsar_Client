@@ -45,6 +45,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
@@ -367,16 +368,116 @@ public class SelfTest {
                 mc.gameSettings.thirdPersonView = 0;
                 break;
             case 31:
+                // Kit PvP: um baú com peitoral P4, poção splash de velocidade, maçãs e uma espada de ferro fora do layout.
+                montarKit(mc);
+                break;
+            case 32:
+                // O baú aberto com a sombra do layout nos espaços vazios do inventário.
+                log(mc.currentScreen instanceof net.minecraft.client.gui.inventory.GuiChest ? "kit" : "kit-sem-bau");
+                break;
+            case 33:
+                // Shift + botão direito em cada item do baú, como a pessoa faria.
+                if (mc.currentScreen instanceof net.minecraft.client.gui.inventory.GuiContainer) {
+                    net.minecraft.client.gui.inventory.GuiContainer bau = (net.minecraft.client.gui.inventory.GuiContainer) mc.currentScreen;
+                    int levados = 0;
+                    for (Object o : new ArrayList<Object>(bau.inventorySlots.inventorySlots)) {
+                        net.minecraft.inventory.Slot s = (net.minecraft.inventory.Slot) o;
+                        if (s.inventory != mc.thePlayer.inventory && s.getHasStack() && kit().levar(bau, s)) levados++;
+                    }
+                    System.out.println("[Pulsar] Kit PvP: " + levados + " itens levados ao lugar");
+                }
+                log("organizado");
+                break;
+            case 34:
+                conferirKit(mc);
+                mc.thePlayer.closeScreen();
+                break;
+            case 35:
+                show("kiteditor", new GuiKitPvp(null, kit()));
+                break;
+            case 36:
                 // Desliga o rádio um passo antes do fim: o pedido de parar sai em até meio segundo.
                 PulsarClient.get().mod("rastro_cometa").setEnabled(false);
                 PulsarClient.get().mod("radio_pulsar").setEnabled(false);
                 mc.displayGuiScreen(null);
                 break;
-            case 32:
+            case 37:
                 finish(mc);
                 break;
             default: break;
         }
+    }
+
+    private static dev.pulsarclient.mods.KitPvp kit() {
+        return (dev.pulsarclient.mods.KitPvp) PulsarClient.get().mod("kit_pvp");
+    }
+
+    /** Layout do teste: espada no 1, maçãs no 3, splash de velocidade no 9 e o kit de diamante na primeira fileira. */
+    private void montarKit(Minecraft mc) {
+        ItemStack[] l = new ItemStack[dev.pulsarclient.mods.KitPvp.ESPACOS];
+        l[0] = new ItemStack(Items.diamond_sword);
+        l[2] = new ItemStack(Items.golden_apple);
+        l[8] = new ItemStack(Items.potionitem, 1, 16418);
+        l[9] = new ItemStack(Items.diamond_helmet);
+        l[10] = new ItemStack(Items.diamond_chestplate);
+        l[11] = new ItemStack(Items.diamond_leggings);
+        l[12] = new ItemStack(Items.diamond_boots);
+        l[7] = new ItemStack(Items.potionitem, 1, 8233);
+        kit().usarKit(0);
+        kit().salvar(0, l);
+        final IntegratedServer server = mc.getIntegratedServer();
+        final UUID id = mc.thePlayer.getUniqueID();
+        final BlockPos pos = new BlockPos((int) Math.floor(mc.thePlayer.posX) - 2, (int) Math.floor(mc.thePlayer.posY), (int) Math.floor(mc.thePlayer.posZ));
+        if (server == null) return;
+        server.addScheduledTask(new Runnable() {
+            @Override
+            public void run() {
+                EntityPlayerMP p = server.getConfigurationManager().getPlayerByUUID(id);
+                net.minecraft.world.WorldServer ws = server.worldServerForDimension(0);
+                if (p == null) return;
+                for (int i = 0; i < 36; i++) p.inventory.setInventorySlotContents(i, null);
+                // O que já estava no lugar do peitoral vai ter que sair para outro espaço.
+                p.inventory.setInventorySlotContents(10, new ItemStack(Blocks.cobblestone, 32));
+                ws.setBlockState(pos, Blocks.chest.getDefaultState());
+                TileEntity te = ws.getTileEntity(pos);
+                if (!(te instanceof net.minecraft.tileentity.TileEntityChest)) {
+                    System.out.println("[Pulsar] selftest: kit sem baú (" + te + ")");
+                    return;
+                }
+                net.minecraft.tileentity.TileEntityChest bau = (net.minecraft.tileentity.TileEntityChest) te;
+                ItemStack peito = new ItemStack(Items.diamond_chestplate);
+                peito.addEnchantment(Enchantment.protection, 4);
+                peito.addEnchantment(Enchantment.unbreaking, 3);
+                bau.setInventorySlotContents(0, peito);
+                bau.setInventorySlotContents(4, new ItemStack(Items.potionitem, 1, 16418));
+                bau.setInventorySlotContents(13, new ItemStack(Items.golden_apple, 8));
+                bau.setInventorySlotContents(20, new ItemStack(Items.iron_sword));
+                p.displayGUIChest(bau);
+            }
+        });
+    }
+
+    /** Confere no servidor (não só na tela) que cada item foi para o espaço do layout e a espada de ferro ficou no baú. */
+    private void conferirKit(Minecraft mc) {
+        IntegratedServer server = mc.getIntegratedServer();
+        EntityPlayerMP p = server == null ? null : server.getConfigurationManager().getPlayerByUUID(mc.thePlayer.getUniqueID());
+        if (p == null) {
+            log("kit-falhou");
+            return;
+        }
+        ItemStack peito = p.inventory.getStackInSlot(10), pocao = p.inventory.getStackInSlot(8), macas = p.inventory.getStackInSlot(2);
+        boolean pedra = false;
+        for (int i = 0; i < 36; i++) {
+            ItemStack s = p.inventory.getStackInSlot(i);
+            if (s != null && s.getItem() == Item.getItemFromBlock(Blocks.cobblestone) && s.stackSize == 32) pedra = true;
+        }
+        boolean ok = peito != null && peito.getItem() == Items.diamond_chestplate && peito.isItemEnchanted()
+                && pocao != null && pocao.getItem() == Items.potionitem && pocao.getMetadata() == 16418
+                && macas != null && macas.getItem() == Items.golden_apple && macas.stackSize == 8
+                && pedra && dev.pulsarclient.mods.KitPvp.movidos() >= 3;
+        System.out.println("[Pulsar] Kit PvP no servidor: peitoral " + peito + ", poção " + pocao + ", maçãs " + macas + ", pedra guardada " + pedra
+                + ", movidos " + dev.pulsarclient.mods.KitPvp.movidos());
+        log(ok ? "kit-ok" : "kit-falhou");
     }
 
     /** Dois jogadores de mentira na frente da câmera: um a 3 blocos e outro a 20, com armadura encantada. */
