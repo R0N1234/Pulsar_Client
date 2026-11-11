@@ -68,6 +68,12 @@
     "mods do Pulsar ligados": ["Pulsar mods on", "модов Pulsar включено", "Pulsar-Mods an"],
     "{n0} de {n1}": ["{0} of {1}", "{0} из {1}", "{0} von {1}"],
     Novidades: ["What's new", "Что нового", "Neuigkeiten"],
+    "Versão 0.8.6:": ["Version 0.8.6:", "Версия 0.8.6:", "Version 0.8.6:"],
+    "Novo mod Kit PvP: monte no painel onde fica cada item do seu inventário e, no baú, Shift + botão direito leva cada item direto para o lugar (vale o tipo e o minério, não o encantamento).": [
+      "New Kit PvP mod: set up in the panel where each item goes in your inventory, and in a chest Shift + right click sends each item straight to its place (by type and material, not enchantment).",
+      "Новый мод «Кит PvP»: настройте в панели, где лежит каждый предмет инвентаря, а в сундуке Shift + правый клик отправит предмет прямо на его место (по типу и материалу, без учёта зачарований).",
+      "Neuer Mod Kit PvP: lege im Panel fest, wo jedes Item im Inventar liegt, und in der Truhe bringt Shift + Rechtsklick jedes Item direkt an seinen Platz (nach Typ und Material, nicht nach Verzauberung).",
+    ],
     "Versão 0.8.5:": ["Version 0.8.5:", "Версия 0.8.5:", "Version 0.8.5:"],
     "Cosméticos do Pulsar: a Órbita Pulsar (acessório) e a Supernova (emote) são grátis, e os outros chegam em breve. Aperte B no jogo para os emotes. O Telescópio virou um zoom igual ao do OptiFine (segure C). Mais FPS: a fonte e o Motor Pulsar param de esperar a placa de vídeo a cada quadro.": [
       "Pulsar cosmetics: the Pulsar Orbit (accessory) and Supernova (emote) are free, and the others are coming soon. Press B in game for emotes. The Telescope is now an OptiFine-style zoom (hold C). More FPS: the font and Pulsar Engine no longer wait on the graphics card every frame.",
