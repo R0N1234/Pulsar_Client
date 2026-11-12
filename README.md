@@ -95,6 +95,8 @@ O mod vem com a voz do Pulsar (sintética, feita para o client, sem áudio de te
 | 11 | UNSTOPPABLE | `unstoppable.ogg` |
 | 12 ou mais | GODLIKE | `godlike.ogg` |
 
+No painel dá para trocar para a lista **Arena**, dos shooters clássicos: FIRST BLOOD, DOUBLE KILL, MULTI KILL, MEGA KILL, ULTRA KILL, MONSTER KILL, LUDICROUS KILL (`ludicrous_kill.ogg`) e HOLY SHIT (`holy_shit.ogg`, 8 ou mais). Os nomes repetidos usam o mesmo arquivo nas duas listas.
+
 O arquivo é lido na hora de tocar, então basta salvar o .ogg e esperar o próximo abate. Se o jogo não achar o arquivo novo, use **Recarregar os sons** no painel do mod. Só .ogg (Vorbis) funciona, mono ou estéreo; um .mp3 ou .wav não toca.
 
 ## ❓ Perguntas rápidas

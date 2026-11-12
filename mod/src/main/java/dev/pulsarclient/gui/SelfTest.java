@@ -478,6 +478,11 @@ public class SelfTest {
                 break;
             case 49:
                 log(sequencias().contagem() == 2 ? "sequencia-dupla-ok" : "sequencia-dupla-falhou");
+                // Lista Arena: o terceiro abate seguido é MULTI KILL (na lista Pulsar seria TRIPLE KILL).
+                sequencias().usarLista(1);
+                sequencias().abate();
+                log("MULTI KILL".equals(sequencias().textoAtual()) ? "sequencia-arena-ok" : "sequencia-arena-falhou");
+                sequencias().usarLista(0);
                 sequencias().setEnabled(false);
                 focar().setEnabled(false);
                 break;

@@ -106,5 +106,23 @@
         "stream": false
       }
     ]
+  },
+  "sequencias.ludicrous_kill": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "pulsar:sequencias/ludicrous_kill",
+        "stream": false
+      }
+    ]
+  },
+  "sequencias.holy_shit": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "pulsar:sequencias/holy_shit",
+        "stream": false
+      }
+    ]
   }
 }

@@ -2,6 +2,7 @@ package dev.pulsarclient.mods;
 
 import dev.pulsarclient.settings.ActionSetting;
 import dev.pulsarclient.settings.BoolSetting;
+import dev.pulsarclient.settings.ModeSetting;
 import dev.pulsarclient.settings.SliderSetting;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.PositionedSound;
@@ -27,15 +28,22 @@ import java.util.Random;
  * trocados pelos .ogg da pasta pulsar/sons/sequencias/ (ver {@link SonsLocais}).
  */
 public class Sequencias extends HudMod {
+    /** Lista Pulsar (a do Rick): 1 a 12 abates, o último vale para 12 ou mais. */
     public static final String[] NOMES = {"first_blood", "double_kill", "triple_kill", "multi_kill", "mega_kill", "ultra_kill",
             "monster_kill", "killing_spree", "rampage", "dominating", "unstoppable", "godlike"};
     public static final String[] TEXTOS = {"FIRST BLOOD", "DOUBLE KILL", "TRIPLE KILL", "MULTI KILL", "MEGA KILL", "ULTRA KILL",
             "MONSTER KILL", "KILLING SPREE", "RAMPAGE", "DOMINATING", "UNSTOPPABLE", "GODLIKE"};
+    /** Lista Arena (a dos shooters clássicos): 1 a 8 abates, o último vale para 8 ou mais. */
+    public static final String[] NOMES_ARENA = {"first_blood", "double_kill", "multi_kill", "mega_kill", "ultra_kill",
+            "monster_kill", "ludicrous_kill", "holy_shit"};
+    public static final String[] TEXTOS_ARENA = {"FIRST BLOOD", "DOUBLE KILL", "MULTI KILL", "MEGA KILL", "ULTRA KILL",
+            "MONSTER KILL", "LUDICROUS KILL", "HOLY SHIT"};
     private static final int VERMELHO = 0xFFE3141E, ESCURO = 0xFF8A0A12, CLARO = 0xFFFF5A5A;
     /** Depois de bater, por quanto tempo a morte do jogador conta como abate seu. */
     private static final int JANELA_ABATE = 60;
     private static final int GOTAS = 7;
 
+    private final ModeSetting lista = add(new ModeSetting("lista", "Lista de sequências", 0, "Pulsar", "Arena"));
     private final SliderSetting intervalo = add(new SliderSetting("intervalo", "Tempo entre abates para seguir a sequência", 10, 3, 30, 1, "s"));
     private final SliderSetting duracao = add(new SliderSetting("duracao", "Tempo do texto na tela", 3, 1, 8, 0.5, "s"));
     private final BoolSetting sangue = add(new BoolSetting("sangue", "Sangue escorrendo nas letras", true));
@@ -70,6 +78,15 @@ public class Sequencias extends HudMod {
     public static int desenhos() { return desenhos; }
 
     public int contagem() { return contagem; }
+
+    /** Teste automático: troca a lista (0 Pulsar, 1 Arena). */
+    public void usarLista(int i) { lista.set(i); }
+
+    private String[] nomes() { return lista.index() == 1 ? NOMES_ARENA : NOMES; }
+    private String[] textos() { return lista.index() == 1 ? TEXTOS_ARENA : TEXTOS; }
+
+    /** O texto da sequência atual (teste automático). */
+    public String textoAtual() { return textos()[Math.min(indice, textos().length - 1)]; }
 
     // ---------- contar os abates ----------
 
@@ -117,14 +134,14 @@ public class Sequencias extends HudMod {
     public void abate() {
         contagem = ticks - ultimoAbate <= intervalo.getInt() * 20 ? contagem + 1 : 1;
         ultimoAbate = ticks;
-        indice = Math.min(contagem, NOMES.length) - 1;
+        indice = Math.min(contagem, nomes().length) - 1;
         mostrarAte = ticks + (int) Math.round(duracao.get() * 20);
         mostrouEm = System.currentTimeMillis();
         semente = mostrouEm;
         abates++;
-        System.out.println("[Pulsar] Sequências: " + TEXTOS[indice] + " (" + contagem + ")");
+        System.out.println("[Pulsar] Sequências: " + textos()[indice] + " (" + contagem + ")");
         if (som.get() && volume.get() > 0) {
-            mc.getSoundHandler().playSound(new Voz(new ResourceLocation("pulsar", "sequencias." + NOMES[indice]), (float) (volume.get() / 100.0)));
+            mc.getSoundHandler().playSound(new Voz(new ResourceLocation("pulsar", "sequencias." + nomes()[indice]), (float) (volume.get() / 100.0)));
         }
     }
 
@@ -144,13 +161,13 @@ public class Sequencias extends HudMod {
         return mostrarAte >= ticks;
     }
 
-    @Override public int width() { return font().getStringWidth("KILLING SPREE") * 2 + 8; }
+    @Override public int width() { return font().getStringWidth("LUDICROUS KILL") * 2 + 8; }
     @Override public int height() { return 34; }
 
     @Override
     public void render(boolean preview) {
         if (!preview && !mostrando()) return;
-        String texto = preview ? TEXTOS[3] : TEXTOS[indice];
+        String texto = preview ? textos()[3] : textoAtual();
         long agora = System.currentTimeMillis();
         float t = preview ? 1.5f : (agora - mostrouEm) / 1000f;
         float fim = (float) duracao.get();
