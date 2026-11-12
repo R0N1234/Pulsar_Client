@@ -8,6 +8,7 @@ const AdmZip = require("adm-zip");
 const { Client } = require("minecraft-launcher-core");
 const { ensureJava } = require("./java");
 const { prepareInstance } = require("./instance");
+const mcversoes = require("./mcversoes");
 
 const MC_VERSION = "1.8.9";
 const ASSET_INDEX = "1.8";
@@ -190,7 +191,27 @@ async function ensureOptifineVersion(root, optifinePath, java, onLog) {
   return OPTIFINE_VERSION_ID;
 }
 
+// Versões de PvP sem o Pulsar (1.7.10, 1.16.5, 1.21): Minecraft puro, com a pasta e o Java de cada uma.
+async function launchVanilla({ versao, config, authorization, runtimeDir, onStatus, onLog, onClose, extraJvmArgs }) {
+  const root = config.gameDir;
+  const gameDir = prepareInstance(root, versao.id);
+  const java = await ensureJava({ javaPath: config.javaPath, runtimeDir, onStatus, major: versao.java });
+  onLog(`[Pulsar] Minecraft ${versao.id} puro (sem os mods do Pulsar), Java ${versao.java}`);
+  const options = {
+    authorization,
+    root,
+    version: { number: versao.id, type: "release" },
+    memory: { max: `${config.memoryMaxGb}G`, min: "1G" },
+    javaPath: java,
+    customArgs: [...JVM_FLAGS, ...extraJvmArgs],
+    overrides: { gameDirectory: gameDir },
+  };
+  return runClient(options, { onStatus, onLog, onClose });
+}
+
 async function launch({ config, authorization, modSourceDir, runtimeDir, onStatus, onLog, onClose, extraJvmArgs = [] }) {
+  const versao = mcversoes.achar(config.version);
+  if (versao.tipo !== "pulsar") return launchVanilla({ versao, config, authorization, runtimeDir, onStatus, onLog, onClose, extraJvmArgs });
   const root = config.gameDir;
   const loader = LOADERS[config.loader] ? config.loader : "forge";
   const { forge, optifine } = LOADERS[loader];
@@ -235,7 +256,10 @@ async function launch({ config, authorization, modSourceDir, runtimeDir, onStatu
     syncOptifineMod(modsDir, null);
     options.version.custom = await ensureOptifineVersion(root, config.optifinePath, java, onLog);
   }
+  return runClient(options, { onStatus, onLog, onClose });
+}
 
+async function runClient(options, { onStatus, onLog, onClose }) {
   const client = new Client();
   let lastStep = "";
   client.on("debug", (l) => {

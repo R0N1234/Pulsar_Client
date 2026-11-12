@@ -10,20 +10,24 @@
 <body>
   <canvas id="stars"></canvas>
 
-  <header class="topbar">
-    <div class="logo"><img src="logo.png" alt="" width="30" height="30">PULSAR <small id="appVersion">CLIENT</small></div>
+  <!-- Modelo B · Órbita: trilho à esquerda, órbitas no meio e a escolha da versão à direita -->
+  <aside class="rail">
+    <div class="rail-logo"><img src="logo.png" alt="Pulsar Client" width="36" height="36"></div>
     <nav class="nav" id="nav">
-      <button type="button" data-view="home" class="on">Início</button>
-      <button type="button" data-view="mods">Mods</button>
-      <button type="button" data-view="texturas">Texturas</button>
-      <button type="button" data-view="versoes">Versões</button>
-      <button type="button" data-view="settings">Ajustes</button>
+      <button type="button" data-view="home" class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.6"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(-24 12 12)"/></svg><span>Início</span></button>
+      <button type="button" data-view="mods"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg><span>Mods</span></button>
+      <button type="button" data-view="texturas"><svg viewBox="0 0 24 24"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></svg><span>Texturas</span></button>
+      <button type="button" data-view="versoes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.2 2"/></svg><span>Versões</span></button>
+      <button type="button" data-view="settings"><svg viewBox="0 0 24 24"><path d="M5 7h9M18 7h1M5 17h1M10 17h9"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span>Ajustes</span></button>
     </nav>
+  </aside>
+
+  <div class="app">
+  <header class="topbar">
+    <div class="logo">PULSAR <small id="appVersion">CLIENT</small></div>
     <div class="right">
       <button type="button" class="update" id="update" hidden></button>
-      <div class="acct" id="acct">
-        <button type="button" class="btn-ghost" id="btnLogin">Entrar com Microsoft</button>
-      </div>
+      <div class="acct" id="acct"></div>
       <div class="acct-menu" id="acctMenu" hidden></div>
       <div class="winctl">
         <button type="button" id="btnMin" aria-label="Minimizar">–</button>
@@ -32,40 +36,49 @@
     </div>
   </header>
 
-  <!-- Início: modelo A · Núcleo -->
+  <!-- Início: modelo B · Órbita -->
   <main class="view on" id="view-home">
-    <div class="pulsar hero-pulsar"><div class="halo"></div><div class="tilt"><div class="beams"></div></div><div class="field"></div><div class="field f2"></div><div class="core"></div></div>
-    <div class="home-center">
-      <div class="home-title">PULSAR</div>
-      <div class="ver">
-        <div class="v"><small>VERSÃO · PVP</small><b>1.8.9</b></div>
-        <div class="sep"></div>
-        <label class="v mode" for="loader"><small>MODO</small>
-          <select id="loader">
-            <option value="forge">Forge + Pulsar</option>
-            <option value="forge_optifine">OptiFine + Forge + Pulsar</option>
-            <option value="optifine">Só OptiFine</option>
-          </select>
-        </label>
-        <button class="btn-play" type="button" id="btnPlay">JOGAR</button>
+    <section class="orbita" id="orbita">
+      <div class="o-head">
+        <h2>Sistema Pulsar</h2>
+        <p>Novidades, sugestões e Discord giram em volta do pulsar. Clique em um planeta para abrir.</p>
       </div>
+      <div class="o-stage" id="oStage">
+        <div class="pulsar o-pulsar" id="oPulsar"><div class="halo"></div><div class="tilt"><div class="beams"></div></div><div class="field"></div><div class="field f2"></div><div class="core"></div></div>
+      </div>
+      <div class="o-leg" id="oLeg" role="tablist" aria-label="Órbitas"></div>
+      <section class="o-win" id="oWin" hidden aria-label="Abas abertas">
+        <div class="o-tabs" id="oTabs" role="tablist"></div>
+        <div class="o-body" id="oBody" role="tabpanel"></div>
+      </section>
+    </section>
+
+    <aside class="b-side">
+      <h4>Escolha a versão</h4>
+      <div class="vbig" id="vBig">
+        <span class="badge" id="vSelo">RECOMENDADA PVP</span>
+        <b id="vNum">1.8.9</b>
+        <p id="vDesc"></p>
+        <div class="feat" id="vFeat"></div>
+      </div>
+      <div class="vrows" id="vRows" role="radiogroup" aria-label="Versão do Minecraft"></div>
+      <label class="mode-row" for="loader" id="modeRow"><span>Modo</span>
+        <select id="loader">
+          <option value="forge">Forge + Pulsar</option>
+          <option value="forge_optifine">OptiFine + Forge + Pulsar</option>
+          <option value="optifine">Só OptiFine</option>
+        </select>
+      </label>
+      <button class="btn-play" type="button" id="btnPlay">JOGAR <span id="playVer">1.8.9</span></button>
       <div class="status" id="status" role="status">Pronto para jogar</div>
+      <div class="bar" id="bar" hidden><span id="barFill"></span></div>
       <div class="sub" id="homeSub"><span id="homeModCount">0</span> mods do Pulsar ligados</div>
       <div class="sub versao-aviso" id="homeVersao" hidden></div>
-      <div class="bar" id="bar" hidden><span id="barFill"></span></div>
-    </div>
-    <section class="card news">
-      <h4>Novidades <button type="button" class="linkbtn" id="btnDiscord">Discord</button> <button type="button" class="linkbtn" id="btnSugestao">sugestões</button></h4>
-      <p><b>Versão 0.8.6:</b> Novo mod Kit PvP: monte no painel onde fica cada item do seu inventário e, no baú, Shift + botão direito leva cada item direto para o lugar (vale o tipo e o minério, não o encantamento).</p>
-      <p><b>Versão 0.8.5:</b> Cosméticos do Pulsar: a Órbita Pulsar (acessório) e a Supernova (emote) são grátis, e os outros chegam em breve. Aperte B no jogo para os emotes. O Telescópio virou um zoom igual ao do OptiFine (segure C). Mais FPS: a fonte e o Motor Pulsar param de esperar a placa de vídeo a cada quadro.</p>
-      <p><b>Versão 0.8.4:</b> Som no Windows com o driver de áudio novo (o mesmo do Minecraft atual), para quem ficava sem som com alguns fones e placas de som.</p>
-      <p><b>Versão 0.8.3:</b> Textos compridos do painel agora quebram em duas linhas e passam sozinhos com o mouse em cima. A Barra Pulsar lê a música do Spotify pelos controles de mídia do Windows, sem login. Novo botão Sugestões no menu do jogo. O W-Tap e Blockhit saiu do client e virou um mod separado.</p>
-      <p><b>Versão 0.8.0:</b> Barra Pulsar no topo da tela com FPS, ms, hora e a música do Spotify (com capa). O fundo do menu virou um universo 360° girando, com Andrômeda, os planetas e um pulsar. Painel do Shift direito e opções dos mods com visual novo, ícones e favoritos. No Motor Pulsar, com muita gente perto, só os mais próximos ficam com detalhe completo e os de longe ficam só com a skin. Novos mods: Pacote Ativo, Barra de Chefe e Aura de Encanto.</p>
-    </section>
-    <section class="card log">
-      <h4>Registro do jogo <button type="button" class="linkbtn" id="btnConsole">console</button> <button type="button" class="linkbtn" id="btnCopyLog">copiar</button></h4>
-      <pre id="log">Os logs do Minecraft aparecem aqui quando o jogo abrir.</pre>
-    </section>
+      <section class="log">
+        <h4>Registro do jogo <button type="button" class="linkbtn" id="btnConsole">console</button> <button type="button" class="linkbtn" id="btnCopyLog">copiar</button></h4>
+        <pre id="log">Os logs do Minecraft aparecem aqui quando o jogo abrir.</pre>
+      </section>
+    </aside>
   </main>
 
   <!-- Mods: modelo C · Painel -->
@@ -191,6 +204,25 @@
     </form>
   </main>
 
+  </div>
+
+  <!-- Novidades da versão: abre uma vez depois de cada atualização -->
+  <div class="upd-modal" id="novModal" hidden>
+    <div class="upd-card nov-card" role="dialog" aria-labelledby="novTitle">
+      <div class="upd-logo">
+        <div class="pulsar"><div class="halo"></div><div class="tilt"><div class="beams"></div></div></div>
+        <img src="logo.png" alt="" width="84" height="84">
+      </div>
+      <small>NOVIDADES DA ATUALIZAÇÃO</small>
+      <h3 id="novTitle">Pulsar Client <span id="novVer"></span></h3>
+      <ul class="nov-list" id="novList"></ul>
+      <div class="upd-actions">
+        <button class="btn-play" type="button" id="novOk">BORA JOGAR</button>
+        <button class="btn-ghost" type="button" id="novTodas">Ver todas as novidades</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Atualização pronta -->
   <div class="upd-modal" id="updModal" hidden>
     <div class="upd-card" role="dialog" aria-labelledby="updTitle">
@@ -211,6 +243,7 @@
 
   <script src="i18n.js"></script>
   <script src="mods.js"></script>
+  <script src="orbitas.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

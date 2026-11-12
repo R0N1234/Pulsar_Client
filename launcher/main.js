@@ -14,6 +14,7 @@ const i18n = require("./src/i18n");
 const { SinalDiscord } = require("./lib/discord");
 const radio = require("./lib/radio");
 const versoes = require("./lib/versoes");
+const mcversoes = require("./lib/mcversoes");
 
 // Janelas (inclusive o login da Microsoft) em português.
 app.commandLine.appendSwitch("lang", "pt-BR");
@@ -109,11 +110,14 @@ const presenca = {
   ligado: false,
   estado: "No menu principal",
   timer: null,
-  comecar(ligado) {
+  versao: "1.8.9",
+  comecar(ligado, versao = "1.8.9") {
     this.discord = this.discord || new SinalDiscord(pushLog);
+    this.versao = versao;
     this.inicio = Date.now();
     this.ligado = ligado;
-    this.estado = "No menu principal";
+    // Sem o mod do Pulsar (1.7.10, 1.16.5, 1.21) o jogo não avisa onde a pessoa está.
+    this.estado = versao === "1.8.9" ? "No menu principal" : "Jogando";
     this.mostrar();
     // Se o Discord abrir depois do jogo, a próxima volta conecta.
     clearInterval(this.timer);
@@ -129,7 +133,7 @@ const presenca = {
   },
   mostrar() {
     if (!this.ligado) return this.discord.apagar();
-    this.discord.mostrar({ detalhes: "Minecraft 1.8.9 · PvP", estado: tr(this.estado), inicio: this.inicio, versao: app.getVersion() }).catch(() => {});
+    this.discord.mostrar({ detalhes: `Minecraft ${this.versao} · PvP`, estado: tr(this.estado), inicio: this.inicio, versao: app.getVersion() }).catch(() => {});
   },
   parar() {
     clearInterval(this.timer);
@@ -247,6 +251,12 @@ app.whenReady().then(() => {
   ipcMain.handle("config:set", (_e, patch) => {
     // Contas só mudam pelos pedidos de conta (a liberação do offline não pode vir da tela).
     const { msRefreshTokenEnc, updateTokenEnc, hasUpdateToken, contasOffline, contaAtiva, originalVerificada, ...safe } = patch || {};
+    // Só as versões do Minecraft que o Pulsar sabe abrir.
+    if ("version" in safe) {
+      if (game || launching) throw new Error("Feche o Minecraft antes de trocar de versão.");
+      safe.version = mcversoes.achar(String(safe.version)).id;
+    }
+    if ("novidadesVistas" in safe) safe.novidadesVistas = String(safe.novidadesVistas).slice(0, 20);
     config.set(safe);
     return publicConfig();
   });
@@ -264,6 +274,7 @@ app.whenReady().then(() => {
     if (/^https:\/\/(optifine\.net|adoptium\.net|modrinth\.com|discord\.gg|github\.com\/R0N1234\/Pulsar_Client)\//.test(String(url))) shell.openExternal(url);
   });
   ipcMain.handle("versoes:list", () => listaVersoes());
+  ipcMain.handle("mc:versoes", () => mcversoes.VERSOES);
   ipcMain.handle("versoes:escolher", (_e, qual) => {
     semJogo("Feche o Minecraft antes de trocar de versão.");
     config.set({ versaoJogo: qual === "anterior" ? "anterior" : "atual" });
@@ -357,9 +368,10 @@ app.whenReady().then(() => {
           send("radio:comando", c);
         },
       });
-      presenca.comecar(config.getEnabledMods().sinal_discord !== false);
+      const mcv = mcversoes.achar(cfg.version);
+      presenca.comecar(mcv.tipo === "pulsar" ? config.getEnabledMods().sinal_discord !== false : true, mcv.id);
       const versao = versoes.escolher(versoes.listar(modSourceDir(), modAnteriorDir()), cfg.versaoJogo);
-      if (versao.qual === "anterior") pushLog(`[Pulsar] Jogando com a versão anterior do Pulsar (${versao.versao}).`);
+      if (versao.qual === "anterior" && mcv.tipo === "pulsar") pushLog(`[Pulsar] Jogando com a versão anterior do Pulsar (${versao.versao}).`);
       game = await launch({
         config: cfg,
         authorization: accounts.mclc(),
@@ -461,7 +473,33 @@ async function tirarPrints(dir) {
   try {
     fs.mkdirSync(dir, { recursive: true });
     await espera(4000);
+    // Janela de novidades da versão (abre sozinha na primeira vez de cada versão).
+    if (await js(`!document.getElementById("novModal").hidden`)) {
+      await print("novidades");
+      await js(`document.getElementById("novOk").click()`);
+      await espera(500);
+    }
     await print("inicio");
+    // Órbitas: um planeta de cada órbita abre a sua aba; a legenda abre a lista da órbita.
+    for (const o of ["novidades", "sugestoes", "discord"]) await js(`document.querySelector('.onode[data-orbita="${o}"]').click()`);
+    await espera(600);
+    await print("orbita-abas");
+    await js(`document.querySelector('#oLeg button[data-orbita="novidades"]').click()`);
+    await espera(600);
+    await print("orbita-novidades");
+    console.log(`[prints] abas: ${await js(`[...document.querySelectorAll(".o-tab")].map((b) => b.textContent).join(" | ")`)}`);
+    await js(`document.querySelector('#oLeg button[data-orbita="novidades"]').click(); document.querySelectorAll(".o-tab .x").forEach((x) => x.click())`);
+    // Versões de PvP: escolhe a 1.21.8, confere e volta para a 1.8.9.
+    await js(`document.querySelector('#vRows button[data-versao="1.21.8"]').click()`);
+    await espera(600);
+    await print("versao-1.21.8");
+    console.log(`[prints] versão do Minecraft: ${config.get().version}`);
+    await js(`document.querySelector('#vRows button[data-versao="1.8.9"]').click()`);
+    await espera(400);
+    await js(`document.querySelector(".acct-now").click()`);
+    await espera(400);
+    await print("contas");
+    await js(`document.querySelector(".acct-now").click()`);
     await aba("mods");
     await espera(800);
     await print("mods");

@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld("pulsar", {
   getMods: () => ipcRenderer.invoke("mods:get"),
   listVersoes: () => ipcRenderer.invoke("versoes:list"),
   escolherVersao: (qual) => ipcRenderer.invoke("versoes:escolher", qual),
+  mcVersoes: () => ipcRenderer.invoke("mc:versoes"),
   setMod: (id, enabled) => ipcRenderer.invoke("mods:set", id, enabled),
   listTexturas: () => ipcRenderer.invoke("texturas:list"),
   baixarTextura: (id) => ipcRenderer.invoke("texturas:baixar", id),
