@@ -33,7 +33,7 @@ public final class Icones {
                 {"bussola", "12"}, {"relogio", "13"}, {"cronometro", "35"}, {"memoria", "14"}, {"servidor", "15"},
                 {"saturacao", "17"}, {"propulsao", "30"}, {"mira_pulsar", "9"}, {"blindagem", "7"}, {"efeitos", "8"},
                 {"combo", "37"}, {"alcance", "6"}, {"tremor_dano", "37"}, {"campo_colisao", "38"}, {"contador_itens", "36"},
-                {"contador_tnt", "34"}, {"recargas", "35"}, {"anti_batata", "35"}, {"filtro_coleta", "36"}, {"animacoes_classicas", "6"}, {"impacto", "37"},
+                {"contador_tnt", "34"}, {"recargas", "35"}, {"anti_batata", "35"}, {"filtro_coleta", "36"}, {"focar_jogador", "9"}, {"sequencias", "37"}, {"animacoes_classicas", "6"}, {"impacto", "37"},
                 {"wtap_blockhit", "6"}, {"inventario", "36"}, {"telescopio", "19"}, {"orbita_livre", "20"},
                 {"meu_nick", "22"}, {"poeira_estelar", "24"}, {"supernova", "18"}, {"contorno", "23"}, {"atmosfera", "25"},
                 {"placar", "16"}, {"lista_tab", "16"}, {"fonte_pulsar", "32"}, {"cores_vivas", "43"}, {"rastro_cometa", "21"},

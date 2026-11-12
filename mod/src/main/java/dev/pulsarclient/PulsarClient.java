@@ -57,6 +57,9 @@ import dev.pulsarclient.mods.TeclasPulse;
 import dev.pulsarclient.mods.KitPvp;
 import dev.pulsarclient.mods.AntiBatata;
 import dev.pulsarclient.mods.FiltroColeta;
+import dev.pulsarclient.mods.FocarJogador;
+import dev.pulsarclient.mods.Sequencias;
+import dev.pulsarclient.mods.SonsLocais;
 import dev.pulsarclient.mods.Telescopio;
 import dev.pulsarclient.mods.TremorDano;
 import net.minecraft.client.Minecraft;
@@ -138,6 +141,8 @@ public class PulsarClient {
         add(new KitPvp());
         add(new AntiBatata());
         add(new FiltroColeta());
+        add(new FocarJogador());
+        add(new Sequencias());
         add(telescopio);
         add(orbita);
         add(new MeuNick());
@@ -166,6 +171,7 @@ public class PulsarClient {
         }
         add(motor);
 
+        SonsLocais.instalar(Minecraft.getMinecraft().mcDataDir);
         config = new PulsarConfig(Minecraft.getMinecraft().mcDataDir);
         config.load(mods);
 

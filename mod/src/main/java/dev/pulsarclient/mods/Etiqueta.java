@@ -54,4 +54,29 @@ public final class Etiqueta {
         GlStateManager.color(1f, 1f, 1f, 1f);
         GlStateManager.popMatrix();
     }
+
+    /** Igual a {@link #draw}, mas sem aparecer através de blocos (como o nome de quem está agachado). */
+    public static void drawComProfundidade(String text, double x, double y, double z, int color) {
+        Minecraft mc = Minecraft.getMinecraft();
+        RenderManager rm = mc.getRenderManager();
+        FontRenderer font = mc.fontRendererObj;
+        float scale = 0.016666668f * 1.6f;
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(x, y, z);
+        GL11.glNormal3f(0f, 1f, 0f);
+        GlStateManager.rotate(-rm.playerViewY, 0f, 1f, 0f);
+        GlStateManager.rotate(rm.playerViewX, 1f, 0f, 0f);
+        GlStateManager.scale(-scale, -scale, scale);
+        GlStateManager.disableLighting();
+        GlStateManager.enableDepth();
+        GlStateManager.depthMask(true);
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        int half = font.getStringWidth(text) / 2;
+        font.drawStringWithShadow(text, -half, 0, color);
+        GlStateManager.enableLighting();
+        GlStateManager.disableBlend();
+        GlStateManager.color(1f, 1f, 1f, 1f);
+        GlStateManager.popMatrix();
+    }
 }

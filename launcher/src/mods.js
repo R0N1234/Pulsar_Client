@@ -24,6 +24,8 @@ window.PULSAR_MODS = [
   ["kit_pvp", "Kit PvP", "Monte o inventário do PvP e pegue do baú com Shift + botão direito, cada item no seu lugar", "Combate", true],
   ["anti_batata", "Anti-Batata", "Avisa quando a regeneração da maçã dourada vai acabar (contagem ou tela piscando) e pode comer outra sozinho", "Combate", "off"],
   ["filtro_coleta", "Filtro de Coleta", "Escolha os itens de PvP que você pega do chão: os marcados em vermelho são descartados na hora", "Combate", "off"],
+  ["focar_jogador", "Focar Jogador", "Na treta, pergunta se quer focar o jogador: o nick fica destacado e uma caixa aparece em volta dele", "Combate", "off"],
+  ["sequencias", "Sequências de Abate", "FIRST BLOOD, DOUBLE KILL... GODLIKE na tela, com sangue escorrendo e a voz do Pulsar", "Combate", "off"],
   ["contador_itens", "Contador de Itens", "Flechas, pérolas, maçãs e poções no inventário", "Combate", "off"],
   ["propulsao", "Propulsão", "Correr fica ligado sem segurar a tecla (tecla padrão R para fixo ou manual)", "Combate", true],
   ["recargas", "Recargas", "Tempo de espera de pérolas e maçãs", "Combate", "off"],
