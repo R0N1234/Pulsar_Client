@@ -41,7 +41,7 @@ public class AntiBatata extends HudMod {
     private static final int COMBATE_TICKS = 30;
 
     private final ModeSetting aviso = add(new ModeSetting("aviso", "Aviso quando a regeneração for acabar", OS_DOIS,
-            "Contagem na tela", "Piscar a tela", "Contagem e piscar", "Nenhum"));
+            "Contagem", "Piscar", "Os dois", "Nenhum"));
     private final SliderSetting antes = add(new SliderSetting("segundos", "Começar o aviso faltando", 3, 1, 10, 1, "s"));
     private final ModeSetting onde = add(new ModeSetting("onde_piscar", "Onde piscar", 0, "Tela toda", "Só as bordas"));
     private final ColorSetting corPisca = add(new ColorSetting("cor_piscar", "Cor do pisca", ColorSetting.VERMELHO));
@@ -302,7 +302,8 @@ public class AntiBatata extends HudMod {
         if (avisando()) {
             // Pisca mais rápido no último segundo.
             double hz = restante <= 20 ? 4 : 2;
-            intensidade = 0.5f + 0.5f * (float) Math.sin(System.currentTimeMillis() / 1000.0 * hz * 2 * Math.PI);
+            // Nunca apaga de todo: a cor fica sempre um pouco na tela enquanto o aviso dura, e pulsa por cima.
+            intensidade = 0.675f + 0.325f * (float) Math.sin(System.currentTimeMillis() / 1000.0 * hz * 2 * Math.PI);
         } else if (acabou.get() && acabouTicks > 0) {
             intensidade = acabouTicks / (float) ACABOU_TICKS;
         } else {
