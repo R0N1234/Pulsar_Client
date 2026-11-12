@@ -405,6 +405,7 @@ public class SelfTest {
             case 37:
                 log("batata");
                 log(dev.pulsarclient.mods.AntiBatata.avisos() > 0 ? "batata-aviso-ok" : "batata-aviso-falhou");
+                log(dev.pulsarclient.mods.AntiBatata.piscadas() > 0 ? "batata-pisca-ok" : "batata-pisca-falhou");
                 break;
             case 38:
                 // Comer sozinho: espada na mão (espaço 1), 3 maçãs no espaço 2, batendo, regeneração de 1,5 s.

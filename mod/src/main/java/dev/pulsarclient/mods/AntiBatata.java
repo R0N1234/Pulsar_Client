@@ -70,6 +70,12 @@ public class AntiBatata extends HudMod {
 
     private static int avisos;
     private static int comidas;
+    private static int piscadas;
+
+    /** Quadros em que a tela piscou (teste automático). */
+    public static int piscadas() {
+        return piscadas;
+    }
 
     public AntiBatata() {
         super("anti_batata", "Anti-Batata", "Avisa quando a regeneração da maçã dourada vai acabar (contagem ou tela piscando) e pode comer outra sozinho",
@@ -312,6 +318,12 @@ public class AntiBatata extends HudMod {
         int alfa = Math.round((float) (forca.get() / 100.0) * 255 * intensidade);
         if (alfa <= 2) return;
         int w = event.resolution.getScaledWidth(), h = event.resolution.getScaledHeight();
+        // Outros mods com shader (Rastro de Cometa, Cores Vivas) rodam antes neste mesmo evento e deixam a projeção e
+        // a profundidade do jeito deles: volta para a da HUD antes de pintar, senão o pisca não aparece.
+        mc.entityRenderer.setupOverlayRendering();
+        GlStateManager.disableDepth();
+        GlStateManager.enableBlend();
+        piscadas++;
         if (onde.index() == 0) {
             Gui.drawRect(0, 0, w, h, corPisca.argb(alfa));
         } else {
@@ -326,6 +338,7 @@ public class AntiBatata extends HudMod {
                 Gui.drawRect(w - d - 2, d + 2, w - d, h - d - 2, c);
             }
         }
+        GlStateManager.enableDepth();
         GlStateManager.enableBlend();
         GlStateManager.color(1f, 1f, 1f, 1f);
     }
