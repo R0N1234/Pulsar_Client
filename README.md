@@ -36,6 +36,8 @@
 
 **Fácil de usar.** Um launcher só: entra com a conta Microsoft, baixa o Java e o Forge sozinho, atualiza sozinho e funciona com ou sem OptiFine.
 
+**Outras versões de PvP.** Além da 1.8.9 com o Pulsar, o launcher abre a **1.7.10**, a **1.16.5** e a **1.21.8** no Minecraft puro, cada uma com a sua pasta e o Java certo baixado sozinho.
+
 <p align="center">
   <img src="docs/hud.png" width="49%" alt="HUD do Pulsar dentro do jogo">
   <img src="docs/opcoes.png" width="49%" alt="Opções do Motor Pulsar">

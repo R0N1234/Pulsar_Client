@@ -68,20 +68,20 @@ function renderAccount(estado) {
   box.textContent = "";
   const offline = contas.ativa !== "microsoft";
   const nome = offline ? contas.ativa : contas.microsoft && contas.microsoft.name;
-  if (!nome && !contas.offline.length && !contas.liberado) {
-    const b = el("button", "btn-ghost", t("Entrar com Microsoft"));
-    b.type = "button";
-    b.onclick = doLogin;
-    box.append(b);
-    return;
-  }
+  // Ícone de contas no canto de cima: sem conta, o boneco abre o menu com o login da Microsoft e os nicks offline.
   const atual = el("button", "acct-now");
   atual.type = "button";
+  atual.title = t("Contas");
   atual.setAttribute("aria-haspopup", "true");
   atual.setAttribute("aria-expanded", String(!$("acctMenu").hidden));
-  atual.append(avatar(nome || "?", offline));
+  if (nome) atual.append(avatar(nome, offline));
+  else {
+    const ico = el("span", "acct-ico");
+    ico.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.8 19.5c1.3-3.4 4-5 7.2-5s5.9 1.6 7.2 5"/></svg>';
+    atual.append(ico);
+  }
   const info = el("span", "acct-info");
-  info.append(el("span", "name", nome || t("Sem conta")), el("span", "st" + (offline ? " off" : ""), t(offline ? "● offline" : nome ? "● original" : "entre para jogar")));
+  info.append(el("span", "name", nome || t("Entrar")), el("span", "st" + (offline ? " off" : ""), t(offline ? "● offline" : nome ? "● original" : "conta Microsoft")));
   atual.append(info, el("span", "caret", "▾"));
   atual.onclick = (e) => {
     e.stopPropagation();
@@ -203,15 +203,66 @@ function setStatus(text, isError = false) {
 }
 const cleanErr = (err) => String(err && err.message ? err.message : err).replace(/^Error invoking remote method '[^']+': (Error: )?/, "");
 
+/* ---------- versões do Minecraft (1.8.9 e as de PvP) ---------- */
+let mcVersoes = [];
+let mcEscolhida = "1.8.9";
+const mcAtual = () => mcVersoes.find((v) => v.id === mcEscolhida) || mcVersoes[0];
+const ehPulsar = () => !mcAtual() || mcAtual().tipo === "pulsar";
+
+function renderMc() {
+  const v = mcAtual();
+  if (!v) return;
+  $("vBig").classList.toggle("van", v.tipo !== "pulsar");
+  $("vSelo").textContent = t(v.selo);
+  $("vNum").textContent = v.id;
+  $("vDesc").textContent = t(v.desc);
+  const feat = $("vFeat");
+  feat.textContent = "";
+  const chips = v.tipo === "pulsar" ? ["Animações 1.7", "Motor Pulsar", `+ ${MODS.filter((m) => m.pronto).length} mods`] : ["Minecraft puro", `Java ${v.java}`];
+  for (const c of chips) feat.append(el("span", "chip", t(c)));
+  const rows = $("vRows");
+  rows.textContent = "";
+  for (const x of mcVersoes) {
+    const b = el("button", "", x.id);
+    b.type = "button";
+    b.dataset.versao = x.id;
+    b.setAttribute("role", "radio");
+    b.setAttribute("aria-checked", String(x.id === v.id));
+    b.title = t(x.selo);
+    b.disabled = document.body.classList.contains("playing");
+    b.onclick = () => escolherMc(x.id);
+    rows.append(b);
+  }
+  $("playVer").textContent = v.id;
+  $("modeRow").hidden = v.tipo !== "pulsar";
+  updateCounts();
+  renderVersoes();
+}
+
+async function escolherMc(id) {
+  if (id === mcEscolhida) return;
+  try {
+    const cfg = await api.setConfig({ version: id });
+    mcEscolhida = cfg.version;
+    renderMc();
+    const v = mcAtual();
+    setStatus(v.tipo === "pulsar" ? (prontaParaJogar() ? "Pronto para jogar" : "Entre com sua conta Microsoft para jogar") : `Minecraft ${v.id} puro: sem os mods do Pulsar.`);
+  } catch (err) {
+    setStatus(cleanErr(err), true);
+  }
+}
+
 $("btnPlay").onclick = async () => {
   $("btnPlay").disabled = true;
   document.body.classList.add("playing");
+  renderMc();
   try {
     await api.launch();
   } catch (err) {
     setStatus(cleanErr(err), true);
     $("btnPlay").disabled = false;
     document.body.classList.remove("playing");
+    renderMc();
     $("bar").hidden = true;
   }
 };
@@ -230,6 +281,7 @@ api.onStatus((s) => {
     if ($("view-texturas").classList.contains("on")) loadTexturas();
     $("btnPlay").disabled = false;
     document.body.classList.remove("playing");
+    renderMc();
     if (!/erro/.test(s.text)) setStatus(s.text);
     else setStatus(s.text, true);
   }
@@ -277,7 +329,7 @@ function updateCounts() {
   const ready = MODS.filter((m) => m.pronto);
   const on = ready.filter(isOn).length;
   $("homeModCount").textContent = t(`${on} de ${ready.length}`);
-  $("homeSub").hidden = $("loader").value === "optifine";
+  $("homeSub").hidden = $("loader").value === "optifine" || !ehPulsar();
   $("modsSummary").textContent = t(`${on} mods ligados. ${ready.length} prontos e ${MODS.length - ready.length} a caminho.`);
   document.querySelectorAll("#mc [data-mod]").forEach((el) => {
     const m = MODS.find((x) => x.id === el.dataset.mod);
@@ -570,6 +622,10 @@ function retraduzir() {
   $("memOut").textContent = t($("mem").value + " GB");
   ["umMsg", "txMsg", "saved", "versaoMsg"].forEach((id) => ($(id).textContent = ""));
   renderVersoes();
+  renderMc();
+  renderOrbitas();
+  renderJanela();
+  if (!$("novModal").hidden) abrirNovidades();
   api.getConfig().then((cfg) => {
     renderOptifine(cfg);
     $("updToken").placeholder = t(cfg.hasUpdateToken ? "Chave salva. Cole outra para trocar." : "Cole a chave do GitHub (github_pat_…)");
@@ -613,7 +669,7 @@ function renderVersoes(v) {
     v.anterior ? "A versão de antes da última atualização, do jeito que ela era." : "Ainda não tem versão anterior. Ela aparece aqui depois da próxima atualização."
   );
   const aviso = $("homeVersao");
-  aviso.hidden = !(v.escolhida === "anterior" && v.anterior);
+  aviso.hidden = !(v.escolhida === "anterior" && v.anterior) || !ehPulsar();
   if (!aviso.hidden) aviso.textContent = t(`Jogando com a versão anterior (${v.anterior.versao})`);
 }
 async function escolherVersao(qual) {
@@ -656,8 +712,6 @@ $("btnUpdToken").onclick = async () => {
 };
 $("btnPickOf").onclick = async () => renderOptifine(await api.pickOptifine());
 $("btnOfSite").onclick = () => api.openLink("https://optifine.net/downloads");
-$("btnDiscord").onclick = () => api.openLink("https://discord.gg/UUW5jTfDKH");
-$("btnSugestao").onclick = () => api.openLink("https://github.com/R0N1234/Pulsar_Client/issues/new?template=sugestao.yml");
 $("loader").addEventListener("change", async () => {
   const cfg = await api.setConfig({ loader: $("loader").value });
   updateCounts();
@@ -780,12 +834,287 @@ api.onRadio((c) => {
   radioTocar(0);
 });
 
+/* ---------- órbitas do Início (modelo Órbita) ---------- */
+// Três órbitas em volta do pulsar: Discord por dentro, Sugestões no meio e Novidades por fora.
+// Cada planeta é um item e abre a sua própria aba na janela de abas; os botões de cima abrem a aba com a lista da órbita.
+const ORBITAS = window.PULSAR_ORBITAS || [];
+const NOVIDADES = window.PULSAR_NOVIDADES || [];
+const MAX_ABAS = 6;
+const orb = { aneis: [], nos: [], t: 0, ultimo: 0, parado: false, foco: null, abas: [], ativa: null, geo: null };
+const semMovimento = matchMedia("(prefers-reduced-motion: reduce)");
+
+const tituloItem = (o, it) => (o.id === "novidades" ? t(`Versão ${it.id}`) : t(it.titulo));
+
+function renderOrbitas() {
+  const stage = $("oStage");
+  stage.querySelectorAll(".orbit-ring,.onode").forEach((n) => n.remove());
+  orb.aneis = [];
+  orb.nos = [];
+  ORBITAS.forEach((o, i) => {
+    const anel = el("div", "orbit-ring");
+    anel.dataset.cor = o.cor;
+    anel.dataset.orbita = o.id;
+    stage.append(anel);
+    orb.aneis.push(anel);
+    o.itens.forEach((it, j) => {
+      const n = el("button", "onode", o.id === "novidades" ? it.nome : t(it.nome));
+      n.type = "button";
+      n.dataset.cor = o.cor;
+      n.dataset.orbita = o.id;
+      n.dataset.item = it.id;
+      n.setAttribute("aria-label", `${t(o.nome)}: ${tituloItem(o, it)}`);
+      n.onclick = () => abrirAba(o.id, it.id);
+      n.onmouseenter = () => (orb.parado = true);
+      n.onmouseleave = () => (orb.parado = false);
+      n.onfocus = () => (orb.parado = true);
+      n.onblur = () => (orb.parado = false);
+      stage.append(n);
+      // Cada órbita começa girada de um jeito, para os planetas não ficarem alinhados.
+      orb.nos.push({ n, anel: i, ang: [0.5, 1.2, 0.2][i % 3] + (j * Math.PI * 2) / o.itens.length });
+    });
+  });
+  renderLegenda();
+  medirOrbitas();
+  posicionarOrbitas();
+  marcarAbertos();
+}
+
+function renderLegenda() {
+  const leg = $("oLeg");
+  leg.textContent = "";
+  // Na legenda, de fora para dentro: Novidades, Sugestões, Discord.
+  for (const o of [...ORBITAS].reverse()) {
+    const b = el("button");
+    b.type = "button";
+    b.setAttribute("role", "tab");
+    b.dataset.cor = o.cor;
+    b.dataset.orbita = o.id;
+    b.setAttribute("aria-selected", String(orb.foco === o.id));
+    b.append(document.createTextNode(t(o.nome)), el("small", "", String(o.itens.length)));
+    b.onclick = () => focarOrbita(orb.foco === o.id ? null : o.id);
+    leg.append(b);
+  }
+}
+
+function focarOrbita(id) {
+  orb.foco = id;
+  $("orbita").classList.toggle("foco", !!id);
+  orb.aneis.forEach((a) => a.classList.toggle("on", a.dataset.orbita === id));
+  orb.nos.forEach(({ n }) => n.classList.toggle("foco", n.dataset.orbita === id));
+  renderLegenda();
+  if (id) abrirAba(id, null);
+}
+
+function medirOrbitas() {
+  const st = $("oStage");
+  const W = st.clientWidth;
+  const H = st.clientHeight;
+  if (!W || !H) return (orb.geo = null);
+  // O centro fica um pouco abaixo do meio (o título fica em cima) e as órbitas cabem na largura e na altura.
+  const cx = W * 0.5;
+  const cy = H * 0.58;
+  const maior = Math.max(140, Math.min(W / 2 - 60, (H * 0.3) / 0.5));
+  const fracoes = [0.42, 0.71, 1];
+  orb.geo = { cx, cy, raios: fracoes.map((f) => ({ rx: maior * f, ry: maior * f * 0.5 })) };
+  orb.aneis.forEach((a, i) => {
+    const r = orb.geo.raios[i] || orb.geo.raios[2];
+    Object.assign(a.style, { left: cx - r.rx + "px", top: cy - r.ry + "px", width: r.rx * 2 + "px", height: r.ry * 2 + "px" });
+  });
+  const tam = Math.max(110, Math.min(220, maior * 0.55));
+  Object.assign($("oPulsar").style, { width: tam + "px", left: cx - tam / 2 + "px", top: cy - tam / 2 + "px" });
+}
+
+function posicionarOrbitas() {
+  if (!orb.geo) return;
+  const { cx, cy, raios } = orb.geo;
+  for (const p of orb.nos) {
+    const r = raios[p.anel] || raios[2];
+    // A de dentro gira mais rápido; uma volta leva de 70 a 140 segundos.
+    const a = p.ang + orb.t * (0.09 - p.anel * 0.022);
+    const x = cx + r.rx * Math.cos(a);
+    const y = cy + r.ry * Math.sin(a);
+    const sen = Math.sin(a);
+    p.n.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-50%)`;
+    // Atrás do pulsar (metade de cima da elipse) fica por baixo e mais apagado.
+    p.n.style.zIndex = sen < 0 ? "0" : String(2 + Math.round(sen * 3));
+    p.n.classList.toggle("back", sen < -0.2);
+  }
+}
+
+function girarOrbitas(agora) {
+  const dt = orb.ultimo ? Math.min(0.1, (agora - orb.ultimo) / 1000) : 0;
+  orb.ultimo = agora;
+  const visivel = $("view-home").classList.contains("on") && !document.hidden;
+  if (visivel && !orb.parado && !semMovimento.matches) {
+    orb.t += dt;
+    posicionarOrbitas();
+  }
+  requestAnimationFrame(girarOrbitas);
+}
+addEventListener("resize", () => {
+  medirOrbitas();
+  posicionarOrbitas();
+});
+
+// Janela de abas: uma aba para cada item aberto (e uma para a lista de cada órbita).
+function acharOrbita(id) {
+  return ORBITAS.find((o) => o.id === id);
+}
+
+function abrirAba(orbitaId, itemId) {
+  const chave = orbitaId + "/" + (itemId || "*");
+  if (!orb.abas.includes(chave)) {
+    orb.abas.push(chave);
+    // Com muitas abas, a mais antiga (que não é a de agora) fecha sozinha.
+    while (orb.abas.length > MAX_ABAS) orb.abas.splice(orb.abas.findIndex((k) => k !== chave), 1);
+  }
+  orb.ativa = chave;
+  renderJanela();
+}
+
+function fecharAba(chave) {
+  const i = orb.abas.indexOf(chave);
+  if (i < 0) return;
+  orb.abas.splice(i, 1);
+  if (orb.ativa === chave) orb.ativa = orb.abas[Math.min(i, orb.abas.length - 1)] || null;
+  renderJanela();
+}
+
+function marcarAbertos() {
+  orb.nos.forEach(({ n }) => n.classList.toggle("aberto", orb.abas.includes(n.dataset.orbita + "/" + n.dataset.item)));
+}
+
+function acaoDoItem(a) {
+  if (a.link) return api.openLink(a.link);
+  if (a.acao === "console") return api.openConsole();
+  if (a.acao === "mods") document.querySelector('#nav button[data-view="mods"]').click();
+}
+
+function renderJanela() {
+  const win = $("oWin");
+  win.hidden = !orb.abas.length;
+  marcarAbertos();
+  if (!orb.abas.length) return;
+  const tabs = $("oTabs");
+  tabs.textContent = "";
+  for (const chave of orb.abas) {
+    const [oid, iid] = chave.split("/");
+    const o = acharOrbita(oid);
+    const it = o && o.itens.find((x) => x.id === iid);
+    const b = el("button", "o-tab");
+    b.type = "button";
+    b.dataset.cor = o.cor;
+    b.dataset.aba = chave;
+    b.setAttribute("role", "tab");
+    b.setAttribute("aria-selected", String(chave === orb.ativa));
+    const nome = it ? (oid === "novidades" ? it.nome : t(it.nome)) : t(o.nome);
+    b.append(el("span", "nm", nome));
+    const x = el("span", "x", "×");
+    x.setAttribute("role", "button");
+    x.setAttribute("aria-label", t("Fechar aba"));
+    x.onclick = (e) => {
+      e.stopPropagation();
+      fecharAba(chave);
+    };
+    b.append(x);
+    b.onclick = () => {
+      orb.ativa = chave;
+      renderJanela();
+    };
+    b.onauxclick = (e) => e.button === 1 && fecharAba(chave);
+    tabs.append(b);
+  }
+  const ativa = tabs.querySelector('[aria-selected="true"]');
+  if (ativa) ativa.scrollIntoView({ block: "nearest", inline: "nearest" });
+
+  const [oid, iid] = orb.ativa.split("/");
+  const o = acharOrbita(oid);
+  const body = $("oBody");
+  body.textContent = "";
+  body.dataset.cor = o.cor;
+  body.scrollTop = 0;
+  if (iid === "*") {
+    body.append(el("small", "cat", t("Órbita")), el("h3", "", t(o.nome)));
+    const lista = el("div", "o-list");
+    for (const it of o.itens) {
+      const b = el("button", "", tituloItem(o, it));
+      b.type = "button";
+      b.dataset.cor = o.cor;
+      b.onclick = () => abrirAba(o.id, it.id);
+      lista.append(b);
+    }
+    body.append(lista);
+    return;
+  }
+  const it = o.itens.find((x) => x.id === iid);
+  body.append(el("small", "cat", t(o.nome)), el("h3", "", tituloItem(o, it)));
+  if (o.id === "novidades") {
+    const ul = el("ul");
+    for (const p of it.itens) ul.append(el("li", "", t(p)));
+    body.append(ul);
+  } else {
+    for (const p of it.itens) body.append(el("p", "", t(p)));
+  }
+  if (it.acoes && it.acoes.length) {
+    const acts = el("div", "o-acts");
+    it.acoes.forEach((a, i) => {
+      const b = el("button", "btn-ghost" + (i === 0 ? " pri" : ""), t(a.rotulo));
+      b.type = "button";
+      b.onclick = () => acaoDoItem(a);
+      acts.append(b);
+    });
+    body.append(acts);
+  }
+}
+
+/* ---------- novidades da versão (depois de atualizar) ---------- */
+// Abre uma vez por versão, no meio da tela, com o logo e o que mudou. Depois fica na órbita Novidades.
+let novidadeAberta = null;
+function abrirNovidades(nov) {
+  if (nov) novidadeAberta = nov;
+  nov = novidadeAberta;
+  if (!nov) return;
+  $("novVer").textContent = nov.id;
+  const ul = $("novList");
+  ul.textContent = "";
+  for (const p of nov.itens) ul.append(el("li", "", t(p)));
+  $("novModal").hidden = false;
+}
+
+function fecharNovidades() {
+  $("novModal").hidden = true;
+  if (novidadeAberta) api.setConfig({ novidadesVistas: novidadeAberta.id }).catch(() => {});
+}
+$("novOk").onclick = fecharNovidades;
+$("novTodas").onclick = () => {
+  fecharNovidades();
+  document.querySelector('#nav button[data-view="home"]').click();
+  focarOrbita("novidades");
+};
+$("novModal").addEventListener("click", (e) => {
+  if (e.target === $("novModal")) fecharNovidades();
+});
+addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !$("novModal").hidden) fecharNovidades();
+});
+
+async function verNovidades(cfg) {
+  const versao = await api.appVersion().catch(() => "");
+  const nov = NOVIDADES.find((n) => n.id === versao);
+  if (nov && cfg.novidadesVistas !== versao) abrirNovidades(nov);
+}
+
 /* ---------- início ---------- */
 (async function init() {
   // O idioma salvo no launcher manda; o do navegador só vale até a configuração chegar.
   const cfg = await api.getConfig().catch(() => ({}));
   if (cfg.idioma && i18n.escolher(cfg.idioma) !== i18n.atual()) i18n.definir(cfg.idioma);
   renderIdiomas();
+  renderOrbitas();
+  requestAnimationFrame(girarOrbitas);
+  mcVersoes = await api.mcVersoes().catch(() => []);
+  mcEscolhida = cfg.version || "1.8.9";
+  renderMc();
   api.listVersoes().then(renderVersoes).catch(() => {});
   enabled = await api.getMods();
   renderChips();
@@ -798,4 +1127,5 @@ api.onRadio((c) => {
   const estado = await api.restoreAccount().catch(() => null);
   renderAccount(estado);
   setStatus(prontaParaJogar() ? "Pronto para jogar" : "Entre com sua conta Microsoft para jogar");
+  verNovidades(cfg);
 })();

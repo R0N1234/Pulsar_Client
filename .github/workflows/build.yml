@@ -185,6 +185,37 @@ jobs:
           git push -qf origin ci-optifine || true
           exit $status
 
+  e2e-versoes:
+    # Versões de PvP sem o Pulsar (1.7.10, 1.16.5 e 1.21.8): abre cada uma de verdade pelo código do botão JOGAR,
+    # com o Java certo baixado pelo launcher. Log e prints no ramo ci-versoes.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Instalar tela virtual
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb x11-xserver-utils libgl1-mesa-dri imagemagick
+      - name: Abrir o Minecraft 1.7.10, 1.16.5 e 1.21.8
+        working-directory: launcher
+        shell: bash
+        run: |
+          npm install --ignore-scripts --no-audit --no-fund
+          status=0
+          xvfb-run -a -s "-screen 0 1280x720x24" node test/versoes-pvp.js "$RUNNER_TEMP/versoes" || status=$?
+          mkdir -p /tmp/ci-versoes
+          cp "$RUNNER_TEMP/versoes"/*.log "$RUNNER_TEMP/versoes"/*.png /tmp/ci-versoes/ 2>/dev/null || true
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git checkout -q --orphan ci-versoes
+          git rm -rfq --cached .
+          cp /tmp/ci-versoes/* . 2>/dev/null || true
+          git add *.log *.png 2>/dev/null || true
+          git commit -qm "Log e prints das versões de PvP ${GITHUB_SHA}" || true
+          git push -qf origin ci-versoes || true
+          exit $status
+
   wtap:
     # W-Tap e Blockhit separado do client (pulsar-wtap-X.jar, para a pasta mods). O jar fica no ramo ci-wtap.
     runs-on: ubuntu-latest
