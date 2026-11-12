@@ -70,7 +70,7 @@ public class Sequencias extends HudMod {
 
     public Sequencias() {
         super("sequencias", "Sequências de Abate", "FIRST BLOOD, DOUBLE KILL... GODLIKE na tela, com sangue escorrendo e a voz do Pulsar",
-                Category.COMBATE, CENTRO, 60, false);
+                Category.COMBATE, CENTRO, 80, false);
     }
 
     /** Teste automático. */

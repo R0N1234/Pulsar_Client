@@ -450,6 +450,8 @@ public class SelfTest {
                 focar().focar(boneco(mc));
                 break;
             case 47:
+                // O print: aviso na HUD, nick na cor e a caixa em volta do Boneco1.
+                log("focar");
                 System.out.println("[Pulsar] Focar Jogador: caixa " + FocarJogador.desenhosCaixa() + ", nome " + FocarJogador.desenhosNome());
                 log(focar().focado() && FocarJogador.desenhosCaixa() > 0 && FocarJogador.desenhosNome() > 0 ? "focar-ok" : "focar-falhou");
                 // Sequências: bate no boneco e ele morre; a voz vem do jar e um .ogg da pasta substitui a próxima.
