@@ -55,6 +55,7 @@
 - **Combo**, **Alcance**, **Blindagem**, **Efeitos**, **Contador de Itens**, **Recargas** e **Contador TNT**
 - **Mira de Pulsar** (formato, cor, tamanho e contorno), **Impacto**, **Campo de Colisão** e **Tremor de Dano**
 - **Animações Clássicas** (bloqueio e swing da 1.7), **Propulsão** (correr fixo) e **Inventário** (trava itens contra drop)
+- **Focar Jogador** (na treta, aperte a tecla para focar quem te bateu: nick destacado e caixa em volta dele) e **Sequências de Abate** (FIRST BLOOD, DOUBLE KILL... GODLIKE em letras de sangue, com a voz do Pulsar; troque as vozes pelos seus .ogg em `pulsar/sons/sequencias/`)
 - **Anti-Batata** (contagem ou tela piscando quando a regeneração da maçã dourada vai acabar, e pode comer outra sozinho) e **Filtro de Coleta** (verde pega, vermelho descarta: escolha os itens de PvP que entram no inventário)
 
 **Visual**
@@ -74,6 +75,27 @@
 3. Entre com a sua conta Microsoft (a que tem o Minecraft) e clique em **JOGAR**.
 
 No jogo, aperte **Shift direito** para abrir o painel de mods. O launcher atualiza sozinho quando sai versão nova.
+
+## 🔊 Suas próprias vozes nas Sequências de Abate
+
+O mod vem com a voz do Pulsar (sintética, feita para o client, sem áudio de terceiros). Para trocar, coloque arquivos **.ogg** na pasta `.minecraft/pulsar/sons/sequencias/` com estes nomes (um por sequência; os que faltarem continuam com a voz do Pulsar):
+
+| Abates | Texto na tela | Arquivo |
+|---|---|---|
+| 1 | FIRST BLOOD | `first_blood.ogg` |
+| 2 | DOUBLE KILL | `double_kill.ogg` |
+| 3 | TRIPLE KILL | `triple_kill.ogg` |
+| 4 | MULTI KILL | `multi_kill.ogg` |
+| 5 | MEGA KILL | `mega_kill.ogg` |
+| 6 | ULTRA KILL | `ultra_kill.ogg` |
+| 7 | MONSTER KILL | `monster_kill.ogg` |
+| 8 | KILLING SPREE | `killing_spree.ogg` |
+| 9 | RAMPAGE | `rampage.ogg` |
+| 10 | DOMINATING | `dominating.ogg` |
+| 11 | UNSTOPPABLE | `unstoppable.ogg` |
+| 12 ou mais | GODLIKE | `godlike.ogg` |
+
+O arquivo é lido na hora de tocar, então basta salvar o .ogg e esperar o próximo abate. Se o jogo não achar o arquivo novo, use **Recarregar os sons** no painel do mod. Só .ogg (Vorbis) funciona, mono ou estéreo; um .mp3 ou .wav não toca.
 
 ## ❓ Perguntas rápidas
 

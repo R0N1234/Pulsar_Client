@@ -1,0 +1,110 @@
+{
+  "sequencias.first_blood": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "pulsar:sequencias/first_blood",
+        "stream": false
+      }
+    ]
+  },
+  "sequencias.double_kill": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "pulsar:sequencias/double_kill",
+        "stream": false
+      }
+    ]
+  },
+  "sequencias.triple_kill": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "pulsar:sequencias/triple_kill",
+        "stream": false
+      }
+    ]
+  },
+  "sequencias.multi_kill": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "pulsar:sequencias/multi_kill",
+        "stream": false
+      }
+    ]
+  },
+  "sequencias.mega_kill": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "pulsar:sequencias/mega_kill",
+        "stream": false
+      }
+    ]
+  },
+  "sequencias.ultra_kill": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "pulsar:sequencias/ultra_kill",
+        "stream": false
+      }
+    ]
+  },
+  "sequencias.monster_kill": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "pulsar:sequencias/monster_kill",
+        "stream": false
+      }
+    ]
+  },
+  "sequencias.killing_spree": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "pulsar:sequencias/killing_spree",
+        "stream": false
+      }
+    ]
+  },
+  "sequencias.rampage": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "pulsar:sequencias/rampage",
+        "stream": false
+      }
+    ]
+  },
+  "sequencias.dominating": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "pulsar:sequencias/dominating",
+        "stream": false
+      }
+    ]
+  },
+  "sequencias.unstoppable": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "pulsar:sequencias/unstoppable",
+        "stream": false
+      }
+    ]
+  },
+  "sequencias.godlike": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "pulsar:sequencias/godlike",
+        "stream": false
+      }
+    ]
+  }
+}

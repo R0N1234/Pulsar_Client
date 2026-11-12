@@ -22,6 +22,8 @@ import dev.pulsarclient.mods.MolduraLeve;
 import dev.pulsarclient.mods.Nebulosa;
 import dev.pulsarclient.mods.PulsarMod;
 import dev.pulsarclient.mods.Telescopio;
+import dev.pulsarclient.mods.FocarJogador;
+import dev.pulsarclient.mods.Sequencias;
 import dev.pulsarclient.rede.Rede;
 import dev.pulsarclient.settings.ColorSetting;
 import dev.pulsarclient.settings.ActionSetting;
@@ -437,13 +439,56 @@ public class SelfTest {
                 show("batatapainel", GuiPulsarPanel.options(null, antiBatata()));
                 break;
             case 45:
+                // Focar Jogador: você bate no Boneco1 (3 blocos à frente), o aviso aparece com a cabeça e a tecla.
+                mc.displayGuiScreen(null);
+                focar().setEnabled(true);
+                if (boneco(mc) != null) net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.AttackEntityEvent(mc.thePlayer, boneco(mc)));
+                break;
+            case 46:
+                log(focar().avisando() ? "focar-aviso" : "focar-aviso-falhou");
+                // A tecla: o boneco fica focado, com o nick na cor e a caixa em volta.
+                focar().focar(boneco(mc));
+                break;
+            case 47:
+                System.out.println("[Pulsar] Focar Jogador: caixa " + FocarJogador.desenhosCaixa() + ", nome " + FocarJogador.desenhosNome());
+                log(focar().focado() && FocarJogador.desenhosCaixa() > 0 && FocarJogador.desenhosNome() > 0 ? "focar-ok" : "focar-falhou");
+                // Sequências: bate no boneco e ele morre; a voz vem do jar e um .ogg da pasta substitui a próxima.
+                focar().focar(null);
+                sequencias().setEnabled(true);
+                copiarSomLocal(mc);
+                if (boneco(mc) != null) {
+                    net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.AttackEntityEvent(mc.thePlayer, boneco(mc)));
+                    boneco(mc).setHealth(0f);
+                }
+                break;
+            case 48:
+                log("sequencia");
+                boolean somJar = mc.getSoundHandler().getSound(new net.minecraft.util.ResourceLocation("pulsar", "sequencias.first_blood")) != null;
+                boolean somLocal = false;
+                try {
+                    somLocal = "Sons do Pulsar".equals(mc.getResourceManager().getResource(new net.minecraft.util.ResourceLocation("pulsar", "sounds/sequencias/double_kill.ogg")).getResourcePackName());
+                } catch (Exception e) {
+                    System.out.println("[Pulsar] selftest: som local não achado: " + e);
+                }
+                System.out.println("[Pulsar] Sequências: abates " + Sequencias.abates() + ", desenhos " + Sequencias.desenhos() + ", som do jar " + somJar + ", som local " + somLocal);
+                log(Sequencias.abates() >= 1 && Sequencias.desenhos() > 0 && somJar ? "sequencia-ok" : "sequencia-falhou");
+                log(somLocal ? "sons-locais-ok" : "sons-locais-falhou");
+                // Segundo abate dentro do intervalo: DOUBLE KILL (toca o .ogg da pasta).
+                sequencias().abate();
+                break;
+            case 49:
+                log(sequencias().contagem() == 2 ? "sequencia-dupla-ok" : "sequencia-dupla-falhou");
+                sequencias().setEnabled(false);
+                focar().setEnabled(false);
+                break;
+            case 50:
                 // Desliga o rádio um passo antes do fim: o pedido de parar sai em até meio segundo.
                 filtro().setEnabled(false);
                 PulsarClient.get().mod("rastro_cometa").setEnabled(false);
                 PulsarClient.get().mod("radio_pulsar").setEnabled(false);
                 mc.displayGuiScreen(null);
                 break;
-            case 46:
+            case 51:
                 finish(mc);
                 break;
             default: break;
@@ -548,6 +593,36 @@ public class SelfTest {
         }
         System.out.println("[Pulsar] Filtro de Coleta no servidor: " + tem + "descartados " + dev.pulsarclient.mods.FiltroColeta.descartados());
         log(capacete && pedra && espada && !lixo && dev.pulsarclient.mods.FiltroColeta.descartados() >= 4 ? "filtro-ok" : "filtro-falhou");
+    }
+
+    private static FocarJogador focar() {
+        return (FocarJogador) PulsarClient.get().mod("focar_jogador");
+    }
+
+    private static Sequencias sequencias() {
+        return (Sequencias) PulsarClient.get().mod("sequencias");
+    }
+
+    /** O Boneco1 (jogador de mentira a 3 blocos), ou null. */
+    private static net.minecraft.entity.player.EntityPlayer boneco(Minecraft mc) {
+        net.minecraft.entity.Entity e = mc.theWorld.getEntityByID(-4242);
+        return e instanceof net.minecraft.entity.player.EntityPlayer ? (net.minecraft.entity.player.EntityPlayer) e : null;
+    }
+
+    /** Copia a voz do jar para a pasta pulsar/sons/sequencias como double_kill.ogg: o jogo tem que ler a da pasta. */
+    private void copiarSomLocal(Minecraft mc) {
+        try {
+            java.io.File destino = new java.io.File(dev.pulsarclient.mods.SonsLocais.pasta(), "sequencias/double_kill.ogg");
+            destino.getParentFile().mkdirs();
+            java.io.InputStream in = SelfTest.class.getResourceAsStream("/assets/pulsar/sounds/sequencias/godlike.ogg");
+            java.io.OutputStream out = new java.io.FileOutputStream(destino);
+            byte[] b = new byte[8192];
+            for (int n; (n = in.read(b)) > 0; ) out.write(b, 0, n);
+            in.close();
+            out.close();
+        } catch (Exception e) {
+            System.out.println("[Pulsar] selftest: não copiei o som local: " + e);
+        }
     }
 
     private static dev.pulsarclient.mods.KitPvp kit() {
