@@ -396,16 +396,158 @@ public class SelfTest {
                 show("kiteditor", new GuiKitPvp(null, kit()));
                 break;
             case 36:
+                // Anti-Batata: regeneração de 5 s; um passo (3 s) depois a contagem e o pisca estão na tela.
+                mc.displayGuiScreen(null);
+                antiBatata().setEnabled(true);
+                antiBatata().prepararTeste(false);
+                darRegeneracao(mc, 100, false);
+                break;
+            case 37:
+                log("batata");
+                log(dev.pulsarclient.mods.AntiBatata.avisos() > 0 ? "batata-aviso-ok" : "batata-aviso-falhou");
+                log(dev.pulsarclient.mods.AntiBatata.piscadas() > 0 ? "batata-pisca-ok" : "batata-pisca-falhou");
+                break;
+            case 38:
+                // Comer sozinho: espada na mão (espaço 1), 3 maçãs no espaço 2, batendo, regeneração de 1,5 s.
+                antiBatata().prepararTeste(true);
+                antiBatata().simularCombate(STEP);
+                mc.thePlayer.inventory.currentItem = 0;
+                darRegeneracao(mc, 30, true);
+                break;
+            case 40:
+                conferirBatata(mc);
+                antiBatata().prepararTeste(false);
+                break;
+            case 41:
+                // Filtro de Coleta: tudo vermelho menos o kit de diamante (o exemplo do Rick); itens caem no pé do jogador.
+                filtro().setEnabled(true);
+                filtro().marcarTodos(true);
+                for (Item i : new Item[] {Items.diamond_helmet, Items.diamond_chestplate, Items.diamond_leggings, Items.diamond_boots}) {
+                    filtro().marcar(new ItemStack(i), false);
+                }
+                soltarItensFiltro(mc);
+                break;
+            case 42:
+                conferirFiltro(mc);
+                break;
+            case 43:
+                show("filtro", new GuiFiltroColeta(null, filtro()));
+                break;
+            case 44:
+                show("batatapainel", GuiPulsarPanel.options(null, antiBatata()));
+                break;
+            case 45:
                 // Desliga o rádio um passo antes do fim: o pedido de parar sai em até meio segundo.
+                filtro().setEnabled(false);
                 PulsarClient.get().mod("rastro_cometa").setEnabled(false);
                 PulsarClient.get().mod("radio_pulsar").setEnabled(false);
                 mc.displayGuiScreen(null);
                 break;
-            case 37:
+            case 46:
                 finish(mc);
                 break;
             default: break;
         }
+    }
+
+    private static dev.pulsarclient.mods.AntiBatata antiBatata() {
+        return (dev.pulsarclient.mods.AntiBatata) PulsarClient.get().mod("anti_batata");
+    }
+
+    private static dev.pulsarclient.mods.FiltroColeta filtro() {
+        return (dev.pulsarclient.mods.FiltroColeta) PulsarClient.get().mod("filtro_coleta");
+    }
+
+    /** Regeneração II no jogador pelo servidor; com maçãs, também espada no espaço 1 e 3 maçãs no espaço 2 (barra limpa). */
+    private void darRegeneracao(Minecraft mc, final int duracao, final boolean comMacas) {
+        final IntegratedServer server = mc.getIntegratedServer();
+        final UUID id = mc.thePlayer.getUniqueID();
+        if (server == null) return;
+        server.addScheduledTask(new Runnable() {
+            @Override
+            public void run() {
+                EntityPlayerMP p = server.getConfigurationManager().getPlayerByUUID(id);
+                if (p == null) return;
+                if (comMacas) {
+                    for (int i = 0; i < 36; i++) {
+                        ItemStack s = p.inventory.getStackInSlot(i);
+                        if (i < 9 || (s != null && s.getItem() == Items.golden_apple)) p.inventory.setInventorySlotContents(i, null);
+                    }
+                    p.inventory.setInventorySlotContents(0, new ItemStack(Items.diamond_sword));
+                    p.inventory.setInventorySlotContents(1, new ItemStack(Items.golden_apple, 3));
+                }
+                p.removePotionEffect(Potion.regeneration.id);
+                p.addPotionEffect(new PotionEffect(Potion.regeneration.id, duracao, 1));
+            }
+        });
+    }
+
+    /** Confere no servidor que uma maçã foi comida (sobraram 2), a regeneração foi renovada e a espada voltou para a mão. */
+    private void conferirBatata(Minecraft mc) {
+        IntegratedServer server = mc.getIntegratedServer();
+        EntityPlayerMP p = server == null ? null : server.getConfigurationManager().getPlayerByUUID(mc.thePlayer.getUniqueID());
+        if (p == null) {
+            log("batata-falhou");
+            return;
+        }
+        int macas = 0;
+        for (int i = 0; i < 36; i++) {
+            ItemStack s = p.inventory.getStackInSlot(i);
+            if (s != null && s.getItem() == Items.golden_apple) macas += s.stackSize;
+        }
+        PotionEffect regen = p.getActivePotionEffect(Potion.regeneration);
+        boolean espada = mc.thePlayer.inventory.currentItem == 0;
+        System.out.println("[Pulsar] Anti-Batata no servidor: maçãs " + macas + ", regeneração " + (regen == null ? "nenhuma" : regen.getDuration())
+                + ", espaço na mão " + (mc.thePlayer.inventory.currentItem + 1) + ", comidas " + dev.pulsarclient.mods.AntiBatata.comidas());
+        log(macas == 2 && regen != null && espada && dev.pulsarclient.mods.AntiBatata.comidas() >= 1 ? "batata-ok" : "batata-falhou");
+    }
+
+    /** Inventário só com a espada e itens de PvP caindo no pé do jogador (pegos depois de 5 ticks). */
+    private void soltarItensFiltro(Minecraft mc) {
+        final IntegratedServer server = mc.getIntegratedServer();
+        final UUID id = mc.thePlayer.getUniqueID();
+        if (server == null) return;
+        server.addScheduledTask(new Runnable() {
+            @Override
+            public void run() {
+                EntityPlayerMP p = server.getConfigurationManager().getPlayerByUUID(id);
+                if (p == null) return;
+                for (int i = 0; i < 36; i++) p.inventory.setInventorySlotContents(i, null);
+                // Espada vermelha que já estava no inventário: nunca é jogada fora.
+                p.inventory.setInventorySlotContents(0, new ItemStack(Items.diamond_sword));
+                ItemStack[] chao = {new ItemStack(Items.diamond_helmet), new ItemStack(Items.iron_chestplate), new ItemStack(Items.potionitem, 1, 16418),
+                        new ItemStack(Items.golden_apple, 2), new ItemStack(Blocks.cobblestone, 16), new ItemStack(Items.bowl)};
+                for (ItemStack s : chao) {
+                    EntityItem e = new EntityItem(p.worldObj, p.posX, p.posY + 0.2, p.posZ, s);
+                    e.motionX = e.motionY = e.motionZ = 0;
+                    e.setPickupDelay(5);
+                    p.worldObj.spawnEntityInWorld(e);
+                }
+            }
+        });
+    }
+
+    /** Confere no servidor: capacete, pedra e espada ficaram; peitoral de ferro, poção, maçãs e tigela foram jogados fora. */
+    private void conferirFiltro(Minecraft mc) {
+        IntegratedServer server = mc.getIntegratedServer();
+        EntityPlayerMP p = server == null ? null : server.getConfigurationManager().getPlayerByUUID(mc.thePlayer.getUniqueID());
+        if (p == null) {
+            log("filtro-falhou");
+            return;
+        }
+        boolean capacete = false, pedra = false, espada = false, lixo = false;
+        StringBuilder tem = new StringBuilder();
+        for (int i = 0; i < 36; i++) {
+            ItemStack s = p.inventory.getStackInSlot(i);
+            if (s == null) continue;
+            tem.append(s.stackSize).append("x ").append(s.getItem().getUnlocalizedName()).append("; ");
+            if (s.getItem() == Items.diamond_helmet) capacete = true;
+            else if (s.getItem() == Item.getItemFromBlock(Blocks.cobblestone) && s.stackSize == 16) pedra = true;
+            else if (s.getItem() == Items.diamond_sword) espada = true;
+            else if (s.getItem() == Items.iron_chestplate || s.getItem() == Items.potionitem || s.getItem() == Items.golden_apple || s.getItem() == Items.bowl) lixo = true;
+        }
+        System.out.println("[Pulsar] Filtro de Coleta no servidor: " + tem + "descartados " + dev.pulsarclient.mods.FiltroColeta.descartados());
+        log(capacete && pedra && espada && !lixo && dev.pulsarclient.mods.FiltroColeta.descartados() >= 4 ? "filtro-ok" : "filtro-falhou");
     }
 
     private static dev.pulsarclient.mods.KitPvp kit() {

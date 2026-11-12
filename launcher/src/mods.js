@@ -22,6 +22,8 @@ window.PULSAR_MODS = [
   ["efeitos", "Efeitos", "Poções ativas com tempo restante", "Combate", "off"],
   ["inventario", "Inventário", "Protege a espada e outros itens contra drop, trava slots (tecla padrão L) e centraliza o inventário", "Combate", true],
   ["kit_pvp", "Kit PvP", "Monte o inventário do PvP e pegue do baú com Shift + botão direito, cada item no seu lugar", "Combate", true],
+  ["anti_batata", "Anti-Batata", "Avisa quando a regeneração da maçã dourada vai acabar (contagem ou tela piscando) e pode comer outra sozinho", "Combate", "off"],
+  ["filtro_coleta", "Filtro de Coleta", "Escolha os itens de PvP que você pega do chão: os marcados em vermelho são descartados na hora", "Combate", "off"],
   ["contador_itens", "Contador de Itens", "Flechas, pérolas, maçãs e poções no inventário", "Combate", "off"],
   ["propulsao", "Propulsão", "Correr fica ligado sem segurar a tecla (tecla padrão R para fixo ou manual)", "Combate", true],
   ["recargas", "Recargas", "Tempo de espera de pérolas e maçãs", "Combate", "off"],
