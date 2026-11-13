@@ -86,7 +86,7 @@ import java.util.Set;
 @Mod(modid = PulsarClient.MODID, name = "Pulsar Client", version = PulsarClient.VERSION, clientSideOnly = true, acceptedMinecraftVersions = "[1.8.9]")
 public class PulsarClient {
     public static final String MODID = "pulsar";
-    public static final String VERSION = "0.9.0";
+    public static final String VERSION = "0.9.1";
     private static PulsarClient instance;
 
     private final List<PulsarMod> mods = new ArrayList<PulsarMod>();
