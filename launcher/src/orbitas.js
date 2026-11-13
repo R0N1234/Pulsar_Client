@@ -7,6 +7,15 @@
 
   const NOVIDADES = [
     {
+      id: "0.9.1",
+      nome: "0.9.1",
+      titulo: "Versão 0.9.1",
+      itens: [
+        "Novo mod Focar Jogador: ao bater ou apanhar de alguém, aparece um aviso com a cabeça da skin e o nick dele. Aperte a tecla (V) e o jogador fica focado: nick destacado e uma caixa em volta dele quando está à vista. Tecla, cor e o tempo sem ver são configuráveis.",
+        "Novo mod Sequências de Abate: FIRST BLOOD, DOUBLE KILL... GODLIKE em letras vermelhas com sangue escorrendo e a voz do Pulsar anunciando. Duas listas (Pulsar e Arena), tempo entre abates, duração, volume e som ligado ou desligado. Suas próprias vozes entram pela pasta pulsar/sons/sequencias.",
+      ],
+    },
+    {
       id: "0.9.0",
       nome: "0.9.0",
       titulo: "Versão 0.9.0",
