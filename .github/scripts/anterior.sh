@@ -11,10 +11,15 @@ TAG=$(gh release list --limit 30 --json tagName,isDraft,isPrerelease \
 if [ -z "$TAG" ]; then echo "Nenhuma versão anterior lançada."; exit 0; fi
 echo "Versão anterior: $TAG"
 # Até a 0.7.2 o jar saía sempre como pulsar-client-0.6.0.jar: o nome passa a ser o da versão da tag.
+# Um Release publicado de novo pode ter sobrado o jar da versão de antes: fica só o que tem o nome da tag.
 renomear() {
-  local jar
-  jar=$(ls "$DEST"/pulsar-client-*.jar | head -1)
-  [ "$jar" = "$DEST/pulsar-client-${TAG#v}.jar" ] || mv "$jar" "$DEST/pulsar-client-${TAG#v}.jar"
+  local certo="$DEST/pulsar-client-${TAG#v}.jar" jar
+  if [ -f "$certo" ]; then
+    for jar in "$DEST"/pulsar-client-*.jar; do [ "$jar" = "$certo" ] || rm -f "$jar"; done
+  else
+    jar=$(ls "$DEST"/pulsar-client-*.jar | head -1)
+    mv "$jar" "$certo"
+  fi
   ls -la "$DEST"
 }
 if gh release download "$TAG" -p "pulsar-client-*.jar" -D "$DEST" --clobber 2>/dev/null && ls "$DEST"/pulsar-client-*.jar >/dev/null 2>&1; then
