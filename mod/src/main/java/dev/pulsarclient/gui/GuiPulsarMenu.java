@@ -39,14 +39,15 @@ public class GuiPulsarMenu extends GuiScreen {
         int y = tituloY + 20;
         int cx = width / 2;
         buttonList.clear();
-        buttonList.add(new MenuBotao(SINGLE, cx - 100, y, 200, 20, "Um jogador", Icones.CONTROLE));
-        buttonList.add(new MenuBotao(MULTI, cx - 100, y + 24, 200, 20, "Multijogador", Icones.AMIGOS));
-        buttonList.add(new MenuBotao(OPTIONS, cx - 104, y + 49, 102, 18, "Opções", Icones.ENGRENAGEM));
-        buttonList.add(new MenuBotao(PANEL, cx + 2, y + 49, 102, 18, "Pulsar Client", Icones.CUBO));
-        buttonList.add(new MenuBotao(LANGUAGE, cx - 112, y + 71, 53, 18, "Idioma", Icones.GLOBO));
-        buttonList.add(new MenuBotao(TEXTURES, cx - 55, y + 71, 53, 18, "Texturas", Icones.CAMADAS));
-        buttonList.add(new MenuBotao(MODS, cx + 2, y + 71, 53, 18, "Mods", Icones.PECA));
-        buttonList.add(new MenuBotao(QUIT, cx + 59, y + 71, 53, 18, "Sair", Icones.SAIR));
+        // Cada fileira um pouco mais larga que a de cima, como no modelo; as de baixo cabem ícone e texto.
+        buttonList.add(new MenuBotao(SINGLE, cx - 110, y, 220, 20, "Um jogador", Icones.CONTROLE));
+        buttonList.add(new MenuBotao(MULTI, cx - 110, y + 24, 220, 20, "Multijogador", Icones.AMIGOS));
+        buttonList.add(new MenuBotao(OPTIONS, cx - 116, y + 49, 114, 18, "Opções", Icones.ENGRENAGEM));
+        buttonList.add(new MenuBotao(PANEL, cx + 2, y + 49, 114, 18, "Pulsar Client", Icones.CUBO));
+        buttonList.add(new MenuBotao(LANGUAGE, cx - 128, y + 71, 61, 18, "Idioma", Icones.GLOBO));
+        buttonList.add(new MenuBotao(TEXTURES, cx - 63, y + 71, 61, 18, "Texturas", Icones.CAMADAS));
+        buttonList.add(new MenuBotao(MODS, cx + 2, y + 71, 61, 18, "Mods", Icones.PECA));
+        buttonList.add(new MenuBotao(QUIT, cx + 67, y + 71, 61, 18, "Sair", Icones.SAIR));
         // Canto de cima, do outro lado da conta: cosméticos e sugestões.
         buttonList.add(new MenuBotao(SUGESTOES, width - 88, 6, 82, 20, "Sugestões", Icones.BRILHO));
         buttonList.add(new MenuBotao(COSMETICOS, width - 176, 6, 84, 20, "Cosméticos", Icones.CAMISA));
