@@ -135,4 +135,8 @@ Cada push roda o jogo de verdade no CI (Linux, Windows e com OptiFine), passa po
 Para lançar uma versão: **Actions** > **Lançar versão** > **Run workflow**, com o número da versão e o que mudou.
 </details>
 
+## Licença
+
+O Pulsar Client é software livre sob a [GPL-3.0](LICENSE). Você pode estudar, modificar e compartilhar o código, mas qualquer versão modificada que for distribuída também precisa ter o código aberto sob a GPL-3.0 e manter os créditos do projeto original.
+
 <p align="center"><sub>Pulsar Client não é afiliado à Mojang nem à Microsoft. Minecraft é marca da Mojang AB.</sub></p>
