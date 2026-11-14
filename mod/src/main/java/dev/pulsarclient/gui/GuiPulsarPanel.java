@@ -54,6 +54,7 @@ public class GuiPulsarPanel extends GuiScreen {
     private static final int OFF = 0xFF353E5A;
     private static final int AMBER = 0xFFFFB347;
     private static final int GOLD = 0xFFFFD84A;
+    private static final int NOVO = 0xFFFF8A3D;
     private static final int CARD_H = 74;
     private static final int CARD_MIN_W = 92;
     private static final int ROW_H = 24;
@@ -287,6 +288,7 @@ public class GuiPulsarPanel extends GuiScreen {
                 mod.favorite() ? GOLD : star ? TEXT : hover ? MUTED : DIM);
         boolean gear = hover && inside(mouseX, mouseY, x + w - 18, y, x + w, y + 18);
         Icones.desenhar(Icones.ENGRENAGEM, x + w - 14, y + 5, 9, gear ? BEAM : hover ? MUTED : DIM);
+        if (mod.novo()) etiquetaNovo(x + 17, y + 4);
         Icones.desenhar(Icones.doMod(mod), x + w / 2f - 11, y + 8, 22, on ? categoryColor(mod.category()) : MUTED);
         String nome = letreiro(mod.name(), w - 8, hover);
         fontRendererObj.drawString(nome, x + (w - fontRendererObj.getStringWidth(nome)) / 2, y + 36, on ? TEXT : MUTED);
@@ -295,6 +297,16 @@ public class GuiPulsarPanel extends GuiScreen {
         Desenho.caixa(x + 5, by, x + w - 5, by + 15, on ? (bh ? 0xFFA6F0FF : BEAM) : bh ? 0xFF26304F : BUTTON_OFF, 4);
         String t = on ? "Ligado" : "Desligado";
         fontRendererObj.drawString(t, x + (w - fontRendererObj.getStringWidth(t)) / 2, by + 4, on ? DARK : MUTED);
+    }
+
+    /** Etiqueta "NOVO" laranja, em letra pequena, no canto do cartão de um mod que acabou de chegar. */
+    private void etiquetaNovo(int x, int y) {
+        Desenho.caixa(x, y, x + 23, y + 9, NOVO, 3);
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(x + 2.5f, y + 2f, 0);
+        GlStateManager.scale(0.55f, 0.55f, 1f);
+        fontRendererObj.drawString("NOVO", 0, 0, DARK);
+        GlStateManager.popMatrix();
     }
 
     /** Opções do mod mostradas nas linhas (a tecla de ligar fica no cabeçalho). */
@@ -790,10 +802,12 @@ public class GuiPulsarPanel extends GuiScreen {
                 mod.toggleFavorite();
             } else if (button == 1 || inside(mouseX, mouseY, x + cw - 18, y, x + cw, y + 18)) {
                 open = mod;
+                mod.marcarVisto();
                 scroll = 0;
                 layout();
             } else if (button == 0) {
                 mod.toggle();
+                mod.marcarVisto();
             }
             return;
         }

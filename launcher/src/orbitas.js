@@ -7,6 +7,17 @@
 
   const NOVIDADES = [
     {
+      id: "0.9.5",
+      nome: "0.9.5",
+      titulo: "Versão 0.9.5",
+      itens: [
+        "Launcher novo no modo Normal: painel de lançamento à direita, mods em cartões, texturas com prévia e ajustes por abas. Em Ajustes dá para voltar para o modo Lite (a tela leve, com as órbitas) na hora.",
+        "Novo mod Gravação: F9 grava o jogo e F10 salva um clipe dos últimos segundos, como no Lunar. Qualidade, FPS, som do jogo e microfone configuráveis; os vídeos ficam em Vídeos/Pulsar Client, com REC na tela e os botões Abrir e Pasta no chat.",
+        "Sequências de Abate com vozes: pastas ou prefixos (MASCULINO_double_kill.ogg, MASCULINO/double_kill.ogg) viram uma opção Voz no painel, com variações (_2, _3) sorteadas. Botão Testar todos os sons para ouvir a lista inteira e Procurar sons novos na pasta.",
+        "Etiqueta NOVO nos mods novos, no painel do jogo (Shift direito) e no launcher.",
+      ],
+    },
+    {
       id: "0.9.1",
       nome: "0.9.1",
       titulo: "Versão 0.9.1",

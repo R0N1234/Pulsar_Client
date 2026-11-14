@@ -386,10 +386,10 @@ jobs:
             $p = Start-Process -FilePath $exe -Wait -PassThru -RedirectStandardOutput (Join-Path $prints "launcher.log") -RedirectStandardError (Join-Path $prints "launcher-erros.log")
             Remove-Item Env:PULSAR_PRINTS
             Anotar "launcher: código $($p.ExitCode)"
-            Get-Content (Join-Path $prints "launcher.log") -ErrorAction SilentlyContinue | Select-String "\[prints\] (versões|escolhida|depois)" | ForEach-Object { Anotar $_.Line }
+            Get-Content (Join-Path $prints "launcher.log") -ErrorAction SilentlyContinue | Select-String "\[prints\] (visual|versões|escolhida|depois|gravação)" | ForEach-Object { Anotar $_.Line }
             $vl = Get-Content (Join-Path $prints "launcher.log") -Raw -ErrorAction SilentlyContinue
             if ($vl -notmatch "escolhida: anterior" -or $vl -notmatch "depois de voltar: atual") { $falhas += "aba Versões" }
-            foreach ($aba in "inicio", "mods", "seus-mods", "texturas", "texturas-usando", "versoes", "versoes-anterior", "inicio-anterior", "ajustes", "atualizacao") {
+            foreach ($aba in "inicio", "mods", "seus-mods", "texturas", "texturas-usando", "versoes", "versoes-anterior", "inicio-anterior", "ajustes", "ajustes-account", "atualizacao", "lite-inicio", "lite-mods", "lite-ajustes") {
               if (-not (Test-Path (Join-Path $prints "launcher-$aba.png"))) { $falhas += "print $aba" }
             }
 
