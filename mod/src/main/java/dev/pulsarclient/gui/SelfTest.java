@@ -525,7 +525,7 @@ public class SelfTest {
                 boolean novo = PulsarClient.get().mod("sequencias").novo() && PulsarClient.get().mod("gravacao").novo();
                 PulsarClient.get().mod("gravacao").marcarVisto();
                 log(novo && !PulsarClient.get().mod("gravacao").novo() ? "novo-ok" : "novo-falhou");
-                show("novos", new GuiPulsarPanel(menu, Category.COMBATE, null));
+                show("novos", new GuiPulsarPanel(new GuiPulsarMenu(), Category.COMBATE, null));
                 break;
             case 54:
                 // Desliga o rádio um passo antes do fim: o pedido de parar sai em até meio segundo.
