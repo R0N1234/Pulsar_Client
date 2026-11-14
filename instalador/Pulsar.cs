@@ -192,13 +192,21 @@ namespace PulsarInstalador
             op = o;
             Text = "Pulsar Client";
             FormBorderStyle = FormBorderStyle.None;
-            StartPosition = FormStartPosition.CenterScreen;
             BackColor = Color.FromArgb(5, 7, 15);
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
             try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); }
             catch { }
-            using (Graphics g = CreateGraphics()) escala = Math.Max(1f, g.DpiX / 96f);
+            // Tamanho: a escala do Windows, mas nunca menor que uns 46% da altura da tela. Em TV e monitor grande
+            // (que costumam ficar em 100%) a janela e as letras crescem junto e dá para ler de longe.
+            Rectangle area = Screen.FromPoint(Cursor.Position).WorkingArea;
+            float dpi;
+            using (Graphics g = CreateGraphics()) dpi = Math.Max(1f, g.DpiX / 96f);
+            escala = Math.Max(dpi, Math.Min(area.Height * 0.46f / H, area.Width * 0.62f / W));
             ClientSize = new Size((int)(W * escala), (int)(H * escala));
+            // Centraliza na tela onde está o mouse (a do launcher), contando com a barra de tarefas.
+            StartPosition = FormStartPosition.Manual;
+            Location = new Point(area.X + (area.Width - ClientSize.Width) / 2, area.Y + (area.Height - ClientSize.Height) / 2);
+            Programa.Registrar("Janela: escala " + escala.ToString("0.00") + " (tela " + area.Width + "x" + area.Height + ", DPI " + dpi.ToString("0.00") + ")");
             KeyPreview = true;
 
             pasta = Instalacao.Pasta();
@@ -651,6 +659,8 @@ namespace PulsarInstalador
         static readonly Color Apagado = Color.FromArgb(141, 153, 187);
         static readonly Color Escuro = Color.FromArgb(91, 103, 137);
         static readonly Color Feixe = Color.FromArgb(127, 231, 255);
+        static readonly Color Ciano = Color.FromArgb(53, 214, 245);
+        static readonly Color Violeta = Color.FromArgb(155, 107, 255);
         static readonly Color Brasa = Color.FromArgb(255, 138, 61);
         static readonly Color Brasa2 = Color.FromArgb(255, 179, 107);
         static readonly Color Ruim = Color.FromArgb(255, 107, 107);
@@ -666,6 +676,8 @@ namespace PulsarInstalador
         };
 
         static Image logo;
+        // O "PC" no anel ciano -> violeta com brilho (o mesmo da tela de carregamento do jogo); o anel ocupa 68% da imagem.
+        static Image anel;
         static PrivateFontCollection fontes;
         static FontFamily familia;
         static readonly List<float[]> estrelas = new List<float[]>();
@@ -675,6 +687,8 @@ namespace PulsarInstalador
             Assembly a = Assembly.GetExecutingAssembly();
             try
             {
+                using (Stream s = a.GetManifestResourceStream("anel.png"))
+                    if (s != null) anel = new Bitmap(Image.FromStream(s));
                 using (Stream s = a.GetManifestResourceStream("logo.png"))
                     if (s != null) logo = new Bitmap(Image.FromStream(s));
             }
@@ -746,7 +760,7 @@ namespace PulsarInstalador
             Pulsar(g, W / 2, cy, s.Tela == Tela.Progresso ? 92 : 104, t, s.Tela == Tela.Progresso ? 2.2f : 0.9f);
 
             Color corTitulo = s.Tela == Tela.Erro ? Ruim : Texto;
-            using (Font f = Fonte(s.Tela == Tela.Inicio ? 30 : 24, true))
+            using (Font f = Fonte(s.Tela == Tela.Inicio ? 30 : 27, true))
                 Centro(g, s.Titulo, f, corTitulo, 172);
 
             switch (s.Tela)
@@ -757,10 +771,10 @@ namespace PulsarInstalador
                     BotaoPrincipal(g, s);
                     break;
                 case Tela.Progresso:
-                    using (Font f = Fonte(14, false)) Centro(g, s.Sub, f, Apagado, 205);
+                    using (Font f = Fonte(16, false)) Centro(g, s.Sub, f, Apagado, 208);
                     Barra(g, s, t);
-                    using (Font f = Fonte(12, false))
-                        Centro(g, Dicas[(int)(t / 4.5f) % Dicas.Length], f, Escuro, 302);
+                    using (Font f = Fonte(13, false))
+                        Centro(g, Dicas[(int)(t / 4.5f) % Dicas.Length], f, Escuro, 318);
                     break;
                 case Tela.Pronto:
                     using (Font f = Fonte(14, false)) Centro(g, s.Sub, f, Ok, 205);
@@ -872,7 +886,12 @@ namespace PulsarInstalador
                         g.DrawLine(p, cx + dx * a0, cy + dy * a0, cx + dx * a1, cy + dy * a1);
                 }
             }
-            if (logo != null) g.DrawImage(logo, cx - tam / 2, cy - tam / 2, tam, tam);
+            if (anel != null)
+            {
+                float a = tam / 0.68f * (1f + pulso * 0.02f);
+                g.DrawImage(anel, cx - a / 2, cy - a / 2, a, a);
+            }
+            else if (logo != null) g.DrawImage(logo, cx - tam / 2, cy - tam / 2, tam, tam);
         }
 
         static void BotaoPrincipal(Graphics g, Estado s)
@@ -903,34 +922,34 @@ namespace PulsarInstalador
             }
         }
 
+        /// <summary>Barra em pílula como a da tela de carregamento do jogo: trilho escuro com contorno, o cheio indo
+        /// do ciano ao violeta com brilho, e embaixo, centralizado, o que está fazendo e a porcentagem.</summary>
         static void Barra(Graphics g, Estado s, float t)
         {
-            RectangleF trilho = new RectangleF(90, 262, W - 180, 8);
-            using (Font f = Fonte(13, false))
-            using (SolidBrush b = new SolidBrush(Apagado))
-                g.DrawString(s.Status, f, b, trilho.X, trilho.Y - 24);
-            using (Font f = Fonte(13, true))
-            using (SolidBrush b = new SolidBrush(Feixe))
-            using (StringFormat sf = new StringFormat())
+            RectangleF trilho = new RectangleF(70, 252, W - 140, 10);
+            using (GraphicsPath p = Arredondado(RectangleF.Inflate(trilho, 1.5f, 1.5f), 6.5f))
+            using (Pen pen = new Pen(Color.FromArgb(120, 138, 147, 216), 1f))
+            using (SolidBrush b = new SolidBrush(Color.FromArgb(11, 16, 48)))
             {
-                sf.Alignment = StringAlignment.Far;
-                g.DrawString((int)Math.Round(s.Progresso * 100) + "%", f, b, new RectangleF(trilho.X, trilho.Y - 24, trilho.Width, 20), sf);
-            }
-            using (GraphicsPath p = Arredondado(trilho, 4))
-            using (SolidBrush b = new SolidBrush(Color.FromArgb(22, 33, 74)))
                 g.FillPath(b, p);
-            float w = Math.Max(8, trilho.Width * (float)s.Progresso);
+                g.DrawPath(pen, p);
+            }
+            float w = Math.Max(10, trilho.Width * (float)s.Progresso);
             RectangleF cheio = new RectangleF(trilho.X, trilho.Y, w, trilho.Height);
-            for (int i = 3; i >= 1; i--)
+            for (int i = 4; i >= 1; i--)
             {
-                using (GraphicsPath pp = Arredondado(RectangleF.Inflate(cheio, i * 2, i * 2), 4 + i * 2))
-                using (SolidBrush b = new SolidBrush(Color.FromArgb(18, Feixe)))
+                using (GraphicsPath pp = Arredondado(RectangleF.Inflate(cheio, i * 2.2f, i * 2.2f), 5 + i * 2.2f))
+                using (LinearGradientBrush b = new LinearGradientBrush(new RectangleF(trilho.X - 10, 0, trilho.Width + 20, 1),
+                    Color.FromArgb(16, Ciano), Color.FromArgb(16, Violeta), 0f))
                     g.FillPath(b, pp);
             }
-            using (GraphicsPath p = Arredondado(cheio, 4))
-            using (LinearGradientBrush b = new LinearGradientBrush(new RectangleF(trilho.X - 1, 0, trilho.Width + 2, 1), Color.FromArgb(155, 124, 255), Feixe, 0f))
+            using (GraphicsPath p = Arredondado(cheio, 5))
+            using (LinearGradientBrush b = new LinearGradientBrush(new RectangleF(trilho.X - 1, 0, trilho.Width + 2, 1), Ciano, Violeta, 0f))
                 g.FillPath(b, p);
-            // Faísca correndo dentro da parte cheia.
+            // Reflexo em cima e uma faísca correndo dentro da parte cheia.
+            using (GraphicsPath p = Arredondado(new RectangleF(cheio.X + 3, cheio.Y + 1.5f, Math.Max(0, cheio.Width - 6), 2.5f), 1.2f))
+            using (SolidBrush b = new SolidBrush(Color.FromArgb(70, 255, 255, 255)))
+                g.FillPath(b, p);
             float x = cheio.X + (t * 160 % (cheio.Width + 60)) - 30;
             RectangleF brilho = new RectangleF(x, cheio.Y, 30, cheio.Height);
             brilho.Intersect(cheio);
@@ -943,6 +962,8 @@ namespace PulsarInstalador
                     b.InterpolationColors = cb;
                     g.FillRectangle(b, brilho);
                 }
+            string texto = s.Status + "  ·  " + (int)Math.Round(s.Progresso * 100) + "%";
+            using (Font f = Fonte(16, true)) Centro(g, Encurtar(g, texto, f, W - 80), f, Texto, trilho.Bottom + 14);
         }
 
         static void Centro(Graphics g, string texto, Font f, Color cor, float y)

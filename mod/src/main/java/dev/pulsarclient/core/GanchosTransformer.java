@@ -30,6 +30,8 @@ import java.util.List;
  * - RendererLivingEntity.setBrightness: cor de quando a entidade leva dano (Impacto).
  * - ModelBiped.setRotationAngles: a pose dos emotes do Pulsar, depois da pose normal do jogo
  *   (a armadura e as camadas da skin copiam a mesma pose, então tudo se mexe junto).
+ * - GuiNewChat.setChatLine: o chat guarda todas as mensagens desde que você entrou no servidor
+ *   (o jogo apagava tudo depois de 100 linhas), então dá para subir até a primeira.
  *
  * Os nomes no jogo publicado são os nomes SRG (func_..., field_...); os outros são do ambiente de desenvolvimento.
  */
@@ -47,6 +49,7 @@ public class GanchosTransformer implements IClassTransformer {
             if (transformedName.equals("net.minecraft.client.renderer.entity.RenderItem")) return patch(bytes, transformedName, 3);
             if (transformedName.equals("net.minecraft.client.renderer.entity.layers.LayerArmorBase")) return patch(bytes, transformedName, 4);
             if (transformedName.equals("net.minecraft.client.model.ModelBiped")) return patch(bytes, transformedName, 5);
+            if (transformedName.equals("net.minecraft.client.gui.GuiNewChat")) return patch(bytes, transformedName, 6);
         } catch (Throwable t) {
             System.err.println("[Pulsar] Não deu para instalar os ganchos em " + transformedName + ": " + t);
         }
@@ -63,7 +66,8 @@ public class GanchosTransformer implements IClassTransformer {
         else if (which == 2) ok = corDano(node);
         else if (which == 3) ok = encantoItem(node);
         else if (which == 4) ok = encantoArmadura(node);
-        else ok = poseEmote(node);
+        else if (which == 5) ok = poseEmote(node);
+        else ok = chatInteiro(node);
         if (!ok) return bytes;
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         node.accept(writer);
@@ -326,6 +330,31 @@ public class GanchosTransformer implements IClassTransformer {
         if (count == 0) return false;
         Ganchos.ganchoEmote = true;
         System.out.println("[Pulsar] Emotes: gancho instalado em ModelBiped (" + m.name + ", " + count + " saídas)");
+        return true;
+    }
+
+    // ---------- chat inteiro ----------
+
+    /** GuiNewChat.setChatLine: troca os dois "100" (limite de linhas guardadas) por Ganchos.LINHAS_CHAT. */
+    private static boolean chatInteiro(ClassNode node) {
+        MethodNode m = method(node, "(Lnet/minecraft/util/IChatComponent;IIZ)V", "setChatLine", "func_146237_a");
+        if (m == null) {
+            System.err.println("[Pulsar] Chat: setChatLine não achado:" + listMethods(node));
+            return false;
+        }
+        int trocas = 0;
+        for (AbstractInsnNode in = m.instructions.getFirst(); in != null; in = in.getNext()) {
+            if (in.getOpcode() == Opcodes.BIPUSH && ((org.objectweb.asm.tree.IntInsnNode) in).operand == 100) {
+                m.instructions.set(in, in = new LdcInsnNode(Ganchos.LINHAS_CHAT));
+                trocas++;
+            }
+        }
+        if (trocas == 0) {
+            System.err.println("[Pulsar] Chat: limite de 100 linhas não achado em " + m.name);
+            return false;
+        }
+        Ganchos.ganchoChat = true;
+        System.out.println("[Pulsar] Chat: guarda até " + Ganchos.LINHAS_CHAT + " linhas (" + trocas + " limites trocados em " + m.name + ")");
         return true;
     }
 

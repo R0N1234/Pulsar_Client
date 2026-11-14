@@ -32,7 +32,18 @@ function visible(line, k) {
   return !q || line.toLowerCase().includes(q);
 }
 
+// Bolinha verde ao lado do nome: o jogo mandou linhas nos últimos 15 segundos.
+let ultimaLinha = 0;
+function vivo() {
+  $("live").classList.toggle("on", Date.now() - ultimaLinha < 15000);
+}
+setInterval(vivo, 2000);
+
 function add(lines) {
+  if (lines.length) {
+    ultimaLinha = Date.now();
+    vivo();
+  }
   const frag = document.createDocumentFragment();
   for (const line of lines) {
     const k = kind(line);

@@ -285,6 +285,7 @@ public class FiltroColeta extends PulsarMod {
         if (entradas.isEmpty() || !podeClicar(p)) return;
         boolean combate = ticks - ultimoCombate <= COMBATE_TICKS;
         int cliques = 0;
+        List<Entrada> resto = new ArrayList<Entrada>();
         Iterator<Entrada> it = entradas.iterator();
         while (it.hasNext() && cliques < CLIQUES_POR_TICK) {
             Entrada e = it.next();
@@ -297,16 +298,25 @@ public class FiltroColeta extends PulsarMod {
             int slot = e.espaco < 9 ? 36 + e.espaco : e.espaco;
             int qtd = Math.min(e.qtd, s.stackSize);
             String nome = s.getDisplayName();
+            int feitos = 0;
             if (qtd >= s.stackSize) {
                 // A pilha toda veio do chão: Ctrl + Q.
                 mc.playerController.windowClick(p.inventoryContainer.windowId, slot, 1, 4, p);
                 cliques++;
+                feitos = qtd;
             } else {
                 // Juntou numa pilha que já existia: joga fora só o que chegou, um por um.
-                for (int i = 0; i < qtd && cliques < CLIQUES_POR_TICK; i++, cliques++) {
+                for (; feitos < qtd && cliques < CLIQUES_POR_TICK; feitos++, cliques++) {
                     mc.playerController.windowClick(p.inventoryContainer.windowId, slot, 0, 4, p);
                 }
+                // Acabaram os cliques deste tick: o que faltou sai no próximo (antes ficava no inventário).
+                if (feitos < qtd) {
+                    Entrada r = new Entrada(e.espaco, e.chave, qtd - feitos, ticks);
+                    r.confirmada = true;
+                    resto.add(r);
+                }
             }
+            qtd = feitos;
             descartados += qtd;
             ItemStack depois = p.inventory.mainInventory[e.espaco];
             antesChave[e.espaco] = KitPvp.chave(depois);
@@ -314,6 +324,7 @@ public class FiltroColeta extends PulsarMod {
             System.out.println("[Pulsar] Filtro de Coleta: descartou " + qtd + "x " + e.chave);
             if (avisar.get()) mc.ingameGUI.setRecordPlaying("§cDescartado: §f" + (qtd > 1 ? qtd + "x " : "") + nome, false);
         }
+        entradas.addAll(resto);
     }
 
     @Override

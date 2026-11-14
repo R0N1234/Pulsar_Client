@@ -360,7 +360,8 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 .orbit-one { width: 40%; height: 30%; border-color: rgba(var(--violet-rgb), .46); animation: orbitDrift calc(12s * var(--motion-scale)) ease-in-out infinite alternate; }
 .orbit-two { width: 70%; height: 50%; animation: orbitDrift calc(16s * var(--motion-scale)) ease-in-out infinite alternate-reverse; }
 .orbit-three { width: 94%; height: 72%; border-color: rgba(var(--amber-rgb), .48); animation: orbitDrift calc(20s * var(--motion-scale)) ease-in-out infinite alternate; }
-.orbit-beam { position: absolute; left: 18%; top: 67%; z-index: -2; width: 64%; height: 3px; background: linear-gradient(90deg, transparent, rgba(var(--cyan-rgb), .35), #d8ffff 52%, rgba(var(--cyan-rgb), .35), transparent); transform: rotate(-21deg); box-shadow: 0 0 17px 5px rgba(var(--cyan-rgb), .2); opacity: .7; }
+/* O feixe do pulsar gira em volta do núcleo, como um farol (a mesma linha de antes, agora presa no centro). */
+.orbit-beam { position: absolute; left: 50%; top: 57%; z-index: -2; width: 64%; height: 3px; background: linear-gradient(90deg, transparent, rgba(var(--cyan-rgb), .35), #d8ffff 50%, rgba(var(--cyan-rgb), .35), transparent); transform: translate(-50%, -50%) rotate(-21deg); box-shadow: 0 0 17px 5px rgba(var(--cyan-rgb), .2); opacity: .7; animation: beamSpin calc(16s * var(--motion-scale)) linear infinite; }
 .pulsar-core {
   position: absolute;
   z-index: 2;
@@ -376,11 +377,15 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
   transform: translate(-50%, -50%);
   animation: corePulse calc(3s * var(--motion-scale)) ease-in-out infinite;
 }
-.pulsar-core::before, .pulsar-core::after, .core-halo { content: ""; position: absolute; inset: -18px; border: 1px solid rgba(var(--cyan-rgb), .36); border-radius: 50%; animation: coreRing calc(4s * var(--motion-scale)) linear infinite; }
-.pulsar-core::after { inset: -31px; border-color: rgba(var(--violet-rgb), .2); animation-direction: reverse; animation-duration: calc(6s * var(--motion-scale)); }
+.pulsar-core::before, .pulsar-core::after, .core-halo { content: ""; position: absolute; inset: -18px; border: 1px solid rgba(var(--cyan-rgb), .36); border-top-color: rgba(var(--cyan-rgb), .95); border-radius: 50%; animation: coreRing calc(4s * var(--motion-scale)) linear infinite; }
+.pulsar-core::after { inset: -31px; border-color: rgba(var(--violet-rgb), .2); border-right-color: rgba(var(--violet-rgb), .85); animation-direction: reverse; animation-duration: calc(6s * var(--motion-scale)); }
 .core-halo { inset: -48px; border-style: dashed; opacity: .4; animation-duration: calc(12s * var(--motion-scale)); }
 .pulsar-core i, .pulsar-core b, .pulsar-core em { position: absolute; top: 50%; left: 50%; width: 7px; height: 7px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
-.pulsar-core i { transform: translate(-43px, -43px); }.pulsar-core b { transform: translate(42px, 18px); background: var(--violet); }.pulsar-core em { transform: translate(-56px, 20px); width: 4px; height: 4px; }
+/* As três luas giram em órbita em volta do núcleo, cada uma no seu raio e na sua velocidade. */
+.pulsar-core i, .pulsar-core b, .pulsar-core em { margin: -3.5px 0 0 -3.5px; animation: lua calc(var(--volta) * var(--motion-scale)) linear infinite; animation-delay: var(--atraso); }
+.pulsar-core i { --raio: 52px; --volta: 7s; --atraso: -1s; }
+.pulsar-core b { --raio: 45px; --volta: 5s; --atraso: -3.2s; background: var(--violet); box-shadow: 0 0 10px var(--violet); animation-direction: reverse; }
+.pulsar-core em { --raio: 60px; --volta: 11s; --atraso: -6s; width: 4px; height: 4px; margin: -2px 0 0 -2px; }
 .orbit-node {
   position: absolute;
   z-index: 3;
@@ -757,6 +762,8 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 @keyframes orbitDrift { from { transform: translate(-50%, -50%) rotate(-3deg); } to { transform: translate(-50%, -50%) rotate(2deg); } }
 @keyframes corePulse { 0%,100% { transform: translate(-50%,-50%) scale(.94); } 50% { transform: translate(-50%,-50%) scale(1.05); } }
 @keyframes coreRing { to { transform: rotate(360deg); } }
+@keyframes beamSpin { from { transform: translate(-50%, -50%) rotate(-21deg); } to { transform: translate(-50%, -50%) rotate(339deg); } }
+@keyframes lua { from { transform: rotate(0deg) translateX(var(--raio)); } to { transform: rotate(360deg) translateX(var(--raio)); } }
 
 @media (min-width: 1500px) {
   :root { --sidebar: 126px; }
@@ -814,6 +821,7 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
   .orbital-map { flex-basis: 430px; min-height: 430px; margin-top: 0; }
   .orbit-line { left: 50%; top: 55%; }.orbit-one { width: 52%; }.orbit-two { width: 82%; }.orbit-three { width: 112%; }
   .pulsar-core { left: 50%; top: 55%; width: 58px; height: 58px; }
+  .orbit-beam { top: 55%; }
   .orbit-node { min-height: 29px; padding: 0 9px; font-size: 10px; }
   .n3, .n5, .n7, .a3, .a7 { display: none; }
   .n1 { left: 13%; top: 20%; }.n2 { left: 64%; top: 22%; }.n4 { left: 36%; bottom: 3%; }.n6 { left: 2%; bottom: 18%; }
@@ -883,6 +891,8 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 }
 
 body.reduced-effects { --motion-scale: .001; }
+/* Efeitos reduzidos: as animações sem fim param no último quadro (rodando a .001 da velocidade elas tremiam). */
+body.reduced-effects *, body.reduced-effects *::before, body.reduced-effects *::after { animation-iteration-count: 1 !important; }
 body.reduced-effects .cursor-light, body.reduced-effects .scan-grid { display: none; }
 
 /* ===== O que o launcher de verdade precisa a mais ===== */

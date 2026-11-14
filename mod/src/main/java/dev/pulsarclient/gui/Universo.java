@@ -19,6 +19,15 @@ public final class Universo {
     public static final ResourceLocation PLANETAS = new ResourceLocation("pulsar", "textures/gui/planetas.png");
     public static final ResourceLocation PULSAR = new ResourceLocation("pulsar", "textures/gui/pulsar.png");
     public static final ResourceLocation LOGO = new ResourceLocation("pulsar", "textures/gui/logo.png");
+    // Logo animado do menu principal (tools/logo_menu.py): anel, nebulosa girando, órbitas e as letras "PC" do Rick.
+    private static final ResourceLocation LOGO_ANEL = new ResourceLocation("pulsar", "textures/gui/logo_anel.png");
+    private static final ResourceLocation LOGO_VORTICE = new ResourceLocation("pulsar", "textures/gui/logo_vortice.png");
+    private static final ResourceLocation LOGO_ORBITAS = new ResourceLocation("pulsar", "textures/gui/logo_orbitas.png");
+    private static final ResourceLocation LOGO_LETRAS = new ResourceLocation("pulsar", "textures/gui/logo_letras.png");
+    /** As órbitas do logo, iguais às de tools/logo_menu.py (semi-eixos e inclinação, numa imagem de 512) e o tempo de uma volta. */
+    private static final float[][] ORBITAS_LOGO = {{246, 74, 24f, 9000f, 0.3f}, {236, 66, -22f, 13000f, 3.5f}};
+    /** O anel ocupa esta fração da imagem do logo (raio 150 em 512). */
+    public static final float ANEL = 300f / 512f;
     // Ícone PC pequeno (32x32), para o nome dos jogadores e o TAB.
     public static final ResourceLocation ICONE = new ResourceLocation("pulsar", "textures/gui/icone.png");
     private static final int CW = 4096;
@@ -142,6 +151,67 @@ public final class Universo {
     public static void logo(int x, int y, int size) {
         bind(LOGO);
         Gui.drawModalRectWithCustomSizedTexture(x, y, 0, 0, size, size, size, size);
+    }
+
+    /**
+     * Logo animado do menu, centrado em (cx, cy), numa imagem de lado size (o anel ocupa {@link #ANEL} dela):
+     * a nebulosa dentro do anel gira, o brilho do anel respira, duas luas andam pelas órbitas e as letras flutuam.
+     */
+    public static void logoMenu(float cx, float cy, float size) {
+        long ms = Minecraft.getSystemTime() - INICIO;
+        float h = size / 2;
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        textura(LOGO_ANEL, cx, cy, h, 0f, 1f);
+        // Respira: o anel de novo por cima, somando luz.
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+        textura(LOGO_ANEL, cx, cy, h * (1f + 0.012f * (float) Math.sin(ms / 900.0)), 0f, 0.10f + 0.10f * (float) Math.sin(ms / 900.0));
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        textura(LOGO_VORTICE, cx, cy, h, (float) (ms % 24000L) / 24000f * 360f, 0.9f);
+        textura(LOGO_ORBITAS, cx, cy, h, 0f, 1f);
+        float flutua = (float) Math.sin(ms / 1400.0) * size * 0.006f;
+        textura(LOGO_LETRAS, cx, cy + flutua, h, 0f, 1f);
+        // As luas: um ponto claro com brilho em cada órbita (o brilho é o núcleo do pulsar, que já é redondo e suave).
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+        float k = size / 512f;
+        for (float[] o : ORBITAS_LOGO) {
+            double t = o[4] + ms / (double) o[3] * Math.PI * 2;
+            double inc = Math.toRadians(o[2]);
+            double x = o[0] * Math.cos(t), y = o[1] * Math.sin(t);
+            float lx = cx + (float) (x * Math.cos(inc) - y * Math.sin(inc)) * k;
+            float ly = cy + (float) (x * Math.sin(inc) + y * Math.cos(inc)) * k;
+            // Na metade de trás da órbita a lua passa atrás do disco: fica fraca dentro do anel.
+            float dx = lx - cx, dy = ly - cy;
+            boolean atras = Math.sin(t) < 0 && dx * dx + dy * dy < (h * ANEL) * (h * ANEL);
+            float r = size * 0.035f;
+            bind(PULSAR);
+            GlStateManager.color(0.7f, 0.95f, 1f, atras ? 0.25f : 0.95f);
+            Tessellator tes = Tessellator.getInstance();
+            WorldRenderer wr = tes.getWorldRenderer();
+            wr.begin(7, DefaultVertexFormats.POSITION_TEX);
+            quad(wr, lx - r, ly - r, lx + r, ly + r, 0, 0, 0.5f, 0.5f);
+            tes.draw();
+        }
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.color(1f, 1f, 1f, 1f);
+    }
+
+    /** Uma camada do logo: quadrado de meia-largura h em volta de (cx, cy), girado e com transparência. */
+    private static void textura(ResourceLocation tex, float cx, float cy, float h, float graus, float alfa) {
+        Minecraft.getMinecraft().getTextureManager().bindTexture(tex);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+        GlStateManager.enableTexture2D();
+        GlStateManager.color(1f, 1f, 1f, alfa);
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(cx, cy, 0);
+        if (graus != 0f) GlStateManager.rotate(graus, 0, 0, 1);
+        Tessellator tes = Tessellator.getInstance();
+        WorldRenderer wr = tes.getWorldRenderer();
+        wr.begin(7, DefaultVertexFormats.POSITION_TEX);
+        quad(wr, -h, -h, h, h, 0, 0, 1, 1);
+        tes.draw();
+        GlStateManager.popMatrix();
     }
 
     /** Ícone PC pequeno, quadrado de lado size. */

@@ -179,7 +179,10 @@ public class FocarJogador extends HudMod {
     private void apertou(int codigo) {
         if (!isEnabled() || codigo == 0 || codigo != tecla.get() || mc.currentScreen != null || mc.thePlayer == null) return;
         if (avisando()) {
-            focar(mc.theWorld.getPlayerEntityByUUID(candidato));
+            // O jogador do aviso pode ter saído de perto: aí só some o aviso (sem tirar o foco que já existia).
+            EntityPlayer c = mc.theWorld.getPlayerEntityByUUID(candidato);
+            if (c != null) focar(c);
+            else avisoAte = -1;
         } else if (foco != null) {
             focar(null);
         }

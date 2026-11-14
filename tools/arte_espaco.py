@@ -125,8 +125,20 @@ def space(w, h, seed, fade_edges=False, center=None):
     return img, rnd
 
 
-def emblem(size, beams_out=True):
-    """Logo do Pulsar Client: "PC" na frente de um pulsar (estrela de nêutrons com os dois feixes de luz)."""
+def diagonal(s, a, b):
+    """Imagem s x s com a cor indo de a (em cima à esquerda) para b (embaixo à direita)."""
+    g = Image.new("RGB", (2, 2))
+    g.putpixel((0, 0), a)
+    g.putpixel((1, 1), b)
+    mid = tuple((a[i] + b[i]) // 2 for i in range(3))
+    g.putpixel((1, 0), mid)
+    g.putpixel((0, 1), mid)
+    return g.resize((s, s), Image.BILINEAR)
+
+
+def emblem(size, beams_out=True, anel_gradiente=False):
+    """Logo do Pulsar Client: "PC" na frente de um pulsar (estrela de nêutrons com os dois feixes de luz).
+    anel_gradiente: o anel vai do ciano ao violeta, com brilho mais forte (tela de carregamento)."""
     s = size
     c = s / 2
     r = s * 0.34
@@ -156,7 +168,14 @@ def emblem(size, beams_out=True):
     # Feixes por fora do círculo (o brilho que "vaza") e por dentro.
     if beams_out:
         img.alpha_composite(beam_layer(200, s * 0.06, reach).filter(ImageFilter.GaussianBlur(s * 0.01)))
-    img.alpha_composite(glow_layer((s, s), lambda g: g.ellipse([c - r * 1.1, c - r * 1.1, c + r * 1.1, c + r * 1.1], outline=BEAM + (150,), width=int(s * 0.035)), s * 0.03))
+    if anel_gradiente:
+        cores = diagonal(s, (64, 224, 255), (168, 92, 255)).convert("RGBA")
+        brilho = Image.new("L", (s, s), 0)
+        ImageDraw.Draw(brilho).ellipse([c - r * 1.04, c - r * 1.04, c + r * 1.04, c + r * 1.04], outline=255, width=int(s * 0.05))
+        cores.putalpha(brilho.filter(ImageFilter.GaussianBlur(s * 0.035)).point(lambda v: int(v * 0.95)))
+        img.alpha_composite(cores)
+    else:
+        img.alpha_composite(glow_layer((s, s), lambda g: g.ellipse([c - r * 1.1, c - r * 1.1, c + r * 1.1, c + r * 1.1], outline=BEAM + (150,), width=int(s * 0.035)), s * 0.03))
 
     disc = Image.new("RGBA", (s, s), (0, 0, 0, 0))
     dd = ImageDraw.Draw(disc)
@@ -178,7 +197,14 @@ def emblem(size, beams_out=True):
     clipped.paste(disc, (0, 0), mask)
     img.alpha_composite(clipped)
     d = ImageDraw.Draw(img)
-    d.ellipse([c - r, c - r, c + r, c + r], outline=BEAM + (255,), width=max(2, int(s * 0.02)))
+    if anel_gradiente:
+        linha = Image.new("L", (s, s), 0)
+        ImageDraw.Draw(linha).ellipse([c - r, c - r, c + r, c + r], outline=255, width=max(2, int(s * 0.018)))
+        cores = diagonal(s, (64, 224, 255), (168, 92, 255)).convert("RGBA")
+        cores.putalpha(linha)
+        img.alpha_composite(cores)
+    else:
+        d.ellipse([c - r, c - r, c + r, c + r], outline=BEAM + (255,), width=max(2, int(s * 0.02)))
 
     font = ImageFont.truetype(FONT, int(s * 0.27))
     text = "PC"
@@ -281,6 +307,25 @@ def splash_background():
     add_galaxy(img, rnd, w * 0.88, h * 0.12, 50, (110, 210, 255), 0.6)
     add_planet(img, w * 0.86, h * 0.7, 58, (230, 140, 80), ring=(240, 210, 170))
     add_planet(img, w * 0.1, h * 0.78, 28, (90, 150, 255))
+    # Nuvens violeta e azuis nas bordas, como no modelo do Rick, deixando o meio limpo para o logo e a barra.
+    nuvens = random.Random(23)
+    for _ in range(26):
+        x = nuvens.choice([nuvens.uniform(0, w * 0.32), nuvens.uniform(w * 0.68, w)])
+        y = nuvens.uniform(0, h)
+        rx, ry = nuvens.uniform(60, 220), nuvens.uniform(30, 90)
+        cor = nuvens.choice([(120, 60, 220), (90, 50, 190), (50, 90, 210), (150, 70, 210)])
+        img.alpha_composite(glow_layer((w, h), lambda g, x=x, y=y, rx=rx, ry=ry, cor=cor: g.ellipse(
+            [x - rx, y - ry, x + rx, y + ry], fill=cor + (nuvens.randint(18, 34),)), 40))
+    # Estrelinhas em cruz, violeta e brancas.
+    d = ImageDraw.Draw(img)
+    for _ in range(14):
+        x, y = nuvens.uniform(0, w), nuvens.uniform(0, h)
+        if abs(x - w / 2) < w * 0.2 and abs(y - h * 0.45) < h * 0.3:
+            continue
+        cor = nuvens.choice([(190, 160, 255), (230, 230, 255)])
+        k = nuvens.uniform(3, 6)
+        d.line([x - k, y, x + k, y], fill=cor + (200,), width=2)
+        d.line([x, y - k, x, y + k], fill=cor + (200,), width=2)
     return img.convert("RGB")
 
 
@@ -290,7 +335,7 @@ def main():
     menu_background().save(os.path.join(MOD_TEX, "fundo.png"), optimize=True)
     emblem(1024).resize((256, 256), Image.LANCZOS).save(os.path.join(MOD_TEX, "logo.png"), optimize=True)
     splash_background().save(os.path.join(SPLASH, "fundo.png"), optimize=True)
-    emblem(1024).resize((512, 512), Image.LANCZOS).save(os.path.join(SPLASH, "logo.png"), optimize=True)
+    emblem(1024, anel_gradiente=True).resize((512, 512), Image.LANCZOS).save(os.path.join(SPLASH, "logo.png"), optimize=True)
     app_icons()
     print("ok")
 
