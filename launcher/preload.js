@@ -42,6 +42,10 @@ contextBridge.exposeInMainWorld("pulsar", {
   onUpdate: (fn) => ipcRenderer.on("update:status", (_e, s) => fn(s)),
   onRadio: (fn) => ipcRenderer.on("radio:comando", (_e, c) => fn(c)),
   radioErro: (texto) => ipcRenderer.send("radio:erro", texto),
+  gravacaoEstado: () => ipcRenderer.invoke("gravacao:estado"),
+  abrirPastaVideos: () => ipcRenderer.invoke("gravacao:pasta"),
+  onGravacao: (fn) => ipcRenderer.on("gravacao:estado", (_e, r) => fn(r)),
+  maximize: () => ipcRenderer.send("window:maximize"),
   minimize: () => ipcRenderer.send("window:minimize"),
   close: () => ipcRenderer.send("window:close"),
 });

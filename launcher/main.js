@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, ipcMain, safeStorage, shell } = require("electron");
+const { app, BrowserWindow, desktopCapturer, dialog, ipcMain, safeStorage, shell } = require("electron");
 const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
@@ -15,6 +15,7 @@ const { SinalDiscord } = require("./lib/discord");
 const radio = require("./lib/radio");
 const versoes = require("./lib/versoes");
 const mcversoes = require("./lib/mcversoes");
+const { Gravacao } = require("./lib/gravacao");
 
 // Janelas (inclusive o login da Microsoft) em português.
 app.commandLine.appendSwitch("lang", "pt-BR");
@@ -31,6 +32,7 @@ let accounts;
 let game = null;
 let launching = false;
 let bridge = null;
+let gravacao = null;
 
 // Segredos (token da Microsoft, chave de atualização) ficam criptografados pelo sistema quando possível.
 function encrypt(text) {
@@ -82,6 +84,10 @@ function publicConfig() {
   return { ...rest, hasUpdateToken: !!updateTokenEnc };
 }
 
+// Visual do launcher: "normal" (o modelo completo) ou "lite" (a tela leve). Escolhido em Ajustes, vale na hora.
+const modoLauncher = () => (config && config.get().modoLauncher === "lite" ? "lite" : "normal");
+const telaDoModo = () => (modoLauncher() === "lite" ? path.join(__dirname, "src", "index.html") : path.join(__dirname, "src", "normal", "index.html"));
+
 function createWindow() {
   win = new BrowserWindow({
     width: 1280,
@@ -95,7 +101,7 @@ function createWindow() {
     // O Rádio Pulsar começa a tocar por pedido do jogo, sem clique na janela do launcher.
     webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, sandbox: true, autoplayPolicy: "no-user-gesture-required", backgroundThrottling: false },
   });
-  win.loadFile(path.join(__dirname, "src", "index.html"));
+  win.loadFile(telaDoModo());
   win.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: "deny" };
@@ -246,6 +252,12 @@ function openConsole() {
 app.whenReady().then(() => {
   config = new Config(app.getPath("userData"));
   accounts = new Accounts(secretStore(), { get: () => config.get(), set: (patch) => config.set(patch) });
+  gravacao = new Gravacao({
+    app, BrowserWindow, desktopCapturer, ipcMain, shell,
+    preload: path.join(__dirname, "gravador-preload.js"),
+    html: path.join(__dirname, "src", "gravador.html"),
+    log: pushLog,
+  });
 
   ipcMain.handle("config:get", () => publicConfig());
   ipcMain.handle("config:set", (_e, patch) => {
@@ -257,7 +269,11 @@ app.whenReady().then(() => {
       safe.version = mcversoes.achar(String(safe.version)).id;
     }
     if ("novidadesVistas" in safe) safe.novidadesVistas = String(safe.novidadesVistas).slice(0, 20);
+    if ("modoLauncher" in safe) safe.modoLauncher = safe.modoLauncher === "lite" ? "lite" : "normal";
+    const antes = modoLauncher();
     config.set(safe);
+    // Trocou de visual: a janela recarrega na outra tela.
+    if ("modoLauncher" in safe && modoLauncher() !== antes && win && !win.isDestroyed()) setTimeout(() => win.loadFile(telaDoModo()), 50);
     return publicConfig();
   });
   ipcMain.handle("optifine:pick", async () => {
@@ -367,6 +383,13 @@ app.whenReady().then(() => {
           pushLog(c.tocando ? `[Pulsar] Rádio: tocando ${c.nome} (volume ${c.volume}%)` : "[Pulsar] Rádio: parado");
           send("radio:comando", c);
         },
+        // Gravação: o launcher grava a janela do jogo (lib/gravacao.js) e devolve o arquivo salvo.
+        onGravar: async (p) => {
+          const r = await gravacao.pedir(p);
+          pushLog(`[Pulsar] Gravação: ${p.acao}${r.arquivo ? " -> " + r.arquivo : ""}`);
+          send("gravacao:estado", r);
+          return r;
+        },
       });
       const mcv = mcversoes.achar(cfg.version);
       presenca.comecar(mcv.tipo === "pulsar" ? config.getEnabledMods().sinal_discord !== false : true, mcv.id);
@@ -385,6 +408,7 @@ app.whenReady().then(() => {
           presenca.parar();
           musica.parar();
           send("radio:comando", { tocando: false });
+          gravacao.parar().then(() => send("gravacao:estado", gravacao.estado));
           closeBridge();
           flushLogs();
           send("game:status", { step: "closed", text: code === 0 ? "Pronto para jogar" : `O jogo fechou com erro (código ${code})` });
@@ -419,6 +443,9 @@ app.whenReady().then(() => {
   });
 
   ipcMain.on("window:minimize", () => win.minimize());
+  ipcMain.on("window:maximize", () => (win.isMaximized() ? win.unmaximize() : win.maximize()));
+  ipcMain.handle("gravacao:estado", () => ({ ...gravacao.estado, pasta: gravacao.pasta() }));
+  ipcMain.handle("gravacao:pasta", () => shell.openPath(gravacao.pasta()));
   ipcMain.on("window:close", () => {
     if (consoleWin && !consoleWin.isDestroyed()) consoleWin.close();
     win.close();
@@ -462,6 +489,7 @@ function abrirAtualizador() {
 }
 
 // Teste no Windows do CI (PULSAR_PRINTS=pasta): abre cada aba, salva um print e fecha o launcher.
+// Roda no visual que estiver configurado (Normal de fábrica) e, no fim, troca para o outro e tira um print dele também.
 async function tirarPrints(dir) {
   const espera = (ms) => new Promise((r) => setTimeout(r, ms));
   const js = (code) => win.webContents.executeJavaScript(code);
@@ -470,9 +498,38 @@ async function tirarPrints(dir) {
     console.log(`[prints] ${nome}`);
   };
   const aba = (v) => js(`document.querySelector('#nav button[data-view="${v}"]').click()`);
+  const clicar = (sel) => js(`document.querySelector('${sel}')?.click()`);
+  const normal = modoLauncher() === "normal";
+  // Os mesmos passos nos dois visuais; só os seletores mudam.
+  const S = normal
+    ? {
+        planeta: (o) => `.orbit-node[data-orbita="${o}"]`,
+        depoisPlanetas: `[data-close-drawer]`,
+        listaNovidades: `#notificationButton`,
+        abasAbertas: `[...document.querySelectorAll("#notificationList button strong")].map((b) => b.textContent).join(" | ")`,
+        fecharNovidades: `document.querySelector("#notificationButton").click()`,
+        contas: `#profileButton`,
+        texBtn: `.texture-card[data-id="f8thful"] .apply-texture`,
+        texBaixada: `!!document.querySelector('.texture-card[data-id="f8thful"] .tx-del')`,
+        anterior: `.versao.anterior:not(.disabled) .primary-small`,
+        atual: `.versao.atual .primary-small`,
+      }
+    : {
+        planeta: (o) => `.onode[data-orbita="${o}"]`,
+        depoisPlanetas: null,
+        listaNovidades: `#oLeg button[data-orbita="novidades"]`,
+        abasAbertas: `[...document.querySelectorAll(".o-tab")].map((b) => b.textContent).join(" | ")`,
+        fecharNovidades: `document.querySelector('#oLeg button[data-orbita="novidades"]').click(); document.querySelectorAll(".o-tab .x").forEach((x) => x.click())`,
+        contas: `.acct-now`,
+        texBtn: `.tx-card[data-id="f8thful"] .tx-btn`,
+        texBaixada: `!!document.querySelector('.tx-card[data-id="f8thful"] .tx-sub')?.textContent.includes("apagar")`,
+        anterior: `.versao.anterior:not([disabled])`,
+        atual: `.versao.atual`,
+      };
   try {
     fs.mkdirSync(dir, { recursive: true });
     await espera(4000);
+    console.log(`[prints] visual: ${modoLauncher()}`);
     // Janela de novidades da versão (abre sozinha na primeira vez de cada versão).
     if (await js(`!document.getElementById("novModal").hidden`)) {
       await print("novidades");
@@ -480,26 +537,30 @@ async function tirarPrints(dir) {
       await espera(500);
     }
     await print("inicio");
-    // Órbitas: um planeta de cada órbita abre a sua aba; a legenda abre a lista da órbita.
-    for (const o of ["novidades", "sugestoes", "discord"]) await js(`document.querySelector('.onode[data-orbita="${o}"]').click()`);
+    // Órbitas: um planeta de cada órbita abre a sua aba (no Normal, o painel lateral); a legenda abre a lista da órbita.
+    for (const o of ["novidades", "sugestoes", "discord"]) {
+      await clicar(S.planeta(o));
+      if (S.depoisPlanetas && o !== "discord") await clicar(S.depoisPlanetas);
+    }
     await espera(600);
     await print("orbita-abas");
-    await js(`document.querySelector('#oLeg button[data-orbita="novidades"]').click()`);
+    if (S.depoisPlanetas) await clicar(S.depoisPlanetas);
+    await clicar(S.listaNovidades);
     await espera(600);
     await print("orbita-novidades");
-    console.log(`[prints] abas: ${await js(`[...document.querySelectorAll(".o-tab")].map((b) => b.textContent).join(" | ")`)}`);
-    await js(`document.querySelector('#oLeg button[data-orbita="novidades"]').click(); document.querySelectorAll(".o-tab .x").forEach((x) => x.click())`);
+    console.log(`[prints] abas: ${await js(S.abasAbertas)}`);
+    await js(S.fecharNovidades);
     // Versões de PvP: escolhe a 1.21.8, confere e volta para a 1.8.9.
-    await js(`document.querySelector('#vRows button[data-versao="1.21.8"]').click()`);
+    await clicar(`#vRows button[data-versao="1.21.8"]`);
     await espera(600);
     await print("versao-1.21.8");
     console.log(`[prints] versão do Minecraft: ${config.get().version}`);
-    await js(`document.querySelector('#vRows button[data-versao="1.8.9"]').click()`);
+    await clicar(`#vRows button[data-versao="1.8.9"]`);
     await espera(400);
-    await js(`document.querySelector(".acct-now").click()`);
+    await clicar(S.contas);
     await espera(400);
     await print("contas");
-    await js(`document.querySelector(".acct-now").click()`);
+    await clicar(S.contas);
     await aba("mods");
     await espera(800);
     await print("mods");
@@ -510,34 +571,72 @@ async function tirarPrints(dir) {
     await espera(4000);
     await print("texturas");
     // Baixa e liga o pacote mais leve pelo launcher, como o jogador faria.
-    await js(`document.querySelector('.tx-card[data-id="f8thful"] .tx-btn').click()`);
-    for (let i = 0; i < 60 && !(await js(`!!document.querySelector('.tx-card[data-id="f8thful"] .tx-sub')?.textContent.includes("apagar")`)); i++) await espera(500);
-    await js(`document.querySelector('.tx-card[data-id="f8thful"] .tx-btn').click()`);
+    await clicar(S.texBtn);
+    for (let i = 0; i < 60 && !(await js(S.texBaixada)); i++) await espera(500);
+    await clicar(S.texBtn);
     await espera(1000);
     await print("texturas-usando");
-    console.log(`[prints] options: ${(fs.readFileSync(path.join(config.get().gameDir, "pulsar", "instancia-1.8.9", "options.txt"), "utf8").match(/resourcePacks:.*/) || ["?"])[0]}`);
+    try {
+      console.log(`[prints] options: ${(fs.readFileSync(path.join(config.get().gameDir, "pulsar", "instancia-1.8.9", "options.txt"), "utf8").match(/resourcePacks:.*/) || ["?"])[0]}`);
+    } catch (e) {
+      console.log(`[prints] options: ${e.message}`);
+    }
     // Aba Versões: escolhe a anterior (o Início avisa), confere e volta para a atual.
     await aba("versoes");
     await espera(800);
     await print("versoes");
     console.log(`[prints] versões: ${JSON.stringify(listaVersoes())}`);
-    await js(`document.querySelector('.versao.anterior:not([disabled])')?.click()`);
+    await clicar(S.anterior);
     await espera(800);
     await print("versoes-anterior");
     console.log(`[prints] escolhida: ${listaVersoes().escolhida}`);
     await aba("home");
     await espera(800);
     await print("inicio-anterior");
-    await js(`document.querySelector('#nav button[data-view="versoes"]').click(); document.querySelector('.versao.atual').click()`);
+    await aba("versoes");
+    await clicar(S.atual);
     await espera(800);
     console.log(`[prints] depois de voltar: ${listaVersoes().escolhida}`);
     await aba("settings");
     await espera(800);
     await print("ajustes");
+    if (normal) {
+      for (const s of ["minecraft", "visual", "update", "account"]) {
+        await clicar(`[data-settings-tab="${s}"]`);
+        await espera(300);
+        await print(`ajustes-${s}`);
+      }
+      await clicar(`[data-settings-tab="general"]`);
+    }
     await aba("home");
     send("update:status", { state: "ready", version: "0.6.1", notas: "Exemplo de novidades da versão nova.\nCorreções e mods novos." });
     await espera(1200);
     await print("atualizacao");
+    // Gravação: grava a própria tela por alguns segundos pelo mesmo caminho do mod (não falha o teste se o PC não deixar).
+    try {
+      const r1 = await gravacao.pedir({ acao: "iniciar", qualidade: "720p", fps: 30, som: false });
+      await espera(3000);
+      const r2 = await gravacao.pedir({ acao: "parar" });
+      console.log(`[prints] gravação: ${r1.gravando ? "gravou" : "não começou"} ${r2.arquivo ? path.basename(r2.arquivo) + " " + fs.statSync(r2.arquivo).size + " bytes" : "sem arquivo"}`);
+    } catch (e) {
+      console.log(`[prints] gravação: ${e.message}`);
+    }
+    // O outro visual: troca em Ajustes, a tela recarrega, print do Início e volta.
+    const outro = normal ? "lite" : "normal";
+    config.set({ modoLauncher: outro });
+    await win.loadFile(telaDoModo());
+    await espera(4000);
+    await js(`if (!document.getElementById("novModal").hidden) document.getElementById("novOk").click()`);
+    await espera(400);
+    await print(`${outro}-inicio`);
+    await aba("mods");
+    await espera(800);
+    await print(`${outro}-mods`);
+    await aba("settings");
+    await espera(800);
+    await print(`${outro}-ajustes`);
+    console.log(`[prints] visual depois: ${modoLauncher()}`);
+    config.set({ modoLauncher: normal ? "normal" : "lite" });
   } catch (e) {
     console.error("[prints] erro:", e);
   }

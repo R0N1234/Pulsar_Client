@@ -7,6 +7,7 @@
 //   POST /radio          {"tocando", "estacao", "volume"} para o Rádio Pulsar
 //   POST /musica         {"capa", "capaId"} e devolve a música tocando no Spotify (Barra Pulsar)
 //   POST /presenca       {"ligado", "lugar": "menu" | "sozinho" | "servidor", "servidor"} para o Sinal Discord
+//   POST /gravar         {"acao": "iniciar" | "parar" | "clipe" | "buffer" | "pasta", ...} para a Gravação (o launcher grava a janela do jogo)
 const http = require("http");
 const crypto = require("crypto");
 
@@ -29,7 +30,7 @@ function lerCorpo(req) {
   });
 }
 
-function startBridge({ onSwitchAccount, onList, onUse, onAddOffline, onPresenca, onRadio, onMusica }) {
+function startBridge({ onSwitchAccount, onList, onUse, onAddOffline, onPresenca, onRadio, onMusica, onGravar }) {
   const key = crypto.randomBytes(24).toString("hex");
   let busy = false;
   const server = http.createServer(async (req, res) => {
@@ -53,6 +54,7 @@ function startBridge({ onSwitchAccount, onList, onUse, onAddOffline, onPresenca,
     if (req.url === "/presenca" && onPresenca) return responder(async () => (onPresenca(corpo), {}));
     if (req.url === "/musica" && onMusica) return responder(() => onMusica(corpo));
     if (req.url === "/radio" && onRadio) return responder(async () => (onRadio(corpo), {}));
+    if (req.url === "/gravar" && onGravar) return responder(() => onGravar(corpo));
     if (req.url !== "/conta/trocar") return reply(404, { ok: false, erro: "Pedido desconhecido." });
     if (busy) return reply(409, { ok: false, erro: "A janela de login já está aberta." });
     busy = true;

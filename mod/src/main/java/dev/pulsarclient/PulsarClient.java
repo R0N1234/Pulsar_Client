@@ -32,6 +32,7 @@ import dev.pulsarclient.mods.CoresVivas;
 import dev.pulsarclient.mods.Cronometro;
 import dev.pulsarclient.mods.FontePulsar;
 import dev.pulsarclient.mods.GgAutomatico;
+import dev.pulsarclient.mods.Gravacao;
 import dev.pulsarclient.mods.IconePulsar;
 import dev.pulsarclient.mods.Impacto;
 import dev.pulsarclient.mods.Inventario;
@@ -86,7 +87,9 @@ import java.util.Set;
 @Mod(modid = PulsarClient.MODID, name = "Pulsar Client", version = PulsarClient.VERSION, clientSideOnly = true, acceptedMinecraftVersions = "[1.8.9]")
 public class PulsarClient {
     public static final String MODID = "pulsar";
-    public static final String VERSION = "0.9.1";
+    public static final String VERSION = "0.9.5";
+    /** Mods que chegaram nas últimas versões: o painel mostra "NOVO" neles até a pessoa mexer. */
+    public static final java.util.Set<String> NOVOS = new java.util.HashSet<String>(java.util.Arrays.asList("focar_jogador", "sequencias", "gravacao"));
     private static PulsarClient instance;
 
     private final List<PulsarMod> mods = new ArrayList<PulsarMod>();
@@ -143,6 +146,7 @@ public class PulsarClient {
         add(new FiltroColeta());
         add(new FocarJogador());
         add(new Sequencias());
+        add(new Gravacao());
         add(telescopio);
         add(orbita);
         add(new MeuNick());

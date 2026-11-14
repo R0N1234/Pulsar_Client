@@ -29,6 +29,8 @@ const DEFAULTS = {
   idioma: "",
   // Versão do mod do Pulsar para jogar: "atual" ou "anterior" (aba Versões).
   versaoJogo: "atual",
+  // Visual do launcher: "normal" (modelo completo) ou "lite" (tela leve).
+  modoLauncher: "normal",
   // Contas offline (só liberadas depois que uma conta Microsoft com o Minecraft entrou neste PC).
   contasOffline: [],
   contaAtiva: "microsoft",

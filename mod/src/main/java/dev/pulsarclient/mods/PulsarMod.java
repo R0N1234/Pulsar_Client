@@ -26,6 +26,10 @@ public abstract class PulsarMod {
     private final BoolSetting favorite = add(new BoolSetting("favorito", "Favorito", false) {
         @Override public boolean visible() { return false; }
     });
+    // Mods que acabaram de chegar mostram "NOVO" no painel até a pessoa abrir as opções ou ligar o mod.
+    private final BoolSetting visto = add(new BoolSetting("visto", "Visto", false) {
+        @Override public boolean visible() { return false; }
+    });
     private boolean enabled;
 
     protected PulsarMod(String id, String name, String description, Category category, boolean enabledByDefault) {
@@ -52,6 +56,14 @@ public abstract class PulsarMod {
     public KeySetting toggleKey() { return toggleKey; }
     public boolean favorite() { return favorite.get(); }
     public void toggleFavorite() { favorite.toggle(); }
+
+    /** Chegou nesta versão (lista em {@link dev.pulsarclient.PulsarClient#NOVOS}) e a pessoa ainda não mexeu nele. */
+    public boolean novo() {
+        return !visto.get() && dev.pulsarclient.PulsarClient.NOVOS.contains(id);
+    }
+
+    /** A pessoa abriu as opções ou ligou o mod no painel: a etiqueta NOVO some. */
+    public void marcarVisto() { visto.set(true); }
 
     public void setEnabled(boolean enabled) {
         if (this.enabled == enabled) return;

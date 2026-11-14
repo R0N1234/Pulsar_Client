@@ -38,6 +38,12 @@ const REQUIRED = [
   [/selftest: sequencia-dupla-ok/, "DOUBLE KILL dentro do intervalo"],
   [/selftest: sequencia-arena-ok/, "lista Arena com MULTI KILL no terceiro abate"],
   [/Sons locais: lendo de/, "pacote de sons locais instalado"],
+  [/selftest: vozes-ok/, "vozes MASCULINO_ e Teste/ achadas na pasta de sons, com variação e multikill"],
+  [/selftest: testar-todos-ok/, "Testar todos os sons tocando a fila"],
+  [/\[e2e\] Gravação: iniciar/, "Gravação pedindo para o launcher começar a gravar"],
+  [/\[e2e\] Gravação: clipe/, "Gravação pedindo o clipe"],
+  [/selftest: gravacao-ok/, "Gravação com os pedidos de gravar e clipe"],
+  [/selftest: novo-ok/, "etiqueta NOVO nos mods novos até a pessoa mexer"],
   [/Tela de carregamento do Pulsar instalada/, "tela de carregamento"],
   [/Motor: gancho de entidades instalado/, "gancho de entidades do Motor"],
   [/Motor: gancho de blocos especiais instalado/, "gancho de baús e placas do Motor"],
@@ -113,7 +119,7 @@ const FORBIDDEN = [
   /selftest: (encanto|pacote|chefe|musica|universo)-falhou/,
   /selftest: (emote|acessorio)-falhou/,
   /selftest: kit-(falhou|sem-bau)/,
-  /selftest: (batata-aviso|batata-pisca|batata|filtro|focar-aviso|focar|sequencia|sons-locais|sequencia-dupla|sequencia-arena)-falhou/,
+  /selftest: (batata-aviso|batata-pisca|batata|filtro|focar-aviso|focar|sequencia|sons-locais|sequencia-dupla|sequencia-arena|vozes|testar-todos|gravacao|novo)-falhou/,
   /Kit PvP: não achei/,
   /Emotes desligados por erro/,
   /Gravidade de Itens: não instalada/,
@@ -207,6 +213,7 @@ setTimeout(() => finish(1, `FALHOU: tempo esgotado (pulsar=${pulsarLoaded}, jogo
     const original = { name: "PulsarTroca", uuid: "0123456789abcdef0123456789abcdef", token: "0" };
     const contas = { microsoft: { name: original.name, uuid: original.uuid }, offline: ["RickPvP", "Rick_Alt2"], ativa: "microsoft", liberado: true };
     const sessao = (c) => (c === "microsoft" ? original : { name: c, uuid: uuidOffline(c), token: "0", offline: true });
+    let gravando = false;
     const bridge = PRINTS
       ? await startBridge({
           onSwitchAccount: async () => original,
@@ -218,6 +225,12 @@ setTimeout(() => finish(1, `FALHOU: tempo esgotado (pulsar=${pulsarLoaded}, jogo
           },
           onPresenca: (p) => onLog(`[e2e] Sinal Discord: ${p.ligado ? "ligado" : "desligado"} ${p.lugar} ${p.servidor || ""}`),
           onRadio: (p) => onLog(`[e2e] Rádio: ${p.tocando ? "tocando " + p.estacao + " " + p.volume + "%" : "parado"}`),
+          // Gravação de mentira: responde como o launcher responderia, sem gravar nada.
+          onGravar: async (p) => {
+            onLog(`[e2e] Gravação: ${p.acao} ${p.qualidade} ${p.fps}fps clipe ${p.clipe}s`);
+            gravando = p.acao === "iniciar" ? true : p.acao === "parar" ? false : gravando;
+            return { gravando, desde: Date.now(), guardando: p.acao === "buffer" ? !!p.ligado : gravando, arquivo: p.acao === "parar" || p.acao === "clipe" ? path.join(work, "teste.webm") : undefined, pasta: work };
+          },
           // Spotify de mentira: uma música com capa, para a Barra Pulsar mostrar no jogo.
           onMusica: async (p) => ({ tocando: true, titulo: "Órbita Lenta", artista: "Pulsar", capaId: "teste", ...(p.capa && p.capaId !== "teste" ? { capa: CAPA_TESTE } : {}) }),
         })

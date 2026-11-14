@@ -9,6 +9,9 @@ window.PULSAR_CATS = {
   Desempenho: "#E8C547",
 };
 
+// Mods novos desta versão: ganham a etiqueta "novo" no launcher (no jogo, a lista fica em PulsarClient.NOVOS).
+window.PULSAR_NOVOS = ["focar_jogador", "sequencias", "gravacao"];
+
 window.PULSAR_MODS = [
   ["teclas_pulse", "Teclas Pulse", "Mostra WASD, cliques e pulo na tela", "Combate", true],
   ["frequencia_cps", "Frequência CPS", "Cliques por segundo, mostrados em Hz", "Combate", true],
@@ -74,7 +77,7 @@ window.PULSAR_MODS = [
   ["amigos", "Amigos", "Lista de amigos e chat dentro do client", "Social"],
   ["sinal_discord", "Sinal Discord", "Mostra no seu perfil do Discord que você está jogando com o Pulsar e em qual servidor", "Social", true],
   ["radio_pulsar", "Rádio Pulsar", "Rádios da internet tocando enquanto você joga: liga, troca de estação e muda o volume no jogo", "Social", "off"],
-  ["replay", "Replay", "Grava partidas para rever depois", "Social"],
+  ["gravacao", "Gravação", "Grava o jogo e salva clipes dos últimos segundos (como no Lunar), com REC na tela", "Social", true],
   ["capturas", "Capturas", "Depois do F2, a print já vai copiada para colar no Discord, com botões no chat", "Social", true],
   ["motor_pulsar", "Motor Pulsar", "Otimizador do Pulsar: perfil Desempenho de fábrica, jogo mais limpo e mais FPS", "Desempenho", true],
   ["organizador_packs", "Organizador de Packs", "Pastas e busca para resource packs", "Desempenho"],

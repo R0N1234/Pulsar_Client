@@ -14,8 +14,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -25,7 +27,7 @@ import java.util.Random;
  * escolhido continuam a sequência; passou o tempo, volta para o primeiro.
  *
  * O abate é contado quando um jogador em quem você bateu há pouco morre. Os sons vêm no Pulsar e podem ser
- * trocados pelos .ogg da pasta pulsar/sons/sequencias/ (ver {@link SonsLocais}).
+ * trocados pelos .ogg da pasta pulsar/sons/sequencias/, em vozes e variações (ver {@link SonsLocais}).
  */
 public class Sequencias extends HudMod {
     /** Lista Pulsar (a do Rick): 1 a 12 abates, o último vale para 12 ou mais. */
@@ -49,12 +51,18 @@ public class Sequencias extends HudMod {
     private final BoolSetting sangue = add(new BoolSetting("sangue", "Sangue escorrendo nas letras", true));
     private final BoolSetting som = add(new BoolSetting("som", "Voz do Pulsar anunciando", true));
     private final SliderSetting volume = add(new SliderSetting("volume", "Volume da voz", 100, 0, 100, 5, "%"));
+    /** Voz dos sons locais: a padrão (arquivos soltos) ou uma pasta/prefixo achado em pulsar/sons/sequencias. */
+    private final ModeSetting voz = add(new ModeSetting("voz", "Voz (pasta pulsar/sons/sequencias)", 0, VOZ_PADRAO));
     private final ActionSetting testar = add(new ActionSetting("testar", "Testar a próxima sequência", new Runnable() {
         @Override public void run() { abate(); }
     }));
-    private final ActionSetting recarregar = add(new ActionSetting("recarregar", "Recarregar os sons da pasta pulsar/sons", new Runnable() {
-        @Override public void run() { mc.refreshResources(); }
+    private final ActionSetting testarTodos = add(new ActionSetting("testar_todos", "Testar todos os sons, um por um", new Runnable() {
+        @Override public void run() { testarTodos(); }
     }));
+    private final ActionSetting recarregar = add(new ActionSetting("recarregar", "Procurar sons novos na pasta", new Runnable() {
+        @Override public void run() { procurarVozes(true); }
+    }));
+    public static final String VOZ_PADRAO = "Padrão";
 
     private int ticks;
     private final Map<EntityLivingBase, Integer> alvos = new HashMap<EntityLivingBase, Integer>();
@@ -67,10 +75,16 @@ public class Sequencias extends HudMod {
 
     private static int abates;
     private static int desenhos;
+    /** Teste de todos os sons: a próxima sequência a tocar e quando (em ticks), ou -1 parado. */
+    private int fila = -1;
+    private int proximoTeste;
+    private int vozesEm = -1;
 
     public Sequencias() {
         super("sequencias", "Sequências de Abate", "FIRST BLOOD, DOUBLE KILL... GODLIKE na tela, com sangue escorrendo e a voz do Pulsar",
                 Category.COMBATE, CENTRO, 80, false);
+        // As vozes da pasta entram na lista já aqui, para a voz salva no config ser reconhecida ao carregar.
+        try { procurarVozes(false); } catch (Throwable ignored) {}
     }
 
     /** Teste automático. */
@@ -88,6 +102,53 @@ public class Sequencias extends HudMod {
     /** O texto da sequência atual (teste automático). */
     public String textoAtual() { return textos()[Math.min(indice, textos().length - 1)]; }
 
+    /** Quantos sons ainda vão tocar no teste de todos (teste automático). */
+    public int naFila() { return fila < 0 ? 0 : nomes().length - fila; }
+
+    public String vozEscolhida() { return voz.index() == 0 ? "" : voz.get(); }
+
+    /** Teste automático: escolhe uma voz pelo nome (ou a padrão). */
+    public boolean usarVoz(String nome) {
+        procurarVozes(false);
+        String[] ops = voz.options();
+        for (int i = 0; i < ops.length; i++) {
+            if (ops[i].equalsIgnoreCase(nome) || (nome.isEmpty() && i == 0)) {
+                voz.set(i);
+                SonsLocais.usarVoz(vozEscolhida());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ---------- vozes ----------
+
+    /** Lê a pasta de sons e atualiza a lista de vozes do painel; avisa no log quando pedido ou quando mudou. */
+    private void procurarVozes(boolean avisar) {
+        List<String> achadas = SonsLocais.vozes();
+        String[] ops = new String[achadas.size() + 1];
+        ops[0] = VOZ_PADRAO;
+        for (int i = 0; i < achadas.size(); i++) ops[i + 1] = achadas.get(i);
+        boolean mudou = !Arrays.equals(ops, voz.options());
+        if (mudou) voz.setOptions(ops);
+        SonsLocais.usarVoz(vozEscolhida());
+        if (avisar || mudou) {
+            StringBuilder b = new StringBuilder("[Pulsar] Sequências: vozes na pasta: ");
+            if (achadas.isEmpty()) b.append("nenhuma (só os arquivos soltos)");
+            for (String v : achadas) b.append(v).append(" (").append(SonsLocais.falasNaVoz(v, nomes())).append(" de ").append(nomes().length).append(") ");
+            System.out.println(b.toString().trim());
+        }
+    }
+
+    /** Toca cada sequência da lista, uma atrás da outra, com o texto na tela: para conferir os sons. */
+    public void testarTodos() {
+        procurarVozes(false);
+        fila = 0;
+        proximoTeste = ticks;
+        contagem = 0;
+        ultimoAbate = -100000;
+    }
+
     // ---------- contar os abates ----------
 
     @SubscribeEvent
@@ -103,6 +164,20 @@ public class Sequencias extends HudMod {
     @Override
     public void tick() {
         ticks++;
+        // Vozes novas na pasta aparecem no painel sem reiniciar (a pasta é lida a cada 10 s).
+        if (isEnabled() && (vozesEm < 0 || ticks - vozesEm >= 200)) {
+            vozesEm = ticks;
+            procurarVozes(false);
+        }
+        if (fila >= 0 && ticks >= proximoTeste) {
+            if (fila >= nomes().length || !isEnabled()) {
+                fila = -1;
+            } else {
+                mostrar(fila++, 0);
+                // Cada fala espera o texto sumir (ou pelo menos 2,5 s) antes da próxima.
+                proximoTeste = ticks + Math.max(50, (int) Math.round(duracao.get() * 20));
+            }
+        }
         if (mc.thePlayer == null || mc.theWorld == null) {
             alvos.clear();
             contagem = 0;
@@ -134,12 +209,19 @@ public class Sequencias extends HudMod {
     public void abate() {
         contagem = ticks - ultimoAbate <= intervalo.getInt() * 20 ? contagem + 1 : 1;
         ultimoAbate = ticks;
-        indice = Math.min(contagem, nomes().length) - 1;
+        abates++;
+        mostrar(Math.min(contagem, nomes().length) - 1, contagem);
+    }
+
+    /** Mostra a sequência "i" na tela e toca a voz dela (contagem só para o log). */
+    private void mostrar(int i, int contagemLog) {
+        indice = i;
         mostrarAte = ticks + (int) Math.round(duracao.get() * 20);
         mostrouEm = System.currentTimeMillis();
         semente = mostrouEm;
-        abates++;
-        System.out.println("[Pulsar] Sequências: " + textos()[indice] + " (" + contagem + ")");
+        java.io.File local = SonsLocais.escolher(nomes()[indice]);
+        System.out.println("[Pulsar] Sequências: " + textos()[indice] + (contagemLog > 0 ? " (" + contagemLog + ")" : " (teste)")
+                + (local != null ? " · som local " + local.getName() : " · voz do Pulsar"));
         if (som.get() && volume.get() > 0) {
             mc.getSoundHandler().playSound(new Voz(new ResourceLocation("pulsar", "sequencias." + nomes()[indice]), (float) (volume.get() / 100.0)));
         }

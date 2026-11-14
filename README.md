@@ -34,7 +34,7 @@
 
 **Bonito sem pesar.** Tema espacial do começo ao fim: menu com um universo 360° girando devagar (Andrômeda, os planetas e um pulsar), painel com ícones e favoritos, fonte própria. Tudo desenhado para custar quase nada de FPS.
 
-**Fácil de usar.** Um launcher só: entra com a conta Microsoft, baixa o Java e o Forge sozinho, atualiza sozinho e funciona com ou sem OptiFine.
+**Fácil de usar.** Um launcher só: entra com a conta Microsoft, baixa o Java e o Forge sozinho, atualiza sozinho e funciona com ou sem OptiFine. Dois visuais, trocados em Ajustes: **Normal** (painel de lançamento à direita, mods em cartões e ajustes por abas) e **Lite** (a tela leve, com as órbitas).
 
 **Outras versões de PvP.** Além da 1.8.9 com o Pulsar, o launcher abre a **1.7.10**, a **1.16.5** e a **1.21.8** no Minecraft puro, cada uma com a sua pasta e o Java certo baixado sozinho.
 
@@ -64,6 +64,7 @@
 
 **Servidores e social**
 - **Atalhos de Texto** (uma tecla manda /lobby, /home...), **GG Automático**, **Sinal Discord** e **Capturas**
+- **Gravação** (como no Lunar: F9 grava o jogo, F10 salva um clipe dos últimos segundos; vídeos em `Vídeos/Pulsar Client`)
 
 **Motor Pulsar**
 - Perfis **Desempenho**, **Desempenho + Qualidade** e **Qualidade+**, com cada parte ajustável
@@ -97,7 +98,13 @@ O mod vem com a voz do Pulsar (sintética, feita para o client, sem áudio de te
 
 No painel dá para trocar para a lista **Arena**, dos shooters clássicos: FIRST BLOOD, DOUBLE KILL, MULTI KILL, MEGA KILL, ULTRA KILL, MONSTER KILL, LUDICROUS KILL (`ludicrous_kill.ogg`) e HOLY SHIT (`holy_shit.ogg`, 8 ou mais). Os nomes repetidos usam o mesmo arquivo nas duas listas.
 
-O arquivo é lido na hora de tocar, então basta salvar o .ogg e esperar o próximo abate. Se o jogo não achar o arquivo novo, use **Recarregar os sons** no painel do mod. Só .ogg (Vorbis) funciona, mono ou estéreo; um .mp3 ou .wav não toca.
+**Vozes.** Para ter mais de uma voz, use um prefixo no nome ou uma subpasta: `MASCULINO_double_kill.ogg` ou `MASCULINO/double_kill.ogg`. Cada prefixo ou pasta vira uma opção em **Voz** no painel do mod (a **Padrão** é a voz do Pulsar). Variações do mesmo som terminam em `_2`, `_3`... (`MASCULINO_holy_shit_2.ogg`) e são sorteadas a cada abate. O nome pode vir com ou sem sublinhado (`multikill.ogg` vale como `multi_kill.ogg`); o que faltar numa voz cai na voz do Pulsar.
+
+O arquivo é lido na hora de tocar, então basta salvar o .ogg e esperar o próximo abate. Use **Testar todos os sons** no painel do mod para ouvir a lista inteira na voz escolhida e **Procurar sons novos na pasta** se um arquivo recém-copiado não apareceu. Só .ogg (Vorbis) funciona, mono ou estéreo; um .mp3 ou .wav não toca.
+
+## 🎥 Gravação, como no Lunar
+
+Com o mod **Gravação** ligado, **F9** começa e para a gravação (aparece **REC** na tela) e **F10** salva um **clipe** dos últimos segundos (de 15 a 120, escolha no painel). Para o clipe funcionar a qualquer hora, ligue **Clipe sempre pronto**; senão, o primeiro F10 começa a guardar e o próximo salva. Qualidade (720p, 1080p ou a tela inteira), 30 ou 60 FPS, som do jogo e microfone são opções do mod. Os vídeos ficam em `Vídeos/Pulsar Client`, e o chat mostra os botões **Abrir** e **Pasta** quando um vídeo é salvo. Quem grava é o launcher (ele precisa estar aberto, como sempre está).
 
 ## ❓ Perguntas rápidas
 

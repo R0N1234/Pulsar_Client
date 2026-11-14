@@ -367,6 +367,7 @@ function renderGrid() {
       c.className = "mcard" + (m.pronto ? "" : " soon");
       c.innerHTML = `<div class="head"><b></b><button class="tog" type="button"></button></div><p></p><small><span></span><span></span></small>`;
       c.querySelector("b").textContent = t(m.nome);
+      if ((window.PULSAR_NOVOS || []).includes(m.id)) c.querySelector("b").append(" ", el("span", "novo", t("novo")));
       c.querySelector("p").textContent = t(m.desc);
       const [catEl, stEl] = c.querySelectorAll("small span");
       catEl.textContent = t(m.cat);
@@ -696,11 +697,14 @@ async function loadSettings() {
   $("dir").value = cfg.gameDir;
   $("loader").value = cfg.loader;
   $("openConsole").checked = cfg.openConsole !== false;
+  $("modoLauncher").value = cfg.modoLauncher === "lite" ? "lite" : "normal";
   renderUpdateToken(cfg);
   renderOptifine(cfg);
   updateCounts();
 }
 $("mem").addEventListener("input", () => ($("memOut").textContent = t($("mem").value + " GB")));
+// O visual (Normal ou Lite) troca na hora: o launcher recarrega a tela.
+$("modoLauncher").addEventListener("change", () => api.setConfig({ modoLauncher: $("modoLauncher").value }).catch((err) => setStatus(cleanErr(err), true)));
 function renderUpdateToken(cfg) {
   $("updToken").value = "";
   $("updToken").placeholder = t(cfg.hasUpdateToken ? "Chave salva. Cole outra para trocar." : "Cole a chave do GitHub (github_pat_…)");

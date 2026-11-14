@@ -4,7 +4,7 @@
     "sounds": [
       {
         "name": "pulsar:sequencias/first_blood",
-        "stream": false
+        "stream": true
       }
     ]
   },
@@ -13,7 +13,7 @@
     "sounds": [
       {
         "name": "pulsar:sequencias/double_kill",
-        "stream": false
+        "stream": true
       }
     ]
   },
@@ -22,7 +22,7 @@
     "sounds": [
       {
         "name": "pulsar:sequencias/triple_kill",
-        "stream": false
+        "stream": true
       }
     ]
   },
@@ -31,7 +31,7 @@
     "sounds": [
       {
         "name": "pulsar:sequencias/multi_kill",
-        "stream": false
+        "stream": true
       }
     ]
   },
@@ -40,7 +40,7 @@
     "sounds": [
       {
         "name": "pulsar:sequencias/mega_kill",
-        "stream": false
+        "stream": true
       }
     ]
   },
@@ -49,7 +49,7 @@
     "sounds": [
       {
         "name": "pulsar:sequencias/ultra_kill",
-        "stream": false
+        "stream": true
       }
     ]
   },
@@ -58,7 +58,7 @@
     "sounds": [
       {
         "name": "pulsar:sequencias/monster_kill",
-        "stream": false
+        "stream": true
       }
     ]
   },
@@ -67,7 +67,7 @@
     "sounds": [
       {
         "name": "pulsar:sequencias/killing_spree",
-        "stream": false
+        "stream": true
       }
     ]
   },
@@ -76,7 +76,7 @@
     "sounds": [
       {
         "name": "pulsar:sequencias/rampage",
-        "stream": false
+        "stream": true
       }
     ]
   },
@@ -85,7 +85,7 @@
     "sounds": [
       {
         "name": "pulsar:sequencias/dominating",
-        "stream": false
+        "stream": true
       }
     ]
   },
@@ -94,7 +94,7 @@
     "sounds": [
       {
         "name": "pulsar:sequencias/unstoppable",
-        "stream": false
+        "stream": true
       }
     ]
   },
@@ -103,7 +103,7 @@
     "sounds": [
       {
         "name": "pulsar:sequencias/godlike",
-        "stream": false
+        "stream": true
       }
     ]
   },
@@ -112,7 +112,7 @@
     "sounds": [
       {
         "name": "pulsar:sequencias/ludicrous_kill",
-        "stream": false
+        "stream": true
       }
     ]
   },
@@ -121,7 +121,7 @@
     "sounds": [
       {
         "name": "pulsar:sequencias/holy_shit",
-        "stream": false
+        "stream": true
       }
     ]
   }

@@ -485,17 +485,56 @@ public class SelfTest {
                 sequencias().abate();
                 log("MULTI KILL".equals(sequencias().textoAtual()) ? "sequencia-arena-ok" : "sequencia-arena-falhou");
                 sequencias().usarLista(0);
-                sequencias().setEnabled(false);
                 focar().setEnabled(false);
+                // Vozes: um prefixo (MASCULINO_...) e uma subpasta (Teste/...) viram vozes no painel; "multikill" vale por multi_kill.
+                copiarSom(mc, "sequencias/MASCULINO_double_kill.ogg");
+                copiarSom(mc, "sequencias/MASCULINO_double_kill_2.ogg");
+                copiarSom(mc, "sequencias/Teste/multikill.ogg");
                 break;
-            case 50:
+            case 50: {
+                java.util.List<String> vozes = dev.pulsarclient.mods.SonsLocais.vozes();
+                boolean teste = sequencias().usarVoz("Teste");
+                java.io.File multi = dev.pulsarclient.mods.SonsLocais.escolher("multi_kill");
+                boolean masc = sequencias().usarVoz("MASCULINO");
+                int variacoes = dev.pulsarclient.mods.SonsLocais.arquivosDe("MASCULINO", "double_kill").size();
+                java.io.File padrao = dev.pulsarclient.mods.SonsLocais.escolher("multi_kill");
+                System.out.println("[Pulsar] Sequências: vozes " + vozes + ", Teste/multi_kill -> " + (multi == null ? "nada" : multi.getName())
+                        + ", MASCULINO double_kill variações " + variacoes + ", MASCULINO multi_kill -> " + (padrao == null ? "voz do Pulsar" : padrao.getName()));
+                log(vozes.contains("MASCULINO") && vozes.contains("Teste") && teste && masc && multi != null && "multikill.ogg".equals(multi.getName())
+                        && variacoes == 2 && padrao == null ? "vozes-ok" : "vozes-falhou");
+                // Testar todos os sons: a fila toca uma sequência atrás da outra.
+                sequencias().usarVoz("");
+                sequencias().testarTodos();
+                break;
+            }
+            case 51:
+                log(sequencias().naFila() > 0 && sequencias().naFila() < Sequencias.NOMES.length ? "testar-todos-ok" : "testar-todos-falhou");
+                sequencias().setEnabled(false);
+                // Gravação: as teclas mandam os pedidos para o launcher pela ponte (o e2e confere o que chegou).
+                gravacao().alternarGravacao();
+                break;
+            case 52:
+                gravacao().salvarClipe();
+                gravacao().alternarGravacao();
+                break;
+            case 53:
+                log("gravacao");
+                System.out.println("[Pulsar] Gravação: pedidos " + dev.pulsarclient.mods.Gravacao.ultimosPedidos());
+                log(dev.pulsarclient.mods.Gravacao.ultimosPedidos().contains("iniciar") && dev.pulsarclient.mods.Gravacao.ultimosPedidos().contains("clipe") ? "gravacao-ok" : "gravacao-falhou");
+                // A etiqueta NOVO: os mods novos mostram até a pessoa mexer neles.
+                boolean novo = PulsarClient.get().mod("sequencias").novo() && PulsarClient.get().mod("gravacao").novo();
+                PulsarClient.get().mod("gravacao").marcarVisto();
+                log(novo && !PulsarClient.get().mod("gravacao").novo() ? "novo-ok" : "novo-falhou");
+                show("novos", new GuiPulsarPanel(menu, Category.COMBATE, null));
+                break;
+            case 54:
                 // Desliga o rádio um passo antes do fim: o pedido de parar sai em até meio segundo.
                 filtro().setEnabled(false);
                 PulsarClient.get().mod("rastro_cometa").setEnabled(false);
                 PulsarClient.get().mod("radio_pulsar").setEnabled(false);
                 mc.displayGuiScreen(null);
                 break;
-            case 51:
+            case 55:
                 finish(mc);
                 break;
             default: break;
@@ -616,10 +655,19 @@ public class SelfTest {
         return e instanceof net.minecraft.entity.player.EntityPlayer ? (net.minecraft.entity.player.EntityPlayer) e : null;
     }
 
+    private static dev.pulsarclient.mods.Gravacao gravacao() {
+        return (dev.pulsarclient.mods.Gravacao) PulsarClient.get().mod("gravacao");
+    }
+
     /** Copia a voz do jar para a pasta pulsar/sons/sequencias como double_kill.ogg: o jogo tem que ler a da pasta. */
     private void copiarSomLocal(Minecraft mc) {
+        copiarSom(mc, "sequencias/double_kill.ogg");
+    }
+
+    /** Copia a voz godlike do jar para pulsar/sons/<caminho>. */
+    private void copiarSom(Minecraft mc, String caminho) {
         try {
-            java.io.File destino = new java.io.File(dev.pulsarclient.mods.SonsLocais.pasta(), "sequencias/double_kill.ogg");
+            java.io.File destino = new java.io.File(dev.pulsarclient.mods.SonsLocais.pasta(), caminho);
             destino.getParentFile().mkdirs();
             java.io.InputStream in = SelfTest.class.getResourceAsStream("/assets/pulsar/sounds/sequencias/godlike.ogg");
             java.io.OutputStream out = new java.io.FileOutputStream(destino);
