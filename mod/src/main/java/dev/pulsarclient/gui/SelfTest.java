@@ -460,6 +460,8 @@ public class SelfTest {
                 copiarSomLocal(mc);
                 if (boneco(mc) != null) {
                     net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.AttackEntityEvent(mc.thePlayer, boneco(mc)));
+                    // O servidor confirma o golpe (o boneco pisca de dano) e ele morre: abate seu.
+                    boneco(mc).hurtTime = 10;
                     boneco(mc).setHealth(0f);
                 }
                 break;
@@ -475,6 +477,15 @@ public class SelfTest {
                 System.out.println("[Pulsar] Sequências: abates " + Sequencias.abates() + ", desenhos " + Sequencias.desenhos() + ", som do jar " + somJar + ", som local " + somLocal);
                 log(Sequencias.abates() >= 1 && Sequencias.desenhos() > 0 && somJar ? "sequencia-ok" : "sequencia-falhou");
                 log(somLocal ? "sons-locais-ok" : "sons-locais-falhou");
+                // Avisos de abate do chat do servidor: os seus contam, os de outro jogador e as mensagens de jogadores não.
+                java.util.List<String> online = java.util.Arrays.asList("Rick", "Fulano", "Joao");
+                boolean chatOk = sequenciaChat("Você matou Fulano!", "Fulano", "Rick", online)
+                        && sequenciaChat("[Arena] Fulano (5.0) foi morto por Rick", "Fulano", "Rick", online)
+                        && sequenciaChat("Fulano was slain by Rick using [Espada]", "Fulano", "Rick", online)
+                        && sequenciaChat("Fulano foi morto por Joao", "Fulano", null, online)
+                        && sequenciaChat("Joao: Rick matou Fulano", null, null, online)
+                        && sequenciaChat("Você foi morto por Fulano", null, null, online);
+                log(chatOk ? "sequencia-chat-ok" : "sequencia-chat-falhou");
                 // Segundo abate dentro do intervalo: DOUBLE KILL (toca o .ogg da pasta).
                 sequencias().abate();
                 break;
@@ -926,6 +937,14 @@ public class SelfTest {
     private static void show(String name, net.minecraft.client.gui.GuiScreen screen) {
         Minecraft.getMinecraft().displayGuiScreen(screen);
         log(name);
+    }
+
+    /** Confere a leitura de um aviso de abate do chat (vítima e quem matou esperados; null = não é abate). */
+    private static boolean sequenciaChat(String linha, String vitima, String matador, java.util.List<String> online) {
+        String[] r = Sequencias.lerChat(linha, "Rick", online);
+        boolean ok = vitima == null ? r == null : r != null && vitima.equals(r[0]) && (matador == null ? r[1] == null : matador.equals(r[1]));
+        if (!ok) System.out.println("[Pulsar] Sequências: chat lido errado: " + linha + " -> " + (r == null ? "nada" : r[0] + "/" + r[1]));
+        return ok;
     }
 
     private static void log(String step) {

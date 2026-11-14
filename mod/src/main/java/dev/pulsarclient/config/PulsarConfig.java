@@ -38,6 +38,13 @@ public class PulsarConfig {
             JsonElement el = new JsonParser().parse(r);
             return el != null && el.isJsonObject() ? el.getAsJsonObject() : new JsonObject();
         } catch (Exception e) {
+            // Config estragado: guarda uma cópia para não perder de vez e começa do padrão.
+            try {
+                java.nio.file.Files.copy(file.toPath(), new File(file.getParentFile(), "config.estragado.json").toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            } catch (Exception ignored) {
+            }
+            System.err.println("[Pulsar] Config ilegível (" + e + "), cópia em config.estragado.json");
             return new JsonObject();
         }
     }
@@ -84,8 +91,22 @@ public class PulsarConfig {
         }
         root.add("mods", all);
         file.getParentFile().mkdirs();
-        try (Writer w = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+        // Escreve num arquivo ao lado e troca no fim: se o jogo fechar no meio (queda de luz, travou), o config
+        // antigo continua inteiro em vez de ficar cortado e todos os ajustes voltarem ao padrão.
+        File tmp = new File(file.getParentFile(), file.getName() + ".tmp");
+        try (Writer w = new OutputStreamWriter(new FileOutputStream(tmp), StandardCharsets.UTF_8)) {
             GSON.toJson(root, w);
+        } catch (Exception e) {
+            System.err.println("[Pulsar] Não foi possível salvar " + file + ": " + e);
+            return;
+        }
+        try {
+            try {
+                java.nio.file.Files.move(tmp.toPath(), file.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                        java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+            } catch (java.nio.file.AtomicMoveNotSupportedException e) {
+                java.nio.file.Files.move(tmp.toPath(), file.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (Exception e) {
             System.err.println("[Pulsar] Não foi possível salvar " + file + ": " + e);
         }

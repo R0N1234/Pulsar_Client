@@ -67,6 +67,58 @@ public final class Desenho {
         terminar();
     }
 
+    /**
+     * Caixa arredondada com a cor indo da esquerda (corEsq) para a direita (corDir), como as bordas ciano -> violeta
+     * dos botões do menu. Mesmas faixas da {@link #caixa}, cada uma com a cor certa nas duas pontas.
+     */
+    public static void caixaGradiente(float l, float t, float r, float b, int corEsq, int corDir, int raio) {
+        if (r <= l || b <= t) return;
+        raio = Math.max(0, Math.min(raio, (int) Math.min((r - l) / 2, (b - t) / 2)));
+        Tessellator tes = Tessellator.getInstance();
+        WorldRenderer wr = tes.getWorldRenderer();
+        GlStateManager.enableBlend();
+        GlStateManager.disableTexture2D();
+        GlStateManager.disableAlpha();
+        GlStateManager.shadeModel(org.lwjgl.opengl.GL11.GL_SMOOTH);
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.color(1f, 1f, 1f, 1f);
+        wr.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        if (raio == 0) {
+            faixa(wr, l, t, r, b, l, r, corEsq, corDir);
+        } else {
+            for (int i = 0; i < raio; i++) {
+                double dy = raio - i - 0.5;
+                float d = (float) (raio - Math.sqrt(raio * raio - dy * dy));
+                faixa(wr, l + d, t + i, r - d, t + i + 1, l, r, corEsq, corDir);
+                faixa(wr, l + d, b - i - 1, r - d, b - i, l, r, corEsq, corDir);
+            }
+            faixa(wr, l, t + raio, r, b - raio, l, r, corEsq, corDir);
+        }
+        tes.draw();
+        GlStateManager.shadeModel(org.lwjgl.opengl.GL11.GL_FLAT);
+        GlStateManager.enableAlpha();
+        terminar();
+    }
+
+    /** Borda de 1 pixel com a cor indo da esquerda para a direita, por fora de um miolo de cor lisa. */
+    public static void caixaBordaGradiente(float l, float t, float r, float b, int fill, int bordaEsq, int bordaDir, int raio) {
+        caixaGradiente(l, t, r, b, bordaEsq, bordaDir, raio);
+        caixa(l + 1, t + 1, r - 1, b - 1, fill, Math.max(0, raio - 1));
+    }
+
+    private static void faixa(WorldRenderer wr, float l, float t, float r, float b, float x0, float x1, int c0, int c1) {
+        int cl = misturar(c0, c1, (l - x0) / Math.max(1f, x1 - x0));
+        int cr = misturar(c0, c1, (r - x0) / Math.max(1f, x1 - x0));
+        cor(wr.pos(l, b, 0), cl);
+        cor(wr.pos(r, b, 0), cr);
+        cor(wr.pos(r, t, 0), cr);
+        cor(wr.pos(l, t, 0), cl);
+    }
+
+    private static void cor(WorldRenderer wr, int argb) {
+        wr.color(argb >> 16 & 255, argb >> 8 & 255, argb & 255, argb >>> 24).endVertex();
+    }
+
     /** Chave liga/desliga em forma de pílula (largura w, altura h). */
     public static void chave(int x, int y, int w, int h, boolean ligado, float hover, int corLigado) {
         int fundo = ligado ? corLigado : misturar(0xFF2A3350, 0xFF36415F, hover);

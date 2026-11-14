@@ -7,6 +7,19 @@
 
   const NOVIDADES = [
     {
+      id: "1.0.0",
+      nome: "1.0.0",
+      titulo: "Versão 1.0.0",
+      itens: [
+        "Versão 1.0.0: o Pulsar Client agora tem o código aberto no GitHub, para todo mundo ver como ele funciona.",
+        "Sequências de Abate só contam quando você elimina o jogador: o seu golpe precisa ser o último antes da morte, e os avisos de abate do chat do servidor (\"Você matou Fulano\", \"Fulano foi morto por você\") também contam. Quem fugiu, saiu de perto ou morreu para outro jogador (assistência) não conta mais.",
+        "Chat inteiro: o jogo guarda todas as mensagens desde que você entrou no servidor, então dá para subir o chat até a primeira, como no Lunar e no Silent.",
+        "Menu principal novo: o logo PC animado no anel com órbitas e luas girando, botões com ícones e o universo girando atrás.",
+        "Tela de carregamento do jogo e tela de atualização no visual novo, com a barra ciano e violeta. A atualização abre no meio da tela e com letras maiores em TV e monitor grande.",
+        "Console do Pulsar com visual novo, e no início do launcher o pulsar gira com o feixe de luz e as luas em órbita.",
+      ],
+    },
+    {
       id: "0.9.5",
       nome: "0.9.5",
       titulo: "Versão 0.9.5",

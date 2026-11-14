@@ -235,14 +235,17 @@ function openConsole() {
     return;
   }
   consoleWin = new BrowserWindow({
-    width: 960,
-    height: 580,
-    minWidth: 560,
+    width: 1180,
+    height: 720,
+    minWidth: 640,
     minHeight: 320,
-    backgroundColor: "#05070F",
+    backgroundColor: "#050816",
     title: tr("Console do Pulsar"),
     icon: ICON,
     autoHideMenuBar: true,
+    // Barra de título escura do próprio console, com os botões do Windows por cima.
+    titleBarStyle: "hidden",
+    titleBarOverlay: { color: "#06091A", symbolColor: "#E6ECFF", height: 40 },
     webPreferences: { preload: path.join(__dirname, "console-preload.js"), contextIsolation: true, sandbox: true },
   });
   consoleWin.loadFile(path.join(__dirname, "src", "console.html"), { query: { idioma: idioma() } });

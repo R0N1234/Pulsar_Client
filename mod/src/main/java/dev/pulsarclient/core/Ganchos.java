@@ -59,6 +59,9 @@ public final class Ganchos {
     public static volatile boolean ganchoEncantoItem;
     public static volatile boolean ganchoEncantoArmadura;
     public static volatile boolean ganchoEmote;
+    public static volatile boolean ganchoChat;
+    /** Quantas linhas o chat guarda (o jogo guardava 100): o bastante para uma sessão inteira num servidor. */
+    public static final int LINHAS_CHAT = 20000;
     // Quantas vezes a cor do brilho foi trocada (teste automático).
     public static volatile long encantoItens;
     public static volatile long encantoArmaduras;

@@ -311,13 +311,60 @@ def camera(d):
     d.ellipse([84, 100, 172, 188], outline=B, width=L)
 
 
+def controle(d):
+    # Controle de videogame: corpo arredondado com cruz e dois botões.
+    d.rounded_rectangle([14, 64, 242, 196], 60, outline=B, width=L)
+    d.line([62, 130, 110, 130], fill=B, width=L - 4)
+    d.line([86, 106, 86, 154], fill=B, width=L - 4)
+    d.ellipse([156, 102, 180, 126], fill=B)
+    d.ellipse([182, 132, 206, 156], fill=B)
+
+
+def camadas(d):
+    # Três camadas empilhadas (texturas).
+    for dy in (0, 52, 104):
+        pts = [(128, 30 + dy), (230, 80 + dy), (128, 130 + dy), (26, 80 + dy)]
+        if dy == 0:
+            d.polygon(pts, outline=B, width=L)
+        else:
+            d.line([(26, 80 + dy), (128, 130 + dy), (230, 80 + dy)], fill=B, width=L, joint="curve")
+
+
+def peca(d):
+    # Peça de quebra-cabeça (mods): contorno da forma cheia, tirado com uma erosão.
+    from PIL import ImageFilter
+    m = Image.new("L", (S, S), 0)
+    md = ImageDraw.Draw(m)
+    md.rectangle([40, 76, 196, 232], fill=255)
+    md.ellipse([88, 24, 148, 84], fill=255)
+    md.ellipse([188, 124, 248, 184], fill=255)
+    dentro = m.filter(ImageFilter.MinFilter(L + 1))
+    from PIL import ImageChops
+    borda = ImageChops.subtract(m, dentro)
+    d._image.paste(B, (0, 0), borda)
+
+
+def sair(d):
+    # Porta com a seta saindo.
+    d.line([(150, 40), (40, 40), (40, 216), (150, 216)], fill=B, width=L, joint="curve")
+    d.line([92, 128, 226, 128], fill=B, width=L)
+    d.line([(180, 82), (228, 128), (180, 174)], fill=B, width=L, joint="curve")
+
+
+def camisa(d):
+    # Camiseta (cosméticos).
+    pts = [(88, 36), (128, 60), (168, 36), (236, 80), (206, 130), (184, 116), (184, 224), (72, 224), (72, 116), (50, 130), (20, 80)]
+    d.polygon(pts, outline=B, width=L)
+
+
 ICONES = [
     lambda d: estrela(d, True), lambda d: estrela(d, False), engrenagem, lupa, teclado, mouse, espada, escudo,
     pocao, mira, monitor, sinal, bussola, relogio, chip, globo,
     lista, coracao, olho, telescopio, orbita, cometa, pessoa, cubo,
     brilho, nuvem, seta_baixo, gota, balao, nota, raio, quadro,
     letra, barra, bomba, ampulheta, mochila, impacto, caixa_linha, seta_voltar,
-    amigos, medalha, grade, pincel, camera,
+    amigos, medalha, grade, pincel, camera, controle, camadas, peca,
+    sair, camisa,
 ]
 
 

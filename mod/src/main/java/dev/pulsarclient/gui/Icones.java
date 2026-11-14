@@ -24,7 +24,8 @@ public final class Icones {
             LISTA = 16, CORACAO = 17, OLHO = 18, TELESCOPIO = 19, ORBITA = 20, COMETA = 21, PESSOA = 22, CUBO = 23,
             BRILHO = 24, NUVEM = 25, SETA_BAIXO = 26, GOTA = 27, BALAO = 28, NOTA = 29, RAIO = 30, QUADRO = 31,
             LETRA = 32, BARRA = 33, BOMBA = 34, AMPULHETA = 35, MOCHILA = 36, IMPACTO = 37, CAIXA = 38, VOLTAR = 39,
-            AMIGOS = 40, MEDALHA = 41, GRADE = 42, PINCEL = 43, CAMERA = 44;
+            AMIGOS = 40, MEDALHA = 41, GRADE = 42, PINCEL = 43, CAMERA = 44, CONTROLE = 45, CAMADAS = 46, PECA = 47,
+            SAIR = 48, CAMISA = 49;
     private static final Map<String, Integer> DOS_MODS = new HashMap<String, Integer>();
 
     static {

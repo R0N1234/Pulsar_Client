@@ -7,27 +7,44 @@ import dev.pulsarclient.settings.SliderSetting;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.PositionedSound;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Sequências de Abate: a cada jogador eliminado, o nome da sequência aparece na tela em letras vermelhas com sangue
  * escorrendo, e a voz do Pulsar anuncia (FIRST BLOOD, DOUBLE KILL... GODLIKE). Abates dentro do intervalo
  * escolhido continuam a sequência; passou o tempo, volta para o primeiro.
  *
- * O abate é contado quando um jogador em quem você bateu há pouco morre. Os sons vêm no Pulsar e podem ser
- * trocados pelos .ogg da pasta pulsar/sons/sequencias/, em vozes e variações (ver {@link SonsLocais}).
+ * Só conta quando VOCÊ elimina o jogador, do mesmo jeito que o servidor decide de quem é o abate:
+ * - Pelo jogo: o seu golpe foi confirmado (o alvo piscou de dano logo depois do seu clique), o jogador morreu de
+ *   verdade (vida zerada ou animação de morte) até 5 s depois, e ninguém mais bateu nele depois de você. Jogador que
+ *   só saiu de perto, fugiu para longe ou sumiu do mundo não conta; dano de queda, fogo ou veneno depois do seu golpe
+ *   continua sendo seu abate, e o golpe de outro jogador depois do seu (assistência) não conta.
+ * - Pelo chat do servidor: avisos como "Você matou Fulano", "Fulano foi morto por Você" ou "Rick matou Fulano" contam
+ *   na hora; "Fulano foi morto por Outro" cancela o abate que o jogo ia contar. Mensagens de jogadores não valem.
+ * O mesmo jogador nunca conta duas vezes (jogo e chat juntos).
+ *
+ * Os sons vêm no Pulsar e podem ser trocados pelos .ogg da pasta pulsar/sons/sequencias/, em vozes e variações
+ * (ver {@link SonsLocais}).
  */
 public class Sequencias extends HudMod {
     /** Lista Pulsar (a do Rick): 1 a 12 abates, o último vale para 12 ou mais. */
@@ -41,11 +58,18 @@ public class Sequencias extends HudMod {
     public static final String[] TEXTOS_ARENA = {"FIRST BLOOD", "DOUBLE KILL", "MULTI KILL", "MEGA KILL", "ULTRA KILL",
             "MONSTER KILL", "LUDICROUS KILL", "HOLY SHIT"};
     private static final int VERMELHO = 0xFFE3141E, ESCURO = 0xFF8A0A12, CLARO = 0xFFFF5A5A;
-    /** Depois de bater, por quanto tempo a morte do jogador conta como abate seu. */
-    private static final int JANELA_ABATE = 60;
+    /** Depois do seu último golpe, por quanto tempo a morte do jogador conta como abate seu (o servidor usa 5 s). */
+    private static final int JANELA_ABATE = 100;
+    /** Até quantos ticks depois do clique o dano no alvo é do seu golpe. */
+    private static final int CONFIRMAR = 6;
+    /** Quanto o abate visto no jogo espera um aviso do chat dizendo que foi de outro jogador. */
+    private static final int ESPERA_CHAT = 6;
+    /** Outro jogador a esta distância do alvo, batendo, quando ele levou dano: o golpe foi dele. */
+    private static final double PERTO_OUTRO = 6.0;
     private static final int GOTAS = 7;
 
     private final ModeSetting lista = add(new ModeSetting("lista", "Lista de sequências", 0, "Pulsar", "Arena"));
+    private final ModeSetting deteccao = add(new ModeSetting("deteccao", "Como reconhecer o abate", 0, "Jogo e chat do servidor", "Só o chat do servidor", "Só o jogo"));
     private final SliderSetting intervalo = add(new SliderSetting("intervalo", "Tempo entre abates para seguir a sequência", 10, 3, 30, 1, "s"));
     private final SliderSetting duracao = add(new SliderSetting("duracao", "Tempo do texto na tela", 3, 1, 8, 0.5, "s"));
     private final BoolSetting sangue = add(new BoolSetting("sangue", "Sangue escorrendo nas letras", true));
@@ -65,7 +89,12 @@ public class Sequencias extends HudMod {
     public static final String VOZ_PADRAO = "Padrão";
 
     private int ticks;
-    private final Map<EntityLivingBase, Integer> alvos = new HashMap<EntityLivingBase, Integer>();
+    private final Map<EntityLivingBase, Alvo> alvos = new HashMap<EntityLivingBase, Alvo>();
+    /** Abates vistos no jogo esperando o chat (nome em minúsculas -> tick em que morreu). */
+    private final Map<String, Integer> pendentes = new HashMap<String, Integer>();
+    /** Jogadores que já contaram (nome em minúsculas -> tick), para jogo e chat não contarem o mesmo abate. */
+    private final Map<String, Integer> contados = new HashMap<String, Integer>();
+    private Object mundo;
     private int contagem;
     private int ultimoAbate = -100000;
     private int mostrarAte = -1;
@@ -151,14 +180,58 @@ public class Sequencias extends HudMod {
 
     // ---------- contar os abates ----------
 
+    /** Um jogador em quem você bateu: quando clicou, quando o golpe foi confirmado e quando outro jogador bateu. */
+    private static final class Alvo {
+        int clique = -100000;
+        int golpe = -100000;
+        int outro = -100000;
+        int dano;
+    }
+
     @SubscribeEvent
     public void onAttack(AttackEntityEvent event) {
         if (!isEnabled() || mc.thePlayer == null || event.entityPlayer != mc.thePlayer) return;
-        if (event.target instanceof EntityPlayer && event.target != mc.thePlayer) alvos.put((EntityLivingBase) event.target, ticks);
+        if (!(event.target instanceof EntityPlayer) || event.target == mc.thePlayer) return;
+        EntityLivingBase alvo = (EntityLivingBase) event.target;
+        Alvo a = alvos.get(alvo);
+        if (a == null) {
+            a = new Alvo();
+            a.dano = alvo.hurtTime;
+            alvos.put(alvo, a);
+        }
+        a.clique = ticks;
     }
 
+    @SubscribeEvent
+    public void onChat(ClientChatReceivedEvent event) {
+        if (!isEnabled() || mc.thePlayer == null || event.message == null || deteccao.index() == 2) return;
+        String linha = EnumChatFormatting.getTextWithoutFormattingCodes(event.message.getUnformattedText());
+        if (linha == null) return;
+        String[] r = lerChat(linha, mc.thePlayer.getName(), online());
+        if (r == null) return;
+        String vitima = r[0].toLowerCase(Locale.ROOT);
+        if (r[1] == null) {
+            // O servidor disse que o abate foi de outro jogador: o que o jogo ia contar não vale.
+            if (pendentes.remove(vitima) != null) System.out.println("[Pulsar] Sequências: " + r[0] + " foi de outro jogador (chat)");
+            return;
+        }
+        pendentes.remove(vitima);
+        contar(r[0], "chat");
+    }
+
+    /** Os nicks do TAB do servidor. */
+    private Collection<String> online() {
+        List<String> nomes = new ArrayList<String>();
+        if (mc.getNetHandler() == null) return nomes;
+        for (NetworkPlayerInfo i : mc.getNetHandler().getPlayerInfoMap()) {
+            if (i.getGameProfile() != null && i.getGameProfile().getName() != null) nomes.add(i.getGameProfile().getName());
+        }
+        return nomes;
+    }
+
+    /** Morreu de verdade: vida zerada ou animação de morte. Sumir do mundo (isDead) sozinho não é morrer. */
     private static boolean morreu(EntityLivingBase e) {
-        return e.isDead || e.getHealth() <= 0 || e.deathTime > 0;
+        return e.getHealth() <= 0 || e.deathTime > 0;
     }
 
     @Override
@@ -178,31 +251,128 @@ public class Sequencias extends HudMod {
                 proximoTeste = ticks + Math.max(50, (int) Math.round(duracao.get() * 20));
             }
         }
-        if (mc.thePlayer == null || mc.theWorld == null) {
+        if (mc.thePlayer == null || mc.theWorld == null || mc.theWorld != mundo) {
+            // Saiu do servidor ou trocou de mundo: os alvos antigos não existem mais.
+            mundo = mc.theWorld;
             alvos.clear();
-            contagem = 0;
+            pendentes.clear();
+            if (mc.thePlayer == null || mc.theWorld == null) contagem = 0;
             return;
         }
         if (!isEnabled()) {
             alvos.clear();
+            pendentes.clear();
             return;
         }
-        Iterator<Map.Entry<EntityLivingBase, Integer>> it = alvos.entrySet().iterator();
+        Iterator<Map.Entry<EntityLivingBase, Alvo>> it = alvos.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<EntityLivingBase, Integer> e = it.next();
-            if (ticks - e.getValue() > JANELA_ABATE) {
+            Map.Entry<EntityLivingBase, Alvo> e = it.next();
+            EntityLivingBase alvo = e.getKey();
+            Alvo a = e.getValue();
+            if (alvo.hurtTime > a.dano) {
+                // Levou dano agora: do seu golpe (logo depois do clique) ou de outro jogador batendo nele.
+                if (ticks - a.clique <= CONFIRMAR) a.golpe = ticks;
+                else if (outroBatendo(alvo)) a.outro = ticks;
+            }
+            a.dano = alvo.hurtTime;
+            if (morreu(alvo)) {
                 it.remove();
-            } else if (morreu(e.getKey())) {
+                boolean meu = ticks - a.golpe <= JANELA_ABATE && a.golpe >= a.outro;
+                if (meu && deteccao.index() != 1) {
+                    pendentes.put(alvo.getName().toLowerCase(Locale.ROOT), ticks);
+                } else if (!meu && a.golpe > -100000) {
+                    System.out.println("[Pulsar] Sequências: " + alvo.getName() + " morreu, mas o último golpe não foi seu");
+                }
+            } else if (alvo.isDead || ticks - Math.max(a.clique, a.golpe) > JANELA_ABATE) {
+                // Saiu de perto, sumiu do mundo ou a luta acabou sem morte: não é abate.
                 it.remove();
-                System.out.println("[Pulsar] Sequências: " + e.getKey().getName() + " eliminado");
-                abate();
             }
         }
+        Iterator<Map.Entry<String, Integer>> p = pendentes.entrySet().iterator();
+        while (p.hasNext()) {
+            Map.Entry<String, Integer> e = p.next();
+            if (ticks - e.getValue() < ESPERA_CHAT) continue;
+            p.remove();
+            contar(e.getKey(), "jogo");
+        }
+        Iterator<Map.Entry<String, Integer>> c = contados.entrySet().iterator();
+        while (c.hasNext()) if (ticks - c.next().getValue() > JANELA_ABATE) c.remove();
         // Você morreu: a sequência acaba.
         if (mc.thePlayer.getHealth() <= 0 && contagem > 0) {
             contagem = 0;
             ultimoAbate = -100000;
         }
+    }
+
+    /** Outro jogador (nem você nem o alvo) perto do alvo e no meio de um golpe. */
+    private boolean outroBatendo(EntityLivingBase alvo) {
+        for (EntityPlayer p : mc.theWorld.playerEntities) {
+            if (p == mc.thePlayer || p == alvo || p.isDead) continue;
+            if (p.getDistanceSqToEntity(alvo) <= PERTO_OUTRO * PERTO_OUTRO && (p.isSwingInProgress || p.swingProgressInt > 0)) return true;
+        }
+        return false;
+    }
+
+    /** Conta o abate de um jogador, se ele ainda não contou há pouco (pelo jogo ou pelo chat). */
+    private void contar(String nome, String fonte) {
+        String chave = nome.toLowerCase(Locale.ROOT);
+        Integer antes = contados.get(chave);
+        if (antes != null && ticks - antes <= JANELA_ABATE) return;
+        contados.put(chave, ticks);
+        System.out.println("[Pulsar] Sequências: " + nome + " eliminado (" + fonte + ")");
+        abate();
+    }
+
+    // ---------- abates no chat do servidor ----------
+
+    private static final String NOME = "([A-Za-z0-9_]{1,16})";
+    private static final String VERBO = "(?:matou|eliminou|abateu|assassinou|derrubou|finalizou|killed|slew|eliminated|murdered)";
+    private static final String MORTO = "(?:foi |was )?(?:morto|morta|eliminad[oa]|abatid[oa]|assassinad[oa]|derrubad[oa]|finalizad[oa]|slain|killed|eliminated|murdered)";
+    /** "Você matou Fulano", "You killed Fulano". */
+    private static final Pattern VOCE_MATOU = Pattern.compile("(?i)\\b(?:voc[eê]|vc|you)\\s+" + VERBO + "\\s+(?:o jogador\\s+|a jogadora\\s+|the player\\s+)?" + NOME + "\\b");
+    /** "Fulano foi morto por Rick", "Fulano was slain by Rick", "Fulano morreu para Rick" (Rick pode ser qualquer um). */
+    private static final Pattern MORTO_POR = Pattern.compile("(?i)\\b(?!(?:foi|was)\\b)" + NOME + "(?:\\s*\\([^)]*\\))?\\s+(?:" + MORTO + "|morreu)\\s+(?:por|pelo|pela|para|pra|by)\\s+(?:o jogador\\s+|the player\\s+)?(voc[eê]|[A-Za-z0-9_]{1,16})(?![\\p{L}\\p{N}_])");
+    /** "Rick matou Fulano" (o primeiro nome é quem matou). */
+    private static final Pattern MATOU = Pattern.compile("(?i)\\b" + NOME + "\\s+" + VERBO + "\\s+(?:o jogador\\s+|a jogadora\\s+|the player\\s+)?" + NOME + "\\b");
+    /** Mensagem de jogador: o texto antes do aviso termina com um nick e ":", "»", ">" ou "->". */
+    private static final Pattern FALA = Pattern.compile("([A-Za-z0-9_]{3,16})\\s*(?::|»|>|->)");
+
+    /**
+     * Lê um aviso de abate do chat. Devolve {vítima, quem matou} com quem matou = seu nick quando foi você,
+     * {vítima, null} quando foi outro jogador, ou null quando a linha não é um aviso de abate.
+     * online: os nicks do servidor (TAB), para reconhecer mensagens de jogadores; null trata qualquer nick como jogador.
+     */
+    public static String[] lerChat(String linha, String eu, Collection<String> online) {
+        Matcher m = VOCE_MATOU.matcher(linha);
+        if (m.find() && !fala(linha, m.start(), online)) return vitima(m.group(1), eu, eu);
+        m = MORTO_POR.matcher(linha);
+        if (m.find() && !fala(linha, m.start(), online)) {
+            String quem = m.group(2);
+            boolean fui = quem.equalsIgnoreCase(eu) || quem.matches("(?i)voc[eê]|vc|you");
+            return vitima(m.group(1), fui ? eu : null, eu);
+        }
+        m = MATOU.matcher(linha);
+        if (m.find() && !fala(linha, m.start(), online)) {
+            String quem = m.group(1);
+            if (quem.matches("(?i)voc[eê]|vc|you|que|quem|who")) return null;
+            return vitima(m.group(2), quem.equalsIgnoreCase(eu) ? eu : null, eu);
+        }
+        return null;
+    }
+
+    private static String[] vitima(String nome, String matador, String eu) {
+        if (nome == null || nome.equalsIgnoreCase(eu) || nome.matches("(?i)voc[eê]|vc|you|o|a|um|uma|the|por|by")) return null;
+        return new String[]{nome, matador};
+    }
+
+    /** O aviso está dentro de uma mensagem que um jogador mandou no chat ("Nick: ...", "<Nick> ...", "Nick » ..."). */
+    private static boolean fala(String linha, int inicio, Collection<String> online) {
+        Matcher f = FALA.matcher(linha.substring(0, inicio));
+        while (f.find()) {
+            if (online == null) return true;
+            for (String n : online) if (n.equalsIgnoreCase(f.group(1))) return true;
+        }
+        return false;
     }
 
     /** Mais um abate: segue a sequência se foi dentro do intervalo, senão começa de novo. */

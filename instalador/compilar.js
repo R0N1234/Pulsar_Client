@@ -34,6 +34,8 @@ function tamanhoPasta(dir) {
 
 const recursos = [
   [path.join(launcher, "build", "icon.png"), "logo.png"],
+  // O "PC" no anel ciano -> violeta da tela de carregamento do jogo (tools/arte_espaco.py).
+  [path.join(aqui, "..", "mod", "src", "main", "resources", "assets", "pulsar", "textures", "splash", "logo.png"), "anel.png"],
   [path.join(aqui, "fontes", "Exo2-Regular.ttf"), "Exo2-Regular.ttf"],
   [path.join(aqui, "fontes", "Exo2-Bold.ttf"), "Exo2-Bold.ttf"],
 ];
