@@ -99,7 +99,7 @@ public class MotorPulsar extends PulsarMod {
         @Override public void run() { aplicarEscolhido(); }
     }));
     // Perfis da pessoa: salvos em .minecraft/pulsar/perfis e compartilhados por um código (copiar e colar).
-    private final TextSetting nomePerfil = add(new TextSetting("nome_perfil", "Nome para salvar o seu perfil", "Meu perfil", 24));
+    private final TextSetting nomePerfil = add(new TextSetting("nome_perfil", "Nome do perfil", "Meu perfil", 24));
     private final ActionSetting salvarPerfil = add(new ActionSetting("perfil_salvar", "Salvar o meu perfil", new Runnable() {
         @Override public void run() { salvarMeuPerfil(); }
     }));
