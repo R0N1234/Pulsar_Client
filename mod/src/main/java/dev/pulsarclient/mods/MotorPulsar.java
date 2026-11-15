@@ -677,11 +677,30 @@ public class MotorPulsar extends PulsarMod {
         if (texto == null) return null;
         int i = texto.indexOf(CODIGO);
         if (i < 0) return null;
-        String resto = texto.substring(i + CODIGO.length()).replaceAll("\\s", "");
-        int fim = 0;
-        while (fim < resto.length() && "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".indexOf(resto.charAt(fim)) >= 0) fim++;
+        // O código pode vir quebrado em linhas e com texto depois ("... valeu!"): junta os pedaços em base64
+        // e tenta do mais comprido para o mais curto até um deles abrir.
+        String resto = texto.substring(i + CODIGO.length());
+        List<String> partes = new ArrayList<String>();
+        for (String p : resto.trim().split("\\s+")) {
+            int fim = 0;
+            while (fim < p.length() && BASE64.indexOf(p.charAt(fim)) >= 0) fim++;
+            if (fim > 0) partes.add(p.substring(0, fim));
+            if (fim < p.length() || p.endsWith("=")) break;
+        }
+        for (int k = partes.size(); k > 0; k--) {
+            StringBuilder b = new StringBuilder();
+            for (int n = 0; n < k; n++) b.append(partes.get(n));
+            JsonObject o = abrir(b.toString());
+            if (o != null) return o;
+        }
+        return null;
+    }
+
+    private static final String BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+    private static JsonObject abrir(String base64) {
         try {
-            byte[] dados = java.util.Base64.getDecoder().decode(resto.substring(0, fim));
+            byte[] dados = java.util.Base64.getDecoder().decode(base64);
             GZIPInputStream gz = new GZIPInputStream(new ByteArrayInputStream(dados));
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buf = new byte[4096];
@@ -691,7 +710,7 @@ public class MotorPulsar extends PulsarMod {
                 if (out.size() > 1 << 20) return null;
             }
             JsonElement el = new JsonParser().parse(new String(out.toByteArray(), StandardCharsets.UTF_8));
-            return el.isJsonObject() && el.getAsJsonObject().has("motor") ? el.getAsJsonObject() : null;
+            return el.isJsonObject() && el.getAsJsonObject().has("motor") && el.getAsJsonObject().get("motor").isJsonObject() ? el.getAsJsonObject() : null;
         } catch (Exception e) {
             return null;
         }
