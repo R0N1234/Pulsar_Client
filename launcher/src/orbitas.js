@@ -7,6 +7,20 @@
 
   const NOVIDADES = [
     {
+      id: "1.0.1",
+      nome: "1.0.1",
+      titulo: "Versão 1.0.1",
+      itens: [
+        "Logo novo do Pulsar Client em todo lugar: no ícone da área de trabalho, na barra de tarefas (no launcher e no jogo), no carregamento e dentro do client.",
+        "OptiFine em um clique: o launcher recomenda o OptiFine na primeira vez, abre o site oficial e, quando o download termina, instala sozinho e troca o modo para OptiFine + Forge + Pulsar.",
+        "Contas com a cabeça da skin do Minecraft no launcher, e tela de contas nova dentro do jogo, com as cabeças, a conta em uso em destaque e o visual do client.",
+        "Motor Pulsar com perfis seus: salve o seu perfil, copie o código e mande para um amigo. Ele clica em \"Colar perfil recebido\" e o perfil entra no client dele na hora.",
+        "Efeitos: todos os efeitos do Minecraft têm uma opção para esconder. Ex.: comer a maçã dourada e não mostrar a Resistência ao fogo.",
+        "Campo de Colisão só nos jogadores (sem caixa em itens e flechas), com cor, espessura da linha e tamanho da caixa ajustáveis.",
+        "A lista do \"Modo\" no launcher não fica mais branca e sem texto: agora abre no visual do client.",
+      ],
+    },
+    {
       id: "1.0.0",
       nome: "1.0.0",
       titulo: "Versão 1.0.0",

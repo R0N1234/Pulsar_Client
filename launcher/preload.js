@@ -4,6 +4,9 @@ contextBridge.exposeInMainWorld("pulsar", {
   getConfig: () => ipcRenderer.invoke("config:get"),
   setConfig: (patch) => ipcRenderer.invoke("config:set", patch),
   pickOptifine: () => ipcRenderer.invoke("optifine:pick"),
+  baixarOptifine: () => ipcRenderer.invoke("optifine:baixar"),
+  cancelarOptifine: () => ipcRenderer.invoke("optifine:cancelar"),
+  onOptifine: (fn) => ipcRenderer.on("optifine:estado", (_e, s) => fn(s)),
   openLink: (url) => ipcRenderer.invoke("link:open", url),
   getMods: () => ipcRenderer.invoke("mods:get"),
   listVersoes: () => ipcRenderer.invoke("versoes:list"),
@@ -24,6 +27,7 @@ contextBridge.exposeInMainWorld("pulsar", {
   // Caminho de um arquivo arrastado para a janela (para soltar mods na lista).
   caminhoDe: (file) => (webUtils ? webUtils.getPathForFile(file) : ""),
   restoreAccount: () => ipcRenderer.invoke("account:restore"),
+  skinUrl: (nome) => ipcRenderer.invoke("skin:url", nome),
   login: () => ipcRenderer.invoke("account:login"),
   logout: () => ipcRenderer.invoke("account:logout"),
   useAccount: (conta) => ipcRenderer.invoke("account:usar", conta),

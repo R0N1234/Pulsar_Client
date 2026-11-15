@@ -144,7 +144,7 @@ def orbitas(grad):
 def letras():
     s = SS
     img = grande()
-    largura = 172.0
+    largura = 172.0 * RAIO / 150.0
     k = largura / 537.0
     alto = 473 * k
     x0, y0 = C - largura / 2, C - alto / 2

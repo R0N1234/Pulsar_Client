@@ -16,6 +16,8 @@ const radio = require("./lib/radio");
 const versoes = require("./lib/versoes");
 const mcversoes = require("./lib/mcversoes");
 const { Gravacao } = require("./lib/gravacao");
+const optifine = require("./lib/optifine");
+const vigiaOptifine = new optifine.Vigia();
 
 // Janelas (inclusive o login da Microsoft) em português.
 app.commandLine.appendSwitch("lang", "pt-BR");
@@ -289,6 +291,59 @@ app.whenReady().then(() => {
     config.set({ optifinePath: r.filePaths[0] });
     return publicConfig();
   });
+  // Instalar o OptiFine: usa o que já estiver na pasta Downloads ou abre o site oficial e espera o download terminar.
+  ipcMain.handle("optifine:baixar", () => {
+    const downloads = app.getPath("downloads");
+    const pronto = (arquivo) => {
+      try {
+        const destino = optifine.guardar(arquivo, path.join(app.getPath("userData"), "optifine"));
+        config.set({ optifinePath: destino, loader: "forge_optifine", optifineAviso: true });
+        console.log("[OptiFine] instalado: " + destino);
+        send("optifine:estado", { estado: "pronto", config: publicConfig() });
+      } catch (e) {
+        send("optifine:estado", { estado: "erro", erro: e.message });
+      }
+    };
+    const existente = optifine.procurar(downloads);
+    if (existente && optifine.valido(existente)) {
+      pronto(existente);
+      return { estado: "pronto" };
+    }
+    shell.openExternal("https://optifine.net/downloads");
+    vigiaOptifine.comecar(downloads, {
+      aoAchar: pronto,
+      aoDesistir: () => send("optifine:estado", { estado: "desistiu" }),
+    });
+    return { estado: "esperando", pasta: downloads };
+  });
+  ipcMain.handle("optifine:cancelar", () => vigiaOptifine.parar());
+  // Endereço da skin de um nick (para a cabeça nas contas). Sem conta original com esse nome, ou sem internet: null.
+  const skins = new Map();
+  ipcMain.handle("skin:url", async (_e, nome) => {
+    nome = String(nome || "");
+    if (!/^[A-Za-z0-9_]{1,16}$/.test(nome)) return null;
+    const k = nome.toLowerCase();
+    const c = skins.get(k);
+    if (c && Date.now() - c.t < 60 * 60 * 1000) return c.url;
+    let url = null;
+    try {
+      const r = await fetch(`https://api.mojang.com/users/profiles/minecraft/${nome}`, { signal: AbortSignal.timeout(6000) });
+      if (r.status === 200) {
+        const { id } = await r.json();
+        const p = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${id}`, { signal: AbortSignal.timeout(6000) });
+        if (p.ok) {
+          const tex = ((await p.json()).properties || []).find((x) => x.name === "textures");
+          const dados = tex ? JSON.parse(Buffer.from(tex.value, "base64").toString("utf8")) : null;
+          const skin = dados && dados.textures && dados.textures.SKIN && dados.textures.SKIN.url;
+          if (skin && /^https?:\/\/textures\.minecraft\.net\//.test(skin)) url = skin.replace(/^http:/, "https:");
+        }
+      }
+      skins.set(k, { url, t: Date.now() });
+    } catch {
+      // Sem internet: tenta de novo na próxima vez.
+    }
+    return url;
+  });
   ipcMain.handle("link:open", (_e, url) => {
     if (/^https:\/\/(optifine\.net|adoptium\.net|modrinth\.com|discord\.gg|github\.com\/R0N1234\/Pulsar_Client)\//.test(String(url))) shell.openExternal(url);
   });
@@ -539,6 +594,19 @@ async function tirarPrints(dir) {
       await js(`document.getElementById("novOk").click()`);
       await espera(500);
     }
+    // Primeira vez sem OptiFine: a janela que recomenda instalar.
+    await espera(900);
+    if (await js(`!!document.getElementById("ofModal") && !document.getElementById("ofModal").hidden`)) {
+      await print("optifine");
+      await js(`document.getElementById("ofDepois").click()`);
+      await espera(400);
+    }
+    // Lista do "Modo" aberta (o visual do client, no lugar da lista branca do Windows).
+    await js(`document.querySelector('.seletor[data-de="loader"] .seletor-botao')?.click()`);
+    await espera(400);
+    await print("modo");
+    await js(`document.querySelector('.seletor[data-de="loader"] .seletor-botao')?.click()`);
+    await espera(300);
     await print("inicio");
     // Órbitas: um planeta de cada órbita abre a sua aba (no Normal, o painel lateral); a legenda abre a lista da órbita.
     for (const o of ["novidades", "sugestoes", "discord"]) {

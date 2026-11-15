@@ -538,7 +538,26 @@ public class SelfTest {
                 log(novo && !PulsarClient.get().mod("gravacao").novo() ? "novo-ok" : "novo-falhou");
                 show("novos", new GuiPulsarPanel(new GuiPulsarMenu(), Category.COMBATE, null));
                 break;
-            case 54:
+            case 54: {
+                // Perfil do Motor: vira código, volta igual mesmo colado no meio de uma mensagem com quebra de linha.
+                dev.pulsarclient.mods.MotorPulsar motor = (dev.pulsarclient.mods.MotorPulsar) PulsarClient.get().mod("motor_pulsar");
+                com.google.gson.JsonObject perfil = motor.perfilAtual("Teste");
+                String codigo = dev.pulsarclient.mods.MotorPulsar.codificar(perfil);
+                com.google.gson.JsonObject volta = dev.pulsarclient.mods.MotorPulsar.decodificar("olha o meu perfil: " + codigo.substring(0, 30) + "\n" + codigo.substring(30) + " valeu!");
+                System.out.println("[Pulsar] Perfil: código com " + codigo.length() + " letras");
+                log(volta != null && "Teste".equals(volta.get("nome").getAsString()) && volta.get("motor").equals(perfil.get("motor"))
+                        && dev.pulsarclient.mods.MotorPulsar.decodificar("PULSAR-PERFIL:lixo") == null ? "perfil-ok" : "perfil-falhou");
+                // Efeitos: esconder a Resistência ao fogo não esconde a Força.
+                dev.pulsarclient.mods.Efeitos efeitos = (dev.pulsarclient.mods.Efeitos) PulsarClient.get().mod("efeitos");
+                for (dev.pulsarclient.settings.Setting st : efeitos.settings())
+                    if (st.key().equals("mostrar_12")) ((dev.pulsarclient.settings.BoolSetting) st).set(false);
+                log(!efeitos.mostra(12) && efeitos.mostra(5) && efeitos.mostra(99) ? "efeitos-ok" : "efeitos-falhou");
+                for (dev.pulsarclient.settings.Setting st : efeitos.settings())
+                    if (st.key().equals("mostrar_12")) ((dev.pulsarclient.settings.BoolSetting) st).set(true);
+                // Campo de Colisão: 150% deixa a caixa 1,5x maior a partir do meio.
+                net.minecraft.util.AxisAlignedBB cx = dev.pulsarclient.mods.CampoColisao.caixa(new net.minecraft.util.AxisAlignedBB(-0.3, 0, -0.3, 0.3, 1.8, 0.3), 1.5);
+                log(Math.abs(cx.maxX - 0.45) < 1e-6 && Math.abs(cx.minY + 0.45) < 1e-6 && Math.abs(cx.maxY - 2.25) < 1e-6 ? "colisao-ok" : "colisao-falhou");
+            }
                 // Desliga o rádio um passo antes do fim: o pedido de parar sai em até meio segundo.
                 filtro().setEnabled(false);
                 PulsarClient.get().mod("rastro_cometa").setEnabled(false);

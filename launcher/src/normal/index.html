@@ -2,10 +2,11 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://cdn.modrinth.com; media-src https://*.somafm.com https://stream.nightride.fm https://*.radioparadise.com https://*.laut.fm">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://cdn.modrinth.com https://textures.minecraft.net; media-src https://*.somafm.com https://stream.nightride.fm https://*.radioparadise.com https://*.laut.fm">
   <title>Pulsar Client</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="normal.css">
+  <link rel="stylesheet" href="../seletor.css">
 </head>
 <body>
   <!-- Modo Normal do launcher: o modelo completo (topo, trilho, painel de lançamento à direita). O modo Lite fica em ../index.html. -->
@@ -213,7 +214,7 @@
                   <label class="setting-row range-row"><span><strong>Memória para o jogo</strong><small><b id="memOut" data-sem-traducao>3 GB</b> reservados para o Minecraft.</small></span><input id="mem" type="range" min="1" max="8" step="1" value="3"></label>
                   <label class="setting-row input-row"><span><strong>Java</strong><small>Deixe vazio para usar o Java 8 do Pulsar. Para usar outro, cole o caminho do javaw.exe de um Java 8.</small></span><input id="java" type="text" placeholder="Automático: o Pulsar baixa o Java 8 sozinho"></label>
                   <label class="setting-row input-row"><span><strong>Pasta do Minecraft</strong><small>A mesma .minecraft do launcher oficial: seus mundos, packs, servidores e opções aparecem no Pulsar.</small></span><input id="dir" type="text"></label>
-                  <div class="setting-row input-row"><span><strong>OptiFine 1.8.9</strong><small>Baixe o <b>OptiFine 1.8.9 HD U M5</b> no site oficial e escolha o arquivo aqui. <button type="button" class="linkbtn" id="btnOfSite">Abrir optifine.net</button></small></span><div class="pick"><span id="ofFile" class="mono" data-sem-traducao>Nenhum arquivo escolhido</span><button class="secondary-button compact" type="button" id="btnPickOf">Escolher arquivo</button></div></div>
+                  <div class="setting-row input-row"><span><strong>OptiFine 1.8.9</strong><small>Baixe o <b>OptiFine 1.8.9 HD U M5</b> no site oficial e escolha o arquivo aqui. <button type="button" class="linkbtn" id="btnOfSite">Instalar OptiFine automático</button></small></span><div class="pick"><span id="ofFile" class="mono" data-sem-traducao>Nenhum arquivo escolhido</span><button class="secondary-button compact" type="button" id="btnPickOf">Escolher arquivo</button></div></div>
                 </div>
               </section>
 
@@ -332,11 +333,31 @@
     </section>
   </div>
 
+  <!-- OptiFine: recomendado na primeira vez que o launcher abre -->
+  <div class="modal-layer" id="ofModal" hidden>
+    <button class="modal-scrim" type="button" data-close-of aria-label="Fechar"></button>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="ofTitle">
+      <div class="modal-visual"><span></span><i></i><img src="../logo.png" alt="" width="72" height="72"></div>
+      <p class="eyebrow"><span>Recomendado</span><i></i><b data-sem-traducao>OptiFine 1.8.9</b></p>
+      <h2 id="ofTitle">Instale o OptiFine</h2>
+      <p class="upd-notes" id="ofTexto">O OptiFine deixa o Minecraft mais leve e libera mais opções de gráfico. Clique em Baixar OptiFine: o site oficial abre, você baixa o OptiFine 1.8.9 HD U M5 e o Pulsar coloca ele no lugar certo sozinho.</p>
+      <ol class="of-passos" id="ofPassos">
+        <li>No site, procure <b>Minecraft 1.8.9</b> e clique em <b>Download</b> no OptiFine HD U M5.</li>
+        <li>Na página seguinte, espere alguns segundos e clique em <b>Download</b> de novo.</li>
+        <li>Quando o download terminar, o Pulsar instala e troca o modo para <b>OptiFine + Forge + Pulsar</b>.</li>
+      </ol>
+      <p class="help of-espera" id="ofEspera" hidden><span class="of-giro" aria-hidden="true"></span><span>Esperando o download do OptiFine terminar…</span></p>
+      <div class="modal-actions"><button class="text-button" type="button" id="ofDepois">Agora não</button><button class="secondary-button" type="button" id="ofBaixar">BAIXAR OPTIFINE</button></div>
+    </section>
+  </div>
+
   <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
 
   <script src="../i18n.js"></script>
   <script src="../mods.js"></script>
   <script src="../orbitas.js"></script>
+  <script src="../cabecas.js"></script>
+  <script src="../seletor.js"></script>
   <script src="normal.js"></script>
 </body>
 </html>

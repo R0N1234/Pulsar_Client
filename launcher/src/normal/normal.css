@@ -931,7 +931,7 @@ body.reduced-effects .cursor-light, body.reduced-effects .scan-grid { display: n
 .conta-usar { display: flex; flex: 1; align-items: center; gap: 10px; min-width: 0; padding: 7px 8px; border: 0; border-radius: 10px; color: inherit; text-align: left; background: transparent; }
 .conta-usar:hover { background: rgba(255,255,255,.04); }
 .conta-usar .avatar { width: 32px; height: 32px; font-size: 13px; }
-.conta-usar > span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.conta-usar > span:not(.avatar) { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
 .conta-usar small { color: var(--cyan); font-size: 10px; }
 .conta.on .conta-usar small { color: var(--cyan); } .conta:not(.on) .conta-usar small { color: var(--faint); }
 .conta-x { flex: 0 0 auto; }
@@ -1061,3 +1061,22 @@ body.reduced-effects .cursor-light, body.reduced-effects .scan-grid { display: n
 .modal-actions .secondary-button { min-width: 170px; font-weight: 700; }
 .toast.error > i { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
 .mobile-nav { display: none !important; }
+
+/* Janela do OptiFine */
+.of-passos { display: grid; gap: 8px; margin: 4px 0 14px; padding: 0; list-style: none; counter-reset: passo; }
+.of-passos li { position: relative; padding: 9px 12px 9px 44px; border: 1px solid var(--line); border-radius: 12px; color: var(--muted); background: rgba(5, 11, 29, .5); font-size: 12px; line-height: 1.45; text-align: left; counter-increment: passo; }
+.of-passos li::before { content: counter(passo); position: absolute; left: 12px; top: 50%; display: grid; place-items: center; width: 22px; height: 22px; margin-top: -11px; border-radius: 50%; color: #06101f; background: linear-gradient(135deg, var(--cyan), var(--violet)); font-size: 11px; font-weight: 800; }
+.of-passos b { color: var(--text); }
+.of-espera { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 0 12px; color: var(--cyan); font-size: 12px; }
+.of-giro { width: 14px; height: 14px; border: 2px solid rgba(var(--cyan-rgb), .25); border-top-color: var(--cyan); border-radius: 50%; animation: ofGiro .8s linear infinite; }
+@keyframes ofGiro { to { transform: rotate(360deg); } }
+
+/* Cabeça da skin nas contas (cabecas.js): quadrada como no Minecraft, com os pixels nítidos. */
+.avatar { position: relative; overflow: hidden; }
+.avatar.tem-skin { border-radius: 9px; background: #0b1230; box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 6px 16px rgba(0,0,0,.35); }
+.avatar.tem-skin > b { visibility: hidden; }
+.avatar.large.tem-skin { border-radius: 11px; }
+.avatar.xlarge.tem-skin { border-radius: 14px; }
+.conta-usar .avatar.tem-skin { border-radius: 7px; }
+.skin-cabeca { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.conta.on .avatar.tem-skin { box-shadow: 0 0 0 1px rgba(var(--cyan-rgb), .55), 0 0 14px rgba(var(--cyan-rgb), .25); }

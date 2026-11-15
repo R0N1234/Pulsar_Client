@@ -79,6 +79,9 @@ public abstract class PulsarMod {
         return setting;
     }
 
+    /** Aviso curto que o painel mostra em cima das opções do mod (ex.: "Código copiado!"). null = nada. */
+    public String aviso() { return null; }
+
     protected void onEnable() {}
     protected void onDisable() {}
 
