@@ -1,7 +1,7 @@
 {
   "name": "pulsar-launcher",
   "productName": "Pulsar Client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Launcher do Pulsar Client, focado em PVP no Minecraft 1.8.9",
   "license": "GPL-3.0-only",
   "main": "main.js",

@@ -23,6 +23,8 @@ const DEFAULTS = {
   javaPath: "",
   loader: "forge",
   optifinePath: "",
+  // Já mostrou a janela que recomenda o OptiFine (na primeira vez que o launcher abre).
+  optifineAviso: false,
   version: "1.8.9",
   openConsole: true,
   // Idioma do launcher ("" = o do sistema): pt-BR, en-US, en-GB, ru ou de.

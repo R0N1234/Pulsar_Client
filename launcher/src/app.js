@@ -59,7 +59,10 @@ function el(tag, cls, texto) {
 }
 
 function avatar(nome, offline) {
-  return el("span", "ava" + (offline ? " off" : ""), (nome || "?").slice(0, 1).toUpperCase());
+  const a = el("span", "ava" + (offline ? " off" : ""));
+  a.append(el("b", "", (nome || "?").slice(0, 1).toUpperCase()));
+  if (nome) window.Cabecas.aplicar(a, nome);
+  return a;
 }
 
 function renderAccount(estado) {
@@ -715,7 +718,20 @@ $("btnUpdToken").onclick = async () => {
   $("saved").textContent = t(cfg.hasUpdateToken ? "Chave salva. Procurando atualização…" : "Chave removida.");
 };
 $("btnPickOf").onclick = async () => renderOptifine(await api.pickOptifine());
-$("btnOfSite").onclick = () => api.openLink("https://optifine.net/downloads");
+// Instalar o OptiFine sozinho: abre o site oficial e o launcher pega o arquivo na pasta Downloads quando terminar.
+$("btnOfSite").onclick = async () => {
+  const r = await api.baixarOptifine().catch((e) => ({ estado: "erro", erro: e.message }));
+  if (r.estado === "esperando") setStatus("Baixe o OptiFine 1.8.9 HD U M5 no site que abriu. O Pulsar instala quando o download terminar.");
+  else if (r.estado === "erro") setStatus(r.erro || "Não deu para abrir o site do OptiFine.", true);
+};
+api.onOptifine((s) => {
+  if (s.estado === "pronto" && s.config) {
+    $("loader").value = s.config.loader;
+    renderOptifine(s.config);
+    setStatus("OptiFine instalado. O modo agora é OptiFine + Forge + Pulsar.");
+  } else if (s.estado === "desistiu") setStatus("O download do OptiFine não apareceu na pasta Downloads. Escolha o arquivo em Ajustes.", true);
+  else if (s.estado === "erro") setStatus(s.erro || "Não deu para instalar o OptiFine.", true);
+});
 $("loader").addEventListener("change", async () => {
   const cfg = await api.setConfig({ loader: $("loader").value });
   updateCounts();

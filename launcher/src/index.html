@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://cdn.modrinth.com; media-src https://*.somafm.com https://stream.nightride.fm https://*.radioparadise.com https://*.laut.fm">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://cdn.modrinth.com https://textures.minecraft.net; media-src https://*.somafm.com https://stream.nightride.fm https://*.radioparadise.com https://*.laut.fm">
   <title>Pulsar Client</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
   <link rel="stylesheet" href="styles.css">
@@ -178,7 +178,7 @@
         <span id="ofFile" class="mono">Nenhum arquivo escolhido</span>
         <button class="btn-ghost" type="button" id="btnPickOf">Escolher arquivo</button>
       </div>
-      <p class="help">O OptiFine não pode ser distribuído junto com o Pulsar, então baixe o <b>OptiFine 1.8.9 HD U M5</b> no site oficial e escolha o arquivo aqui. <button type="button" class="linkbtn" id="btnOfSite">Abrir optifine.net</button></p>
+      <p class="help">O OptiFine não pode ser distribuído junto com o Pulsar, então baixe o <b>OptiFine 1.8.9 HD U M5</b> no site oficial e escolha o arquivo aqui. <button type="button" class="linkbtn" id="btnOfSite">Instalar OptiFine automático</button></p>
 
       <label for="java">Java</label>
       <input id="java" type="text" placeholder="Automático: o Pulsar baixa o Java 8 sozinho">
@@ -252,6 +252,7 @@
   <script src="i18n.js"></script>
   <script src="mods.js"></script>
   <script src="orbitas.js"></script>
+  <script src="cabecas.js"></script>
   <script src="seletor.js"></script>
   <script src="app.js"></script>
 </body>

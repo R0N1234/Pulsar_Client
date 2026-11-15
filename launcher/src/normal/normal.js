@@ -271,8 +271,10 @@
 
   function avatar(nome, offline, cls) {
     const a = el("span", "avatar " + (cls || "") + (offline ? " off" : "") + (nome ? "" : " none"));
-    if (nome) a.textContent = nome.slice(0, 1).toUpperCase();
-    else a.append(icone("i-user"));
+    if (nome) {
+      a.append(el("b", "", nome.slice(0, 1).toUpperCase()));
+      window.Cabecas.aplicar(a, nome);
+    } else a.append(icone("i-user"));
     return a;
   }
 
@@ -965,7 +967,7 @@
     api.checkUpdate().catch(() => {});
   };
   $("btnPickOf").onclick = async () => renderOptifine(await api.pickOptifine());
-  $("btnOfSite").onclick = () => api.openLink("https://optifine.net/downloads");
+  $("btnOfSite").onclick = () => abrirOptifine(true);
   $("loader").addEventListener("change", async () => {
     const cfg = await api.setConfig({ loader: $("loader").value });
     updateCounts();
@@ -1088,6 +1090,59 @@
   $("updLater").onclick = () => ($("updModal").hidden = true);
   $$("[data-close-upd]").forEach((b) => b.addEventListener("click", () => ($("updModal").hidden = true)));
 
+  /* ---------- OptiFine: janela que recomenda e instala sozinho ---------- */
+  let esperandoOptifine = false;
+  function abrirOptifine(baixarJa) {
+    $("ofEspera").hidden = true;
+    $("ofBaixar").disabled = false;
+    $("ofModal").hidden = false;
+    if (baixarJa) baixarOptifine();
+  }
+  function fecharOptifine() {
+    $("ofModal").hidden = true;
+    if (esperandoOptifine) api.cancelarOptifine().catch(() => {});
+    esperandoOptifine = false;
+    api.setConfig({ optifineAviso: true }).catch(() => {});
+  }
+  async function baixarOptifine() {
+    $("ofBaixar").disabled = true;
+    const r = await api.baixarOptifine().catch((e) => ({ estado: "erro", erro: e.message }));
+    if (r.estado === "esperando") {
+      esperandoOptifine = true;
+      $("ofEspera").hidden = false;
+    } else if (r.estado === "erro") {
+      $("ofBaixar").disabled = false;
+      toast("OptiFine", r.erro || "Não deu para abrir o site do OptiFine.", "erro");
+    }
+  }
+  api.onOptifine((s) => {
+    esperandoOptifine = false;
+    $("ofEspera").hidden = true;
+    $("ofBaixar").disabled = false;
+    if (s.estado === "pronto") {
+      $("ofModal").hidden = true;
+      if (s.config) {
+        $("loader").value = s.config.loader;
+        renderOptifine(s.config);
+        updateCounts();
+      }
+      setStatus("Pronto para jogar");
+      toast("OptiFine instalado", "O modo agora é OptiFine + Forge + Pulsar.");
+    } else if (s.estado === "desistiu") {
+      toast("OptiFine", "O download não apareceu na pasta Downloads. Se baixou em outro lugar, escolha o arquivo em Ajustes.");
+    } else if (s.estado === "erro") {
+      toast("OptiFine", s.erro || "Não deu para instalar o OptiFine.", "erro");
+    }
+  });
+  $("ofBaixar").onclick = baixarOptifine;
+  $("ofDepois").onclick = fecharOptifine;
+  $$("[data-close-of]").forEach((b) => b.addEventListener("click", fecharOptifine));
+  // Primeira vez (sem OptiFine e sem ter visto a janela): aparece depois das novidades da versão.
+  async function sugerirOptifine() {
+    const cfg = await api.getConfig().catch(() => null);
+    if (cfg && !cfg.optifinePath && !cfg.optifineAviso && $("novModal").hidden && $("updModal").hidden) abrirOptifine(false);
+  }
+
   /* ---------- novidades da versão ---------- */
   let novidadeAberta = null;
   function abrirNovidades(nov) {
@@ -1103,6 +1158,7 @@
   function fecharNovidades() {
     $("novModal").hidden = true;
     if (novidadeAberta) api.setConfig({ novidadesVistas: novidadeAberta.id }).catch(() => {});
+    setTimeout(sugerirOptifine, 400);
   }
   $("novOk").onclick = fecharNovidades;
   $("novTodas").onclick = () => {
@@ -1117,12 +1173,14 @@
     const nov = NOVIDADES.find((n) => n.id === versao);
     $("notificationDot").hidden = !(nov && cfg.novidadesVistas !== versao);
     if (nov && cfg.novidadesVistas !== versao) abrirNovidades(nov);
+    else setTimeout(sugerirOptifine, 800);
   }
 
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
     if (!$("updModal").hidden) $("updModal").hidden = true;
     else if (!$("novModal").hidden) fecharNovidades();
+    else if (!$("ofModal").hidden) fecharOptifine();
     else if (!$("drawerLayer").hidden) fecharPainel();
     else setPopovers(null);
   });
