@@ -52,7 +52,25 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.opengl.Display;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import dev.pulsarclient.settings.Setting;
+import net.minecraft.client.gui.GuiScreen;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Motor Pulsar: o otimizador do próprio client.
@@ -70,10 +88,32 @@ public class MotorPulsar extends PulsarMod {
     /** Versão em que o perfil Desempenho passou a ser o padrão: quem vem de antes recebe ele uma vez. */
     private static final String PERFIL_PADRAO = "0.6";
 
+    /** Começo do código de um perfil compartilhado (o resto é o perfil compactado em base64). */
+    public static final String CODIGO = "PULSAR-PERFIL:";
+    /** Opções que não vão no perfil compartilhado. */
+    private static final Set<String> FORA_DO_PERFIL = new HashSet<String>(Arrays.asList(
+            "perfil", "nome_perfil", "tecla_ligar", "favorito", "visto", "perfil_versao", "molduras_versao", "blocos_versao", "bonecos_versao"));
+
     private final ModeSetting profile = add(new ModeSetting("perfil", "Perfil", 0, PROFILES));
     private final ActionSetting applyProfile = add(new ActionSetting("aplicar", "Aplicar o perfil escolhido", new Runnable() {
-        @Override public void run() { applyProfile(profile.index()); }
+        @Override public void run() { aplicarEscolhido(); }
     }));
+    // Perfis da pessoa: salvos em .minecraft/pulsar/perfis e compartilhados por um código (copiar e colar).
+    private final TextSetting nomePerfil = add(new TextSetting("nome_perfil", "Nome para salvar o seu perfil", "Meu perfil", 24));
+    private final ActionSetting salvarPerfil = add(new ActionSetting("perfil_salvar", "Salvar o meu perfil", new Runnable() {
+        @Override public void run() { salvarMeuPerfil(); }
+    }));
+    private final ActionSetting copiarPerfil = add(new ActionSetting("perfil_copiar", "Copiar código para mandar a alguém", new Runnable() {
+        @Override public void run() { copiarCodigo(); }
+    }));
+    private final ActionSetting colarPerfil = add(new ActionSetting("perfil_colar", "Colar perfil recebido (aplica na hora)", new Runnable() {
+        @Override public void run() { colarCodigo(); }
+    }));
+    private final ActionSetting apagarPerfil = add(new ActionSetting("perfil_apagar", "Apagar o perfil escolhido", new Runnable() {
+        @Override public void run() { apagarEscolhido(); }
+    }) {
+        @Override public boolean visible() { return profile.index() >= PROFILES.length; }
+    });
     private final BoolSetting background = add(new BoolSetting("fundo", "Poupar PC em segundo plano", true));
     private final SliderSetting backgroundFps = add(new SliderSetting("fundo_fps", "FPS em segundo plano", 15, 5, 60, 5, ""));
     private final BoolSetting occlusion = add(new BoolSetting("oclusao", "Não desenhar o que está atrás de paredes", true));
@@ -145,6 +185,7 @@ public class MotorPulsar extends PulsarMod {
         MolduraLeve.usar(new MolduraLeve.Regra() {
             @Override public boolean leve() { return isEnabled() && framesLeves.get(); }
         });
+        atualizarPerfis();
     }
 
     private boolean molduraFalhou, placaFalhou;
@@ -546,6 +587,226 @@ public class MotorPulsar extends PulsarMod {
 
         if (mc.renderGlobal != null && mc.theWorld != null) mc.renderGlobal.loadRenderers();
         gs.saveOptions();
+        PulsarClient.get().save();
+    }
+
+    // ---------- perfis da pessoa (salvar, copiar e colar) ----------
+
+    private String aviso;
+    private long avisoAte;
+
+    @Override
+    public String aviso() {
+        return System.currentTimeMillis() < avisoAte ? aviso : null;
+    }
+
+    private void avisar(String texto) {
+        aviso = texto;
+        avisoAte = System.currentTimeMillis() + 8000;
+        System.out.println("[Pulsar] Motor: " + texto);
+    }
+
+    private static File pastaPerfis() {
+        return new File(new File(Minecraft.getMinecraft().mcDataDir, "pulsar"), "perfis");
+    }
+
+    /** Nome que pode virar arquivo: sem barras nem caracteres que o Windows recusa. */
+    static String nomeLimpo(String nome) {
+        String n = nome == null ? "" : nome.replaceAll("[\\\\/:*?\"<>|\\p{Cntrl}]", "").trim();
+        if (n.length() > 24) n = n.substring(0, 24).trim();
+        for (String p : PROFILES) if (p.equalsIgnoreCase(n)) n = n + " (meu)";
+        return n.isEmpty() ? "Meu perfil" : n;
+    }
+
+    /** Lista do "Perfil": os três prontos e depois os salvos na pasta perfis (arquivos .txt com o código). */
+    private void atualizarPerfis() {
+        List<String> nomes = new ArrayList<String>(Arrays.asList(PROFILES));
+        File[] arquivos = pastaPerfis().listFiles();
+        if (arquivos != null) {
+            Arrays.sort(arquivos);
+            for (File f : arquivos) {
+                String n = f.getName();
+                if (f.isFile() && n.toLowerCase().endsWith(".txt")) nomes.add(n.substring(0, n.length() - 4));
+            }
+        }
+        profile.setOptions(nomes.toArray(new String[0]));
+    }
+
+    /** O perfil atual (opções do Motor e os gráficos do jogo) como texto JSON. */
+    public JsonObject perfilAtual(String nome) {
+        JsonObject motor = new JsonObject();
+        for (Setting st : settings()) {
+            if (FORA_DO_PERFIL.contains(st.key()) || st instanceof ActionSetting) continue;
+            JsonElement v = st.save();
+            if (v != null) motor.add(st.key(), v);
+        }
+        GameSettings gs = mc.gameSettings;
+        JsonObject jogo = new JsonObject();
+        jogo.addProperty("graficos_bonitos", gs.fancyGraphics);
+        jogo.addProperty("nuvens", gs.clouds);
+        jogo.addProperty("luz_suave", gs.ambientOcclusion);
+        jogo.addProperty("sombras", gs.entityShadows);
+        jogo.addProperty("distancia", gs.renderDistanceChunks);
+        jogo.addProperty("mipmap", gs.mipmapLevels);
+        jogo.addProperty("fps_max", gs.limitFramerate);
+        jogo.addProperty("vsync", gs.enableVsync);
+        jogo.addProperty("particulas", gs.particleSetting);
+        JsonObject o = new JsonObject();
+        o.addProperty("v", 1);
+        o.addProperty("nome", nome);
+        o.add("motor", motor);
+        o.add("jogo", jogo);
+        return o;
+    }
+
+    /** Perfil virando código: "PULSAR-PERFIL:" + JSON compactado em base64 (cabe numa mensagem do Discord). */
+    public static String codificar(JsonObject perfil) {
+        try {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            GZIPOutputStream gz = new GZIPOutputStream(bytes);
+            gz.write(perfil.toString().getBytes(StandardCharsets.UTF_8));
+            gz.close();
+            return CODIGO + java.util.Base64.getEncoder().encodeToString(bytes.toByteArray());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /** Lê um código (aceita espaços, quebras de linha e texto em volta, como numa mensagem colada). null se não for um perfil. */
+    public static JsonObject decodificar(String texto) {
+        if (texto == null) return null;
+        int i = texto.indexOf(CODIGO);
+        if (i < 0) return null;
+        String resto = texto.substring(i + CODIGO.length()).replaceAll("\\s", "");
+        int fim = 0;
+        while (fim < resto.length() && "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".indexOf(resto.charAt(fim)) >= 0) fim++;
+        try {
+            byte[] dados = java.util.Base64.getDecoder().decode(resto.substring(0, fim));
+            GZIPInputStream gz = new GZIPInputStream(new ByteArrayInputStream(dados));
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buf = new byte[4096];
+            int n;
+            while ((n = gz.read(buf)) > 0) {
+                out.write(buf, 0, n);
+                if (out.size() > 1 << 20) return null;
+            }
+            JsonElement el = new JsonParser().parse(new String(out.toByteArray(), StandardCharsets.UTF_8));
+            return el.isJsonObject() && el.getAsJsonObject().has("motor") ? el.getAsJsonObject() : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** Aplica um perfil lido de um código ou arquivo. */
+    void aplicarPerfil(JsonObject o) {
+        JsonObject motor = o.getAsJsonObject("motor");
+        for (Setting st : settings()) {
+            if (FORA_DO_PERFIL.contains(st.key()) || st instanceof ActionSetting || !motor.has(st.key())) continue;
+            try {
+                st.load(motor.get(st.key()));
+            } catch (Exception ignored) {
+            }
+        }
+        GameSettings gs = mc.gameSettings;
+        JsonObject jogo = o.has("jogo") && o.get("jogo").isJsonObject() ? o.getAsJsonObject("jogo") : new JsonObject();
+        try {
+            if (jogo.has("graficos_bonitos")) gs.fancyGraphics = jogo.get("graficos_bonitos").getAsBoolean();
+            if (jogo.has("nuvens")) gs.clouds = clamp(jogo.get("nuvens").getAsInt(), 0, 2);
+            if (jogo.has("luz_suave")) gs.ambientOcclusion = clamp(jogo.get("luz_suave").getAsInt(), 0, 2);
+            if (jogo.has("sombras")) gs.entityShadows = jogo.get("sombras").getAsBoolean();
+            if (jogo.has("distancia")) gs.renderDistanceChunks = clamp(jogo.get("distancia").getAsInt(), 2, 32);
+            if (jogo.has("fps_max")) gs.limitFramerate = clamp(jogo.get("fps_max").getAsInt(), 10, 260);
+            if (jogo.has("vsync")) {
+                gs.enableVsync = jogo.get("vsync").getAsBoolean();
+                Display.setVSyncEnabled(gs.enableVsync);
+            }
+            if (jogo.has("mipmap")) {
+                int m = clamp(jogo.get("mipmap").getAsInt(), 0, 4);
+                if (gs.mipmapLevels != m) gs.setOptionFloatValue(GameSettings.Options.MIPMAP_LEVELS, m);
+            }
+        } catch (Exception e) {
+            System.err.println("[Pulsar] Motor: parte dos gráficos do perfil não foi lida: " + e);
+        }
+        appliedParticles = -1;
+        hidePlants = isEnabled() && !plants.get();
+        appliedPlants = hidePlants;
+        updateSky();
+        if (mc.renderGlobal != null && mc.theWorld != null) mc.renderGlobal.loadRenderers();
+        gs.saveOptions();
+        PulsarClient.get().save();
+    }
+
+    private static int clamp(int v, int min, int max) {
+        return Math.max(min, Math.min(max, v));
+    }
+
+    private void aplicarEscolhido() {
+        int i = profile.index();
+        if (i < PROFILES.length) {
+            applyProfile(i);
+            avisar("Perfil " + profile.get() + " aplicado.");
+            return;
+        }
+        File f = new File(pastaPerfis(), profile.get() + ".txt");
+        JsonObject o = null;
+        try {
+            o = decodificar(new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8));
+        } catch (Exception ignored) {
+        }
+        if (o == null) {
+            avisar("Não deu para ler o perfil " + profile.get() + ".");
+            return;
+        }
+        aplicarPerfil(o);
+        avisar("Perfil " + profile.get() + " aplicado.");
+    }
+
+    /** Salva num arquivo; devolve o nome usado. */
+    private String guardar(String nome, JsonObject perfil) {
+        String n = nomeLimpo(nome);
+        perfil.addProperty("nome", n);
+        try {
+            File pasta = pastaPerfis();
+            pasta.mkdirs();
+            Files.write(new File(pasta, n + ".txt").toPath(), codificar(perfil).getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            avisar("Não deu para salvar o perfil: " + e.getMessage());
+            return null;
+        }
+        atualizarPerfis();
+        for (int i = 0; i < profile.options().length; i++) if (profile.options()[i].equals(n)) profile.set(i);
+        PulsarClient.get().save();
+        return n;
+    }
+
+    private void salvarMeuPerfil() {
+        String n = guardar(nomePerfil.get(), perfilAtual(nomePerfil.get()));
+        if (n != null) avisar("Perfil " + n + " salvo. Ele aparece na lista \"Perfil\".");
+    }
+
+    private void copiarCodigo() {
+        String nome = profile.index() >= PROFILES.length ? profile.get() : nomeLimpo(nomePerfil.get());
+        GuiScreen.setClipboardString(codificar(perfilAtual(nome)));
+        avisar("Código copiado! Cole no Discord para a pessoa, e ela usa \"Colar perfil recebido\".");
+    }
+
+    private void colarCodigo() {
+        JsonObject o = decodificar(GuiScreen.getClipboardString());
+        if (o == null) {
+            avisar("Copie primeiro o código do perfil (começa com " + CODIGO + ").");
+            return;
+        }
+        String nome = o.has("nome") ? o.get("nome").getAsString() : "Perfil recebido";
+        aplicarPerfil(o);
+        String n = guardar(nome, o);
+        avisar("Perfil " + (n != null ? n : nome) + " aplicado e salvo na lista.");
+    }
+
+    private void apagarEscolhido() {
+        if (profile.index() < PROFILES.length) return;
+        String n = profile.get();
+        if (new File(pastaPerfis(), n + ".txt").delete()) avisar("Perfil " + n + " apagado.");
+        atualizarPerfis();
         PulsarClient.get().save();
     }
 }

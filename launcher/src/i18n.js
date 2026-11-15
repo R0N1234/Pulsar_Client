@@ -446,7 +446,7 @@
     "Bloqueio e swing no estilo da 1.7": ["1.7-style blocking and swing", "Блок и взмах в стиле 1.7", "Blocken und Schwingen im Stil von 1.7"],
     "Mira com formato, cor, tamanho e contorno": ["Crosshair with shape, color, size and outline", "Прицел с формой, цветом, размером и контуром", "Fadenkreuz mit Form, Farbe, Größe und Umriss"],
     "Muda a cor do inimigo quando ele leva dano": ["Changes the enemy's color when they take damage", "Меняет цвет противника, когда он получает урон", "Ändert die Farbe des Gegners, wenn er Schaden nimmt"],
-    "Mostra a hitbox de jogadores e projéteis": ["Shows the hitbox of players and projectiles", "Показывает хитбоксы игроков и снарядов", "Zeigt die Hitbox von Spielern und Geschossen"],
+    "Caixa de acerto em volta dos jogadores": ["Hit box around players", "Хитбокс вокруг игроков", "Trefferbox um Spieler"],
     "Durabilidade da armadura e do item na mão": ["Durability of your armor and held item", "Прочность брони и предмета в руке", "Haltbarkeit der Rüstung und des Items in der Hand"],
     "Poções ativas com tempo restante": ["Active potions with time left", "Активные зелья и оставшееся время", "Aktive Tränke mit Restzeit"],
     "Protege a espada e outros itens contra drop, trava slots (tecla padrão L) e centraliza o inventário": [

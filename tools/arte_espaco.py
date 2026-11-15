@@ -333,10 +333,8 @@ def main():
     os.makedirs(MOD_TEX, exist_ok=True)
     os.makedirs(SPLASH, exist_ok=True)
     menu_background().save(os.path.join(MOD_TEX, "fundo.png"), optimize=True)
-    emblem(1024).resize((256, 256), Image.LANCZOS).save(os.path.join(MOD_TEX, "logo.png"), optimize=True)
     splash_background().save(os.path.join(SPLASH, "fundo.png"), optimize=True)
-    emblem(1024, anel_gradiente=True).resize((512, 512), Image.LANCZOS).save(os.path.join(SPLASH, "logo.png"), optimize=True)
-    app_icons()
+    # Os logos e ícones (launcher, instalador, carregamento e jogo) saem de tools/logo_icone.py.
     print("ok")
 
 

@@ -1,0 +1,65 @@
+/* Listas de escolha do Pulsar (seletor.js): vidro escuro, borda ciano e a opção escolhida em destaque. */
+.seletor-nativo { display: none !important; }
+.seletor { position: relative; display: inline-flex; min-width: 0; }
+.seletor-botao {
+  display: inline-flex; align-items: center; justify-content: flex-end; gap: 10px; width: 100%; min-width: 0;
+  padding: 0; border: 0; color: #f5f7ff; background: transparent; font: inherit; font-weight: 650; cursor: pointer;
+}
+.seletor-texto { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seletor-botao svg { flex: none; width: 16px; height: 16px; color: #aab6d8; transition: transform .2s ease, color .2s ease; }
+.seletor.aberto .seletor-botao svg { transform: rotate(180deg); color: #4de8ff; }
+.seletor-botao:hover svg { color: #4de8ff; }
+.seletor-botao:disabled { cursor: default; opacity: .55; }
+.seletor-botao:focus-visible { outline: 2px solid #4de8ff; outline-offset: 4px; border-radius: 6px; }
+
+.seletor-lista {
+  position: fixed; z-index: 9999; display: flex; flex-direction: column; gap: 3px; max-height: min(320px, 60vh);
+  padding: 6px; overflow: auto; border: 1px solid rgba(77, 232, 255, .35); border-radius: 14px;
+  background: linear-gradient(180deg, rgba(14, 22, 52, .98), rgba(7, 11, 30, .98));
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .55), 0 0 0 1px rgba(152, 105, 255, .12), 0 0 28px rgba(77, 232, 255, .12);
+  animation: seletorAbre .16s cubic-bezier(.22, 1, .36, 1);
+  -webkit-app-region: no-drag;
+}
+.seletor-lista[hidden] { display: none; }
+.seletor-lista.acima { animation-name: seletorAbreCima; }
+.seletor-lista::-webkit-scrollbar { width: 8px; }
+.seletor-lista::-webkit-scrollbar-thumb { border-radius: 8px; background: rgba(152, 105, 255, .45); }
+.seletor-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 38px;
+  padding: 8px 12px; border: 1px solid transparent; border-radius: 10px; color: #d6def7; background: transparent;
+  font: inherit; font-size: 13px; font-weight: 600; text-align: left; cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.seletor-item svg { flex: none; width: 15px; height: 15px; color: #4de8ff; opacity: 0; }
+.seletor-item:hover, .seletor-item:focus-visible {
+  outline: 0; color: #fff; border-color: rgba(77, 232, 255, .22);
+  background: linear-gradient(90deg, rgba(77, 232, 255, .12), rgba(152, 105, 255, .12));
+}
+.seletor-item[aria-selected="true"] {
+  color: #4de8ff; border-color: rgba(77, 232, 255, .35);
+  background: linear-gradient(90deg, rgba(77, 232, 255, .16), rgba(152, 105, 255, .16));
+}
+.seletor-item[aria-selected="true"] svg { opacity: 1; }
+.seletor-item:disabled { opacity: .45; cursor: default; }
+@keyframes seletorAbre { from { opacity: 0; transform: translateY(-6px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes seletorAbreCima { from { opacity: 0; transform: translateY(6px) scale(.98); } to { opacity: 1; transform: none; } }
+body.reduced-effects .seletor-lista { animation: none; }
+
+/* Onde a lista mora */
+.mode-select .seletor, .mode-row .seletor { flex: 1; justify-content: flex-end; }
+.mode-select .seletor { margin-left: 18px; }
+.mode-select .seletor-botao { height: 50px; font-size: 12px; }
+.mode-select > svg { display: none; }
+.mode-row .seletor-botao { font-size: 15px; }
+.setting-row .seletor, .settings .seletor { min-width: 190px; }
+.setting-row .seletor-botao, .settings .seletor-botao {
+  justify-content: space-between; height: 36px; padding: 0 11px; border: 1px solid rgba(141, 177, 255, .17); border-radius: 10px;
+  color: #aab6d8; background: #0a1128; font-size: 12px;
+}
+.setting-row .seletor-botao:hover, .settings .seletor-botao:hover, .setting-row .seletor.aberto .seletor-botao, .settings .seletor.aberto .seletor-botao {
+  border-color: rgba(77, 232, 255, .4); color: #f5f7ff;
+}
+@media (max-width: 880px) {
+  .mode-select .seletor { width: 100%; margin-left: 0; }
+  .mode-select .seletor-botao { height: 28px; justify-content: flex-start; }
+}

@@ -325,7 +325,7 @@ public class GuiPulsarPanel extends GuiScreen {
     private String headerNote() {
         if (listening == open.toggleKey()) return "Aperte a tecla para ligar e desligar. Esc cancela, Backspace deixa sem tecla";
         String other = conflict(open.toggleKey());
-        return other == null ? null : "A tecla de ligar e desligar já é usada em: " + other;
+        return other == null ? open.aviso() : "A tecla de ligar e desligar já é usada em: " + other;
     }
 
     /** Posição de cada opção: {x, y, largura} relativos ao começo da lista. Pequenas em duas colunas, sliders inteiros. */
