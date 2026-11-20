@@ -233,7 +233,7 @@ public class SelfTest {
                 PulsarClient.get().pressToggleKey(Keyboard.KEY_G);
                 sensibilidade = mc.gameSettings.mouseSensitivity;
                 cinemaAntes = mc.gameSettings.smoothCamera;
-                KeyBinding.setKeyBindState(telescopio().key.getKeyCode(), true);
+                telescopio().segurarParaTeste(true);
                 break;
             case 15:
                 // Igual ao OptiFine: com zoom, a câmera cinematográfica liga para a mira ficar suave.
@@ -241,7 +241,7 @@ public class SelfTest {
                 log(lenta ? "zoom" : "zoom-sem-mira-lenta");
                 break;
             case 16:
-                KeyBinding.setKeyBindState(telescopio().key.getKeyCode(), false);
+                telescopio().segurarParaTeste(false);
                 break;
             case 17:
                 boolean voltou = !telescopio().zoomAtivo() && mc.gameSettings.smoothCamera == cinemaAntes && mc.gameSettings.mouseSensitivity == sensibilidade;
