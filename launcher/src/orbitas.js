@@ -7,6 +7,16 @@
 
   const NOVIDADES = [
     {
+      id: "1.0.2",
+      nome: "1.0.2",
+      titulo: "Versão 1.0.2",
+      itens: [
+        "Câmera: depois de usar o zoom, a câmera não fica mais lenta. O atalho \"Alternar Câmera Cinematográfica\" saiu de Controles, para ninguém ligar sem querer.",
+        "Telescópio vem desligado em instalações novas, deixando a tecla C com o zoom do OptiFine. Quem quiser liga no painel.",
+        "Quando o Minecraft não abre, o Console do Pulsar mostra o motivo, para ficar fácil de resolver ou de mandar para o suporte.",
+      ],
+    },
+    {
       id: "1.0.1",
       nome: "1.0.1",
       titulo: "Versão 1.0.1",

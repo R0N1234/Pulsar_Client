@@ -87,7 +87,7 @@ import java.util.Set;
 @Mod(modid = PulsarClient.MODID, name = "Pulsar Client", version = PulsarClient.VERSION, clientSideOnly = true, acceptedMinecraftVersions = "[1.8.9]")
 public class PulsarClient {
     public static final String MODID = "pulsar";
-    public static final String VERSION = "1.0.1";
+    public static final String VERSION = "1.0.2";
     /** Mods que chegaram nas últimas versões: o painel mostra "NOVO" neles até a pessoa mexer. */
     public static final java.util.Set<String> NOVOS = new java.util.HashSet<String>(java.util.Arrays.asList("focar_jogador", "sequencias", "gravacao"));
     private static PulsarClient instance;
