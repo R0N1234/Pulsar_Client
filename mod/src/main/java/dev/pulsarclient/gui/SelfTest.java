@@ -224,6 +224,8 @@ public class SelfTest {
             case 13:
                 // A tecla de ligar e desligar escolhida no painel: desliga o Telescópio e o aviso aparece na tela.
                 mc.displayGuiScreen(null);
+                // O Telescópio vem desligado numa instalação nova: liga antes, para a tecla desligar e ligar de novo.
+                telescopio().setEnabled(true);
                 PulsarClient.get().mod("telescopio").toggleKey().set(Keyboard.KEY_G);
                 PulsarClient.get().pressToggleKey(Keyboard.KEY_G);
                 log("tecla");

@@ -37,7 +37,7 @@ public class Telescopio extends PulsarMod {
     private int teclaConferida = -1;
 
     public Telescopio() {
-        super("telescopio", "Telescópio", "Zoom igual ao do OptiFine, segurando uma tecla", Category.VISUAL, true);
+        super("telescopio", "Telescópio", "Zoom igual ao do OptiFine, segurando uma tecla", Category.VISUAL, false);
     }
 
     /** O zoom está ativo agora. Usado pelo teste automático. */
