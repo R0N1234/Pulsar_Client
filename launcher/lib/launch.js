@@ -9,6 +9,7 @@ const { Client } = require("minecraft-launcher-core");
 const { ensureJava } = require("./java");
 const { prepareInstance } = require("./instance");
 const mcversoes = require("./mcversoes");
+const { baixarArquivo, baixarBuffer, baixarJson } = require("./baixar");
 
 const MC_VERSION = "1.8.9";
 const ASSET_INDEX = "1.8";
@@ -44,14 +45,7 @@ const LOADERS = {
   forge_optifine: { forge: true, optifine: true },
 };
 
-async function download(url, dest) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Não consegui baixar ${url} (HTTP ${res.status})`);
-  fs.mkdirSync(path.dirname(dest), { recursive: true });
-  const tmp = dest + ".part";
-  fs.writeFileSync(tmp, Buffer.from(await res.arrayBuffer()));
-  fs.renameSync(tmp, dest);
-}
+const download = (url, dest) => baixarArquivo(url, dest);
 
 async function ensureForge(root) {
   const jar = path.join(root, "pulsar", "forge", `forge-${FORGE_VERSION}-universal.jar`);
@@ -64,9 +58,7 @@ async function ensureOpenAL(root) {
   const dir = path.join(root, "pulsar", "openal", OPENAL_VERSAO);
   const dll = path.join(dir, "OpenAL64.dll");
   if (fs.existsSync(dll) && fs.statSync(dll).size > 100000) return dir;
-  const res = await fetch(OPENAL_URL);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const jar = Buffer.from(await res.arrayBuffer());
+  const jar = await baixarBuffer(OPENAL_URL, { semDadosMs: 20000 });
   const sha1 = require("crypto").createHash("sha1").update(jar).digest("hex");
   if (sha1 !== OPENAL_SHA1) throw new Error("arquivo diferente do esperado");
   const entry = new AdmZip(jar).getEntry("windows/x64/org/lwjgl/openal/OpenAL.dll");
@@ -81,9 +73,9 @@ async function ensureOpenAL(root) {
 async function ensureVanillaJar(root) {
   const jar = path.join(root, "versions", MC_VERSION, `${MC_VERSION}.jar`);
   if (fs.existsSync(jar)) return jar;
-  const manifest = await (await fetch(MANIFEST_URL)).json();
+  const manifest = await baixarJson(MANIFEST_URL);
   const entry = manifest.versions.find((v) => v.id === MC_VERSION);
-  const versionJson = await (await fetch(entry.url)).json();
+  const versionJson = await baixarJson(entry.url);
   await download(versionJson.downloads.client.url, jar);
   return jar;
 }
@@ -195,7 +187,7 @@ async function ensureOptifineVersion(root, optifinePath, java, onLog) {
 async function launchVanilla({ versao, config, authorization, runtimeDir, onStatus, onLog, onClose, extraJvmArgs }) {
   const root = config.gameDir;
   const gameDir = prepareInstance(root, versao.id);
-  const java = await ensureJava({ javaPath: config.javaPath, runtimeDir, onStatus, major: versao.java });
+  const java = await ensureJava({ javaPath: config.javaPath, runtimeDir, onStatus, onLog, major: versao.java });
   onLog(`[Pulsar] Minecraft ${versao.id} puro (sem os mods do Pulsar), Java ${versao.java}`);
   const options = {
     authorization,
@@ -220,7 +212,8 @@ async function launch({ config, authorization, modSourceDir, runtimeDir, onStatu
 
   if (optifine) checkOptifineFile(config.optifinePath);
 
-  const java = await ensureJava({ javaPath: config.javaPath, runtimeDir, onStatus });
+  onLog(`[Pulsar] Minecraft ${MC_VERSION}, modo ${loader}, pasta ${root}, memória ${config.memoryMaxGb} GB`);
+  const java = await ensureJava({ javaPath: config.javaPath, runtimeDir, onStatus, onLog });
 
   // O jogo procura o OpenAL na ordem das pastas: primeiro o novo, depois o original (nativos do 1.8.9).
   // O -Djava.library.path daqui vem depois do que o launcher-core põe, e o último é o que vale.
@@ -276,8 +269,12 @@ async function runClient(options, { onStatus, onLog, onClose }) {
 
   onStatus({ step: "start", text: "Verificando os arquivos do Minecraft" });
   const proc = await client.launch(options);
-  if (!proc) throw new Error("O Minecraft não abriu. Veja o registro do jogo para o motivo.");
-  proc.on("close", (code) => onClose(code));
+  if (!proc) throw new Error("O Minecraft não abriu. Veja as linhas [MCLC] no console para o motivo.");
+  proc.on("error", (e) => onLog(`[Pulsar] ERRO: o Java não abriu o jogo (${e.code || e.message})`));
+  proc.on("close", (code) => {
+    if (code !== 0) onLog(`[Pulsar] O Minecraft fechou com o código ${code}. As linhas acima mostram o motivo.`);
+    onClose(code);
+  });
   onStatus({ step: "running", text: "Jogando" });
   return proc;
 }
