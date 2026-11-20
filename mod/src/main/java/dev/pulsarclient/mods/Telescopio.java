@@ -6,6 +6,7 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
@@ -13,26 +14,19 @@ import org.lwjgl.opengl.Display;
  * Telescópio: o zoom do OptiFine. Segurando a tecla (C no começo) a visão aproxima 4 vezes na hora,
  * com a câmera cinematográfica ligada para a mira ficar suave; soltando, tudo volta como estava.
  *
- * A câmera cinematográfica é uma opção só do jogo (a do F8), e o zoom do OptiFine também mexe nela.
- * Antes o Telescópio guardava o valor no instante em que o zoom começava: se o zoom do OptiFine tinha
- * ligado a câmera um pouco antes (ele olha a tecla a cada quadro, o Minecraft só a cada tick), o valor
- * guardado já era "ligada" e, ao soltar, a câmera ficava lenta para sempre. Agora o Telescópio lembra
- * o que o jogador escolheu enquanto nenhum zoom está ativo e, ao soltar, volta para isso e confere por
- * mais um instante que nada ligou a câmera de novo.
+ * A câmera cinematográfica (a do F8) só fica ligada enquanto um zoom está ativo, o nosso ou o do OptiFine.
+ * Fora do zoom ela é sempre desligada: antes, com o zoom do OptiFine na mesma tecla, ela podia ficar ligada
+ * depois de soltar e a câmera continuava lenta. O atalho "Alternar Câmera Cinematográfica" também sai de
+ * Opções > Controles, para ninguém ligar a câmera lenta sem querer.
  */
 public class Telescopio extends PulsarMod {
     private static final float APROXIMA = 4f;
-    /** Depois de soltar, por este tempo a câmera é conferida (um outro zoom pode devolver um valor velho). */
-    private static final long CONFERE_MS = 500;
 
     public final KeyBinding key = new KeyBinding("Telescópio (zoom)", Keyboard.KEY_C, "Pulsar Client");
     private final TeclaDoJogo zoomKey = add(new TeclaDoJogo("tecla_zoom", "Tecla do zoom (segurar)", key));
 
     private boolean zooming;
-    /** A câmera cinematográfica que o jogador escolheu (F8), vista com nenhum zoom ativo. */
-    private boolean cinemaDoJogador;
-    private boolean cinemaConhecida;
-    private long conferirAte;
+    private boolean atalhoEscondido;
     private boolean segurandoTeste;
     private int teclaConferida = -1;
 
@@ -53,18 +47,13 @@ public class Telescopio extends PulsarMod {
     @SubscribeEvent
     public void onRender(TickEvent.RenderTickEvent event) {
         if (event.phase != TickEvent.Phase.START || mc.gameSettings == null) return;
+        esconderAtalhoDaCamera();
         tirarZoomDoOptifine(false);
         boolean agora = isEnabled() && mc.currentScreen == null && teclaSegurada();
-        if (agora && !zooming) {
-            tirarZoomDoOptifine(true);
-            if (!cinemaConhecida) lembrarCinema();
-            mc.gameSettings.smoothCamera = true;
-        } else if (!agora && zooming) {
-            voltarCinema();
-        } else if (!zooming) {
-            cuidarDepoisDoZoom();
-        }
+        if (agora && !zooming) tirarZoomDoOptifine(true);
         zooming = agora;
+        if (zooming) mc.gameSettings.smoothCamera = true;
+        else if (mc.gameSettings.smoothCamera && !zoomDoOptifineSegurado()) mc.gameSettings.smoothCamera = false;
     }
 
     /**
@@ -77,40 +66,9 @@ public class Telescopio extends PulsarMod {
         return key.getKeyCode() != 0 && Display.isActive() && GameSettings.isKeyDown(key);
     }
 
-    /** Fora do zoom: guarda a escolha do jogador e, logo depois de soltar, desfaz se algo religou a câmera. */
-    private void cuidarDepoisDoZoom() {
-        if (zoomDoOptifineSegurado()) return;
-        boolean agora = mc.gameSettings.smoothCamera;
-        if (System.currentTimeMillis() < conferirAte && agora != cinemaDoJogador) {
-            if (teclaDoF8Segurada()) {
-                lembrarCinema();
-            } else {
-                mc.gameSettings.smoothCamera = cinemaDoJogador;
-                System.out.println("[Pulsar] Telescópio: câmera cinematográfica religada depois do zoom, voltando ao normal");
-            }
-            return;
-        }
-        lembrarCinema();
-    }
-
-    private void lembrarCinema() {
-        cinemaDoJogador = mc.gameSettings.smoothCamera;
-        cinemaConhecida = true;
-    }
-
-    private void voltarCinema() {
-        mc.gameSettings.smoothCamera = cinemaConhecida && cinemaDoJogador;
-        conferirAte = System.currentTimeMillis() + CONFERE_MS;
-    }
-
-    private boolean teclaDoF8Segurada() {
-        KeyBinding f8 = mc.gameSettings.keyBindSmoothCamera;
-        return f8 != null && f8.getKeyCode() != 0 && GameSettings.isKeyDown(f8);
-    }
-
     @Override
     protected void onDisable() {
-        if (zooming) voltarCinema();
+        if (zooming) mc.gameSettings.smoothCamera = false;
         zooming = false;
     }
 
@@ -122,6 +80,17 @@ public class Telescopio extends PulsarMod {
     @SubscribeEvent
     public void onFov(EntityViewRenderEvent.FOVModifier event) {
         if (zooming) event.setFOV(event.getFOV() / APROXIMA);
+    }
+
+    /** Tira "Alternar Câmera Cinematográfica" de Opções > Controles e da tecla (o jogo continua funcionando sem ele). */
+    private void esconderAtalhoDaCamera() {
+        if (atalhoEscondido || mc.gameSettings.keyBindings == null) return;
+        atalhoEscondido = true;
+        KeyBinding cinema = mc.gameSettings.keyBindSmoothCamera;
+        if (cinema == null) return;
+        cinema.setKeyCode(0);
+        mc.gameSettings.keyBindings = ArrayUtils.removeElement(mc.gameSettings.keyBindings, cinema);
+        KeyBinding.resetKeyBindingArrayAndHash();
     }
 
     /** O zoom do OptiFine, se ele estiver no jogo e ainda tiver tecla. */
@@ -145,6 +114,11 @@ public class Telescopio extends PulsarMod {
      */
     private void tirarZoomDoOptifine(boolean sempre) {
         int nossa = key.getKeyCode();
+        // Com o Telescópio desligado, a tecla C fica com o zoom do OptiFine.
+        if (!isEnabled()) {
+            teclaConferida = -1;
+            return;
+        }
         if (!sempre && nossa == teclaConferida) return;
         teclaConferida = nossa;
         if (nossa == 0) return;
