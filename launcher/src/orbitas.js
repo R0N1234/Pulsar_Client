@@ -11,6 +11,7 @@
       nome: "1.0.2",
       titulo: "Versão 1.0.2",
       itens: [
+        "Perfil completo: o código do Motor Pulsar agora leva tudo, mods ligados, posição da HUD, opções de cada mod, FOV, sensibilidade e as teclas do jogo. Quem cola fica com o client igual ao seu (contas e senhas nunca vão junto).",
         "Câmera: depois de usar o zoom, a câmera não fica mais lenta. O atalho \"Alternar Câmera Cinematográfica\" saiu de Controles, para ninguém ligar sem querer.",
         "Telescópio vem desligado em instalações novas, deixando a tecla C com o zoom do OptiFine. Quem quiser liga no painel.",
         "Quando o Minecraft não abre, o Console do Pulsar mostra o motivo, para ficar fácil de resolver ou de mandar para o suporte.",
