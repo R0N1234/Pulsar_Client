@@ -4,6 +4,8 @@
 const fs = require("fs");
 const path = require("path");
 const { execFile } = require("child_process");
+const AdmZip = require("adm-zip");
+const { baixarBuffer, progressoNoLog } = require("./baixar");
 
 function adoptiumUrl(major) {
   const os = { win32: "windows", darwin: "mac", linux: "linux" }[process.platform];
@@ -31,17 +33,49 @@ function findJava(dir) {
 }
 
 function extract(archive, dest) {
-  // O tar do Windows 10+ também abre .zip.
+  fs.mkdirSync(dest, { recursive: true });
+  // No Windows o .zip é aberto aqui mesmo: o tar.exe não existe em todo Windows
+  // e se perde com pasta de usuário com acento ou caractere especial.
+  if (archive.endsWith(".zip")) {
+    new AdmZip(archive).extractAllTo(dest, true);
+    return Promise.resolve();
+  }
   return new Promise((resolve, reject) => {
-    fs.mkdirSync(dest, { recursive: true });
     execFile("tar", ["-xf", archive, "-C", dest], (err) => (err ? reject(err) : resolve()));
   });
 }
 
-async function ensureJava({ javaPath, runtimeDir, onStatus, major = 8 }) {
+/** Roda "java -version" e devolve a primeira linha. Falha com o erro real se o Java não abrir. */
+function versaoJava(java) {
+  return new Promise((resolve, reject) => {
+    execFile(java, ["-version"], { timeout: 30000, windowsHide: true }, (err, stdout, stderr) => {
+      const saida = `${stderr || ""}${stdout || ""}`.trim();
+      if (err) {
+        const motivo = err.killed ? "não respondeu em 30s" : err.code || err.message;
+        reject(new Error(`O Java em "${java}" não abriu (${motivo}).${saida ? " Saída: " + saida.split("\n")[0] : ""}`));
+      } else resolve(saida.split("\n")[0] || "versão desconhecida");
+    });
+  });
+}
+
+async function ensureJava({ javaPath, runtimeDir, onStatus, onLog = () => {}, major = 8 }) {
+  const java = await acharOuBaixarJava({ javaPath, runtimeDir, onStatus, onLog, major });
+  onLog(`[Pulsar] Java: ${java}`);
+  try {
+    onLog(`[Pulsar] Java: ${await versaoJava(java)}`);
+  } catch (e) {
+    // Java baixado pelo Pulsar e estragado (download cortado, antivírus): apaga para baixar de novo na próxima.
+    if (!(javaPath && major === 8)) fs.rmSync(path.join(runtimeDir, `java${major}`), { recursive: true, force: true });
+    throw new Error(e.message + (javaPath && major === 8 ? " Confira o Java escolhido em Ajustes ou deixe o campo vazio." : " Tente jogar de novo para o Pulsar baixar o Java outra vez."));
+  }
+  return java;
+}
+
+async function acharOuBaixarJava({ javaPath, runtimeDir, onStatus, onLog, major }) {
   // O Java escolhido em Ajustes é um Java 8 (o campo pede isso); a 1.21 sempre usa o Java 21 do Pulsar.
   if (javaPath && major === 8) {
     if (!fs.existsSync(javaPath)) throw new Error(`O Java escolhido em Ajustes não existe: ${javaPath}`);
+    onLog("[Pulsar] Usando o Java escolhido em Ajustes");
     return javaPath;
   }
   const nome = `Java ${major}`;
@@ -50,16 +84,28 @@ async function ensureJava({ javaPath, runtimeDir, onStatus, major = 8 }) {
   if (found) return found;
 
   onStatus({ step: "java", text: `Baixando o ${nome} (só na primeira vez)` });
-  const res = await fetch(adoptiumUrl(major));
-  if (!res.ok) throw new Error(`Não consegui baixar o ${nome} (HTTP ${res.status}).` + (major === 8 ? " Escolha um Java 8 em Ajustes." : ""));
+  onLog(`[Pulsar] ${nome} não encontrado em ${dir}, baixando (só na primeira vez)`);
+  let dados;
+  try {
+    dados = await baixarBuffer(adoptiumUrl(major), { onProgresso: progressoNoLog(nome, onLog) });
+  } catch (e) {
+    throw new Error(`Não consegui baixar o ${nome}: ${e.message}` + (major === 8 ? " Ou escolha um Java 8 em Ajustes." : ""));
+  }
   const archive = path.join(runtimeDir, process.platform === "win32" ? `java${major}.zip` : `java${major}.tar.gz`);
   fs.mkdirSync(runtimeDir, { recursive: true });
-  fs.writeFileSync(archive, Buffer.from(await res.arrayBuffer()));
+  fs.writeFileSync(archive, dados);
 
   onStatus({ step: "java", text: `Instalando o ${nome}` });
+  onLog(`[Pulsar] Instalando o ${nome} em ${dir}`);
   fs.rmSync(dir, { recursive: true, force: true });
-  await extract(archive, dir);
-  fs.rmSync(archive, { force: true });
+  try {
+    await extract(archive, dir);
+  } catch (e) {
+    fs.rmSync(dir, { recursive: true, force: true });
+    throw new Error(`Não consegui instalar o ${nome} (${e.message}).`);
+  } finally {
+    fs.rmSync(archive, { force: true });
+  }
   const java = findJava(dir);
   if (!java) throw new Error(`O ${nome} foi baixado, mas não encontrei o executável.` + (major === 8 ? " Escolha um Java 8 em Ajustes." : ""));
   return java;
