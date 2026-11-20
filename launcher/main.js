@@ -221,11 +221,26 @@ function pushLog(text) {
   if (!flushTimer) flushTimer = setTimeout(flushLogs, 100);
 }
 
+// Cópia do console em arquivo (pasta do Pulsar/logs/ultima-abertura.log), para o jogador mandar quando algo der errado.
+function arquivoLog() {
+  return path.join(app.getPath("userData"), "logs", "ultima-abertura.log");
+}
+
+function gravarLog(linhas, novo = false) {
+  try {
+    fs.mkdirSync(path.dirname(arquivoLog()), { recursive: true });
+    const texto = linhas.map((l) => l + "\n").join("");
+    if (novo) fs.writeFileSync(arquivoLog(), texto);
+    else fs.appendFileSync(arquivoLog(), texto);
+  } catch {}
+}
+
 function flushLogs() {
   flushTimer = null;
   if (pendingLines.length === 0) return;
   const batch = pendingLines;
   pendingLines = [];
+  gravarLog(batch);
   send("game:log", batch);
   if (consoleWin && !consoleWin.isDestroyed()) consoleWin.webContents.send("console:lines", batch);
 }
@@ -253,6 +268,20 @@ function openConsole() {
   consoleWin.loadFile(path.join(__dirname, "src", "console.html"), { query: { idioma: idioma() } });
   consoleWin.on("closed", () => (consoleWin = null));
 }
+
+// Erro inesperado no launcher (por exemplo dentro da biblioteca que abre o jogo): vai para o console em vez de sumir.
+process.on("uncaughtException", (err) => {
+  console.error(err);
+  try {
+    pushLog(`[Pulsar] ERRO inesperado no launcher: ${err && err.stack ? err.stack : err}`);
+  } catch {}
+});
+process.on("unhandledRejection", (err) => {
+  console.error(err);
+  try {
+    pushLog(`[Pulsar] ERRO inesperado no launcher: ${err && err.stack ? err.stack : err}`);
+  } catch {}
+});
 
 app.whenReady().then(() => {
   config = new Config(app.getPath("userData"));
@@ -419,11 +448,14 @@ app.whenReady().then(() => {
   ipcMain.handle("game:launch", async () => {
     if (game || launching) throw new Error("O Minecraft já está aberto.");
     launching = true;
+    let ultimaEtapa = "";
     try {
       await accounts.fresh();
       const cfg = config.get();
       logLines.length = 0;
+      pendingLines = [];
       send("game:log-reset");
+      gravarLog([`Pulsar Client ${app.getVersion()} - ${new Date().toISOString()} - ${process.platform} ${process.arch}`], true);
       pushLog("──────── Abrindo o Minecraft ────────");
       if (cfg.openConsole) openConsole();
       bridge = await startBridge({
@@ -459,7 +491,11 @@ app.whenReady().then(() => {
         modSourceDir: versao.pasta || modSourceDir(),
         runtimeDir: path.join(app.getPath("userData"), "runtime"),
         extraJvmArgs: [`-Dpulsar.ponte=${bridge.port}`, `-Dpulsar.chave=${bridge.key}`],
-        onStatus: (s) => send("game:status", s),
+        onStatus: (s) => {
+          send("game:status", s);
+          // A etapa também vai para o console, para não parecer que travou (o progresso de download fica só na barra).
+          if (s.step !== "download" && s.text && s.text !== ultimaEtapa) pushLog(`[Pulsar] ${(ultimaEtapa = s.text)}`);
+        },
         onLog: pushLog,
         onClose: (code) => {
           game = null;
@@ -474,6 +510,11 @@ app.whenReady().then(() => {
       });
       return true;
     } catch (err) {
+      // O erro aparecia só na barra do launcher; agora vai também para o console e para o arquivo de log.
+      pushLog(`[Pulsar] ERRO: o Minecraft não abriu: ${err && err.message ? err.message : err}`);
+      if (err && err.stack) pushLog(err.stack);
+      pushLog(`[Pulsar] Registro salvo em ${arquivoLog()}`);
+      flushLogs();
       game = null;
       presenca.parar();
       musica.parar();
