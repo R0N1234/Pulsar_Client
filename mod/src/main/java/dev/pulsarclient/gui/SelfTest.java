@@ -224,6 +224,8 @@ public class SelfTest {
             case 13:
                 // A tecla de ligar e desligar escolhida no painel: desliga o Telescópio e o aviso aparece na tela.
                 mc.displayGuiScreen(null);
+                // O Telescópio vem desligado numa instalação nova: liga antes, para a tecla desligar e ligar de novo.
+                telescopio().setEnabled(true);
                 PulsarClient.get().mod("telescopio").toggleKey().set(Keyboard.KEY_G);
                 PulsarClient.get().pressToggleKey(Keyboard.KEY_G);
                 log("tecla");
@@ -233,7 +235,7 @@ public class SelfTest {
                 PulsarClient.get().pressToggleKey(Keyboard.KEY_G);
                 sensibilidade = mc.gameSettings.mouseSensitivity;
                 cinemaAntes = mc.gameSettings.smoothCamera;
-                KeyBinding.setKeyBindState(telescopio().key.getKeyCode(), true);
+                telescopio().segurarParaTeste(true);
                 break;
             case 15:
                 // Igual ao OptiFine: com zoom, a câmera cinematográfica liga para a mira ficar suave.
@@ -241,7 +243,7 @@ public class SelfTest {
                 log(lenta ? "zoom" : "zoom-sem-mira-lenta");
                 break;
             case 16:
-                KeyBinding.setKeyBindState(telescopio().key.getKeyCode(), false);
+                telescopio().segurarParaTeste(false);
                 break;
             case 17:
                 boolean voltou = !telescopio().zoomAtivo() && mc.gameSettings.smoothCamera == cinemaAntes && mc.gameSettings.mouseSensitivity == sensibilidade;
