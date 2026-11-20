@@ -1,0 +1,810 @@
+[status] Baixando o Java 8 (só na primeira vez)
+[Pulsar] Java 8 não encontrado em /home/runner/work/_temp/versoes/runtime/java8, baixando (só na primeira vez)
+[Pulsar] Baixando Java 8: 0% (0.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 10% (4.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 20% (8.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 30% (12.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 40% (16.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 50% (20.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 60% (24.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 70% (28.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 80% (32.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 90% (36.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 100% (39.9 de 39.9 MB)
+[status] Instalando o Java 8
+[Pulsar] Instalando o Java 8 em /home/runner/work/_temp/versoes/runtime/java8
+[Pulsar] Java: /home/runner/work/_temp/versoes/runtime/java8/jdk8u514-b01-jre/bin/java
+[Pulsar] Java: openjdk version "1.8.0_514"
+[Pulsar] Minecraft 1.7.10 puro (sem os mods do Pulsar), Java 8
+[status] Verificando os arquivos do Minecraft
+[MCLC]: MCLC version 3.18.2
+[MCLC]: Using Java version 1.8.0_514 64-bit
+[MCLC]: Cache directory created.
+[MCLC]: Cached version_manifest.json
+[MCLC]: Parsed version from version manifest
+[status] Baixando arquivos do sistema
+[MCLC]: Cached 1.7.10.json
+[status] Baixando arquivos do sistema
+[status] Baixando arquivos do sistema
+[MCLC]: Downloaded and extracted natives
+[status] Arquivos baixados
+[MCLC]: Set native path to /home/runner/work/_temp/versoes/mc/natives/1.7.10
+[MCLC]: Attempting to download Minecraft version jar
+[status] Baixando arquivos do Minecraft
+[MCLC]: Downloaded version jar and wrote version json
+[status] Arquivos baixados
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[status] Baixando bibliotecas
+[MCLC]: Collected class paths
+[status] Bibliotecas prontas
+[MCLC]: Using : to separate class paths
+[MCLC]: Attempting to download assets
+[status] Baixando arquivos do Minecraft
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[status] Baixando sons e texturas
+[MCLC]: Downloaded assets
+[status] Arquivos baixados
+[MCLC]: Set launch options
+[MCLC]: Launching with arguments -XX:-UseAdaptiveSizePolicy -XX:-OmitStackTraceInFastThrow -Dfml.ignorePatchDiscrepancies=true -Dfml.ignoreInvalidMinecraftCertificates=true -Djava.library.path=/home/runner/work/_temp/versoes/mc/natives/1.7.10 -Xmx2G -Xms1G -Xss1M -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=16M -Dfml.readTimeout=180 -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 -Dlog4j.configurationFile=log4j2_17-111.xml -cp /home/runner/work/_temp/versoes/mc/libraries/com/mojang/netty/1.8.8/netty-1.8.8.jar:/home/runner/work/_temp/versoes/mc/libraries/com/mojang/realms/1.3.5/realms-1.3.5.jar:/home/runner/work/_temp/versoes/mc/libraries/org/apache/commons/commons-compress/1.8.1/commons-compress-1.8.1.jar:/home/runner/work/_temp/versoes/mc/libraries/commons-logging/commons-logging/1.1.3/commons-logging-1.1.3.jar:/home/runner/work/_temp/versoes/mc/libraries/org/apache/httpcomponents/httpclient/4.3.3/httpclient-4.3.3.jar:/home/runner/work/_temp/versoes/mc/libraries/org/apache/httpcomponents/httpcore/4.3.2/httpcore-4.3.2.jar:/home/runner/work/_temp/versoes/mc/libraries/net/sf/trove4j/trove4j/3.0.3/trove4j-3.0.3.jar:/home/runner/work/_temp/versoes/mc/libraries/com/ibm/icu/icu4j-core-mojang/51.2/icu4j-core-mojang-51.2.jar:/home/runner/work/_temp/versoes/mc/libraries/net/sf/jopt-simple/jopt-simple/4.5/jopt-simple-4.5.jar:/home/runner/work/_temp/versoes/mc/libraries/com/paulscode/codecjorbis/20101023/codecjorbis-20101023.jar:/home/runner/work/_temp/versoes/mc/libraries/com/paulscode/codecwav/20101023/codecwav-20101023.jar:/home/runner/work/_temp/versoes/mc/libraries/com/paulscode/libraryjavasound/20101123/libraryjavasound-20101123.jar:/home/runner/work/_temp/versoes/mc/libraries/com/paulscode/librarylwjglopenal/20100824/librarylwjglopenal-20100824.jar:/home/runner/work/_temp/versoes/mc/libraries/com/paulscode/soundsystem/20120107/soundsystem-20120107.jar:/home/runner/work/_temp/versoes/mc/libraries/io/netty/netty-all/4.0.10.Final/netty-all-4.0.10.Final.jar:/home/runner/work/_temp/versoes/mc/libraries/com/google/guava/guava/15.0/guava-15.0.jar:/home/runner/work/_temp/versoes/mc/libraries/org/apache/commons/commons-lang3/3.1/commons-lang3-3.1.jar:/home/runner/work/_temp/versoes/mc/libraries/commons-io/commons-io/2.4/commons-io-2.4.jar:/home/runner/work/_temp/versoes/mc/libraries/commons-codec/commons-codec/1.9/commons-codec-1.9.jar:/home/runner/work/_temp/versoes/mc/libraries/net/java/jinput/jinput/2.0.5/jinput-2.0.5.jar:/home/runner/work/_temp/versoes/mc/libraries/net/java/jutils/jutils/1.0.0/jutils-1.0.0.jar:/home/runner/work/_temp/versoes/mc/libraries/com/google/code/gson/gson/2.2.4/gson-2.2.4.jar:/home/runner/work/_temp/versoes/mc/libraries/com/mojang/authlib/1.5.21/authlib-1.5.21.jar:/home/runner/work/_temp/versoes/mc/libraries/org/apache/logging/log4j/log4j-api/2.0-beta9/log4j-api-2.0-beta9.jar:/home/runner/work/_temp/versoes/mc/libraries/org/apache/logging/log4j/log4j-core/2.0-beta9/log4j-core-2.0-beta9.jar:/home/runner/work/_temp/versoes/mc/libraries/org/lwjgl/lwjgl/lwjgl/2.9.1/lwjgl-2.9.1.jar:/home/runner/work/_temp/versoes/mc/libraries/org/lwjgl/lwjgl/lwjgl_util/2.9.1/lwjgl_util-2.9.1.jar:/home/runner/work/_temp/versoes/mc/libraries/tv/twitch/twitch/5.16/twitch-5.16.jar:/home/runner/work/_temp/versoes/mc/libraries/java3d/vecmath/1.3.1/vecmath-1.3.1.jar:/home/runner/work/_temp/versoes/mc/versions/1.7.10/1.7.10.jar net.minecraft.client.main.Main --username PulsarTeste --version 1.7.10 --gameDir /home/runner/work/_temp/versoes/mc/pulsar/instancia-1.7.10 --assetsDir /home/runner/work/_temp/versoes/mc/assets --assetIndex 1.7.10 --uuid 8fab0eee-219e-31ee-816f-85dfd43508ee --accessToken 8fab0eee-219e-31ee-816f-85dfd43508ee --userProperties {} --userType mojang
+[status] Abrindo o Minecraft
+[status] Jogando
+[19:36:32] [main/INFO]: Setting user: PulsarTeste
+[19:36:32] [main/INFO]: (Session ID is token:8fab0eee-219e-31ee-816f-85dfd43508ee:8fab0eee-219e-31ee-816f-85dfd43508ee)
+[19:36:33] [Client thread/INFO]: LWJGL Version: 2.9.1
+If on Windows, make sure to provide all of the necessary dll's as specified in the twitchsdk README. Also, make sure to set the PATH environment variable to point to the directory containing the dll's.
+[19:36:37] [Client thread/ERROR]: Couldn't initialize twitch stream
+[19:36:37] [Client thread/INFO]: Reloading ResourceManager: Default
+
+Starting up SoundSystem...
+Initializing LWJGL OpenAL
+    (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
+
+ALSA lib confmisc.c:855:(parse_card) [error.core] cannot find card '0'
+ALSA lib conf.c:5211:(_snd_config_evaluate) [error.core] function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) [error.core] error evaluating strings
+ALSA lib conf.c:5211:(_snd_config_evaluate) [error.core] function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1342:(snd_func_refer) [error.core] error evaluating name
+ALSA lib conf.c:5211:(_snd_config_evaluate) [error.core] function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5734:(snd_config_expand) [error.core] Evaluate error: No such file or directory
+ALSA lib pcm.c:2722:(snd_pcm_open_noupdate) [error.pcm] Unknown PCM default
+AL lib: (EE) alsa_open_playback: Could not open playback device 'default': No such file or directory
+Error in class 'LibraryLWJGLOpenAL'
+    Unable to initialize OpenAL.  Probable cause: OpenAL not supported.
+
+    ERROR MESSAGE:
+        Could not locate OpenAL library.
+    STACK TRACE:
+        org.lwjgl.openal.AL.create(AL.java:151)
+
+        org.lwjgl.openal.AL.create(AL.java:102)
+        org.lwjgl.openal.AL.create(AL.java:201)
+        paulscode.sound.libraries.LibraryLWJGLOpenAL.init(LibraryLWJGLOpenAL.java:164)
+        paulscode.sound.SoundSystem.CommandNewLibrary(SoundSystem.java:1576)
+
+        paulscode.sound.SoundSystem.CommandQueue(SoundSystem.java:2572)
+
+        paulscode.sound.CommandThread.run(CommandThread.java:121)
+
+[19:36:38] [Client thread/INFO]: Created: 512x256 textures/blocks-atlas
+    ERROR MESSAGE:
+        Could not locate OpenAL library.
+
+Starting up SoundSystem...
+[19:36:39] [Client thread/INFO]: Created: 256x256 textures/items-atlas
+Switching to No Sound
+    (Silent Mode)
+
+[19:36:39] [Sound Library Loader/INFO]: Sound engine started
+[Pulsar] O Minecraft fechou com o código null. As linhas acima mostram o motivo.
