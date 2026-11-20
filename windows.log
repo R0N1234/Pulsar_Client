@@ -1,0 +1,24 @@
+prints do instalador: código 0
+instalação: código 0 em 12 s; launcher em C:\Users\runneradmin\AppData\Local\Programs\Pulsar Client\Pulsar Client.exe existe: True
+atualizador junto do launcher: True
+launcher: código 0
+[prints] visual: normal
+[prints] versões: {"atual":{"versao":"1.0.2"},"anterior":{"versao":"1.0.1"},"escolhida":"atual"}
+[prints] escolhida: anterior
+[prints] depois de voltar: atual
+[prints] gravação: gravou Pulsar 2026-11-20 19-41-16.mp4 16220 bytes
+[prints] visual depois: lite
+atualização: código 0 em 11 s; launcher existe: True
+19:40:32  Início: --prints D:\a\_temp\prints-windows
+19:40:32  Início: --auto --sem-abrir
+19:40:33  Janela: escala 1.00 (tela 1024x720, DPI 1.00)
+19:40:33  Pasta: C:\Users\runneradmin\AppData\Local\Programs\Pulsar Client
+19:40:33  Rodando C:\Users\runneradmin\AppData\Local\Temp\PulsarClient-Setup-1.0.2.exe /S
+19:40:44  Instalador terminou com o código 0 em 10 s
+19:40:44  Fim, código 0
+19:41:23  Início: --atualizar D:\a\Pulsar_Client\Pulsar_Client\launcher\dist\Pulsar Client Setup 1.0.2.exe --versao teste --app C:\Users\runneradmin\AppData\Local\Programs\Pulsar Client\Pulsar Client.exe --auto --sem-abrir
+19:41:23  Janela: escala 1.00 (tela 1024x720, DPI 1.00)
+19:41:23  Pasta: C:\Users\runneradmin\AppData\Local\Programs\Pulsar Client
+19:41:25  Rodando D:\a\Pulsar_Client\Pulsar_Client\launcher\dist\Pulsar Client Setup 1.0.2.exe --updated /S
+19:41:33  Instalador terminou com o código 0 em 8 s
+19:41:34  Fim, código 0

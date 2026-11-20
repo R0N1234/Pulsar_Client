@@ -1,0 +1,2 @@
+(node:3668) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `Pulsar Client --trace-deprecation ...` to show where the warning was created)
