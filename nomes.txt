@@ -1,0 +1,74 @@
+mappings-mixin-srg.tiny: 	m	(F)F	l	func_70678_g	method_7167	getSwingProgress
+mappings-mixin-srg.tiny: 	m	(IZ)F	a	func_78266_a	method_2385	renderDefaultChar
+mappings-mixin-srg.tiny: 	m	(Ljava/lang/String;Z)V	a	func_78255_a	method_2395	renderStringAtPos
+mappings-mixin-srg.tiny: 	m	(CZ)F	b	func_78277_a	method_2399	renderUnicodeChar
+mappings-mixin-srg.tiny: 		c	Render single line string by setting GL color, current (posX,posY), and calling renderStringAtPos()
+mappings-mixin-srg.tiny: 	m	(Lauk;Lavr;)V	a	func_180475_a	method_2419	renderScoreboard
+mappings-mixin-srg.tiny: 	m	(ILauo;Lauk;)V	a	func_175249_a	method_2621	renderPlayerlist
+mappings-mixin-srg.tiny: 	m	(Ljy;)V	a	func_175069_a	method_3363	loadShader
+mappings-mixin-srg.tiny: 	m	(F)V	a	func_78440_a	method_3471	renderItemInFirstPerson
+mappings-mixin-srg.tiny: 	m	(FF)V	b	func_178096_b	method_3485	transformFirstPersonItem
+mappings-mixin-srg.tiny: 	m	(F)V	f	func_78442_d	method_3493	renderFireInFirstPerson
+mappings-mixin-srg.tiny: 	m	(Lpr;FZ)Z	a	func_177092_a	method_4010	setBrightness
+mappings-mixin-srg.tiny: 	m	(Lpr;F)F	d	func_77040_d	method_4019	getSwingProgress
+mappings-mixin-srg.tiny: 	m	()V	f	func_177091_f	method_4021	unsetBrightness
+mappings-mixin-srg.tiny: 	f	Ljava/util/List;	d	field_148031_d	field_5029	listShaders
+mappings-mixin-srg.tiny: 	m	(F)V	a	func_148018_a	method_4144	loadShaderGroup
+mappings-mixin-srg.tiny: 	m	(F)V	a	func_148042_a	method_4156	loadShader
+mappings-mixin-srg.tiny: 	m	(Lbni;Lblt$a;Ljava/lang/String;)Lblt;	a	func_148057_a	method_4164	loadShader
+mappings.tiny: 	m	(IZ)F	a	method_2385	renderDefaultChar
+mappings.tiny: 	m	(Ljava/lang/String;Z)V	a	method_2395	renderStringAtPos
+mappings.tiny: 	m	(CZ)F	b	method_2399	renderUnicodeChar
+mappings.tiny: 		c	Render single line string by setting GL color, current (posX,posY), and calling renderStringAtPos()
+mappings.tiny: 	m	(Lauk;Lavr;)V	a	method_2419	renderScoreboard
+mappings.tiny: 	m	(ILauo;Lauk;)V	a	method_2621	renderPlayerlist
+mappings.tiny: 	m	(Ljy;)V	a	method_3363	loadShader
+mappings.tiny: 	m	(F)V	a	method_3471	renderItemInFirstPerson
+mappings.tiny: 	m	(FF)V	b	method_3485	transformFirstPersonItem
+mappings.tiny: 	m	(F)V	f	method_3493	renderFireInFirstPerson
+mappings.tiny: 	m	(Lpr;FZ)Z	a	method_4010	setBrightness
+mappings.tiny: 	m	(Lpr;F)F	d	method_4019	getSwingProgress
+mappings.tiny: 	m	()V	f	method_4021	unsetBrightness
+mappings.tiny: 	f	Ljava/util/List;	d	field_5029	listShaders
+mappings.tiny: 	m	(F)V	a	method_4144	loadShaderGroup
+mappings.tiny: 	m	(F)V	a	method_4156	loadShader
+mappings.tiny: 	m	(Lbni;Lblt$a;Ljava/lang/String;)Lblt;	a	method_4164	loadShader
+mappings.tiny: 	m	(F)F	l	method_7167	getSwingProgress
+mappings-srg-named.srg: MD: net/minecraft/entity/EntityLivingBase/func_70678_g (F)F net/minecraft/entity/EntityLivingBase/getSwingProgress (F)F
+mappings-srg-named.srg: MD: net/minecraft/client/gui/FontRenderer/func_78266_a (IZ)F net/minecraft/client/gui/FontRenderer/renderDefaultChar (IZ)F
+mappings-srg-named.srg: MD: net/minecraft/client/gui/FontRenderer/func_78255_a (Ljava/lang/String;Z)V net/minecraft/client/gui/FontRenderer/renderStringAtPos (Ljava/lang/String;Z)V
+mappings-srg-named.srg: MD: net/minecraft/client/gui/FontRenderer/func_78277_a (CZ)F net/minecraft/client/gui/FontRenderer/renderUnicodeChar (CZ)F
+mappings-srg-named.srg: MD: net/minecraft/client/gui/GuiIngame/func_180475_a (Lnet/minecraft/scoreboard/ScoreObjective;Lnet/minecraft/client/gui/ScaledResolution;)V net/minecraft/client/gui/GuiIngame/renderScoreboard (Lnet/minecraft/scoreboard/ScoreObjective;Lnet/minecraft/client/gui/ScaledResolution;)V
+mappings-srg-named.srg: MD: net/minecraft/client/gui/GuiPlayerTabOverlay/func_175249_a (ILnet/minecraft/scoreboard/Scoreboard;Lnet/minecraft/scoreboard/ScoreObjective;)V net/minecraft/client/gui/GuiPlayerTabOverlay/renderPlayerlist (ILnet/minecraft/scoreboard/Scoreboard;Lnet/minecraft/scoreboard/ScoreObjective;)V
+mappings-srg-named.srg: MD: net/minecraft/client/renderer/EntityRenderer/func_175069_a (Lnet/minecraft/util/ResourceLocation;)V net/minecraft/client/renderer/EntityRenderer/loadShader (Lnet/minecraft/util/ResourceLocation;)V
+mappings-srg-named.srg: MD: net/minecraft/client/renderer/ItemRenderer/func_78440_a (F)V net/minecraft/client/renderer/ItemRenderer/renderItemInFirstPerson (F)V
+mappings-srg-named.srg: MD: net/minecraft/client/renderer/ItemRenderer/func_178096_b (FF)V net/minecraft/client/renderer/ItemRenderer/transformFirstPersonItem (FF)V
+mappings-srg-named.srg: MD: net/minecraft/client/renderer/ItemRenderer/func_78442_d (F)V net/minecraft/client/renderer/ItemRenderer/renderFireInFirstPerson (F)V
+mappings-srg-named.srg: MD: net/minecraft/client/renderer/entity/RendererLivingEntity/func_177092_a (Lnet/minecraft/entity/EntityLivingBase;FZ)Z net/minecraft/client/renderer/entity/RendererLivingEntity/setBrightness (Lnet/minecraft/entity/EntityLivingBase;FZ)Z
+mappings-srg-named.srg: MD: net/minecraft/client/renderer/entity/RendererLivingEntity/func_77040_d (Lnet/minecraft/entity/EntityLivingBase;F)F net/minecraft/client/renderer/entity/RendererLivingEntity/getSwingProgress (Lnet/minecraft/entity/EntityLivingBase;F)F
+mappings-srg-named.srg: MD: net/minecraft/client/renderer/entity/RendererLivingEntity/func_177091_f ()V net/minecraft/client/renderer/entity/RendererLivingEntity/unsetBrightness ()V
+mappings-srg-named.srg: FD: net/minecraft/client/shader/ShaderGroup/field_148031_d net/minecraft/client/shader/ShaderGroup/listShaders
+mappings-srg-named.srg: MD: net/minecraft/client/shader/ShaderGroup/func_148018_a (F)V net/minecraft/client/shader/ShaderGroup/loadShaderGroup (F)V
+mappings-srg-named.srg: MD: net/minecraft/client/shader/Shader/func_148042_a (F)V net/minecraft/client/shader/Shader/loadShader (F)V
+mappings-srg-named.srg: MD: net/minecraft/client/shader/ShaderLoader/func_148057_a (Lnet/minecraft/client/resources/IResourceManager;Lnet/minecraft/client/shader/ShaderLoader$ShaderType;Ljava/lang/String;)Lnet/minecraft/client/shader/ShaderLoader; net/minecraft/client/shader/ShaderLoader/loadShader (Lnet/minecraft/client/resources/IResourceManager;Lnet/minecraft/client/shader/ShaderLoader$ShaderType;Ljava/lang/String;)Lnet/minecraft/client/shader/ShaderLoader;
+mappings-srg.tiny: 	m	(F)F	l	func_70678_g	method_7167	getSwingProgress
+mappings-srg.tiny: 	m	(IZ)F	a	func_78266_a	method_2385	renderDefaultChar
+mappings-srg.tiny: 	m	(Ljava/lang/String;Z)V	a	func_78255_a	method_2395	renderStringAtPos
+mappings-srg.tiny: 	m	(CZ)F	b	func_78277_a	method_2399	renderUnicodeChar
+mappings-srg.tiny: 		c	Render single line string by setting GL color, current (posX,posY), and calling renderStringAtPos()
+mappings-srg.tiny: 	m	(Lauk;Lavr;)V	a	func_180475_a	method_2419	renderScoreboard
+mappings-srg.tiny: 	m	(ILauo;Lauk;)V	a	func_175249_a	method_2621	renderPlayerlist
+mappings-srg.tiny: 	m	(Ljy;)V	a	func_175069_a	method_3363	loadShader
+mappings-srg.tiny: 	m	(F)V	a	func_78440_a	method_3471	renderItemInFirstPerson
+mappings-srg.tiny: 	m	(FF)V	b	func_178096_b	method_3485	transformFirstPersonItem
+mappings-srg.tiny: 	m	(F)V	f	func_78442_d	method_3493	renderFireInFirstPerson
+mappings-srg.tiny: 	m	(Lpr;FZ)Z	a	func_177092_a	method_4010	setBrightness
+mappings-srg.tiny: 	m	(Lpr;F)F	d	func_77040_d	method_4019	getSwingProgress
+mappings-srg.tiny: 	m	()V	f	func_177091_f	method_4021	unsetBrightness
+mappings-srg.tiny: 	f	Ljava/util/List;	d	field_148031_d	field_5029	listShaders
+mappings-srg.tiny: 	m	(F)V	a	func_148018_a	method_4144	loadShaderGroup
+mappings-srg.tiny: 	m	(F)V	a	func_148042_a	method_4156	loadShader
+mappings-srg.tiny: 	m	(Lbni;Lblt$a;Ljava/lang/String;)Lblt;	a	func_148057_a	method_4164	loadShader
+srg.tsrg: 	a (F)V func_78440_a
+srg.tsrg: 	b (FF)V func_178096_b
+srg.tsrg: 	a (Lpr;FZ)Z func_177092_a
