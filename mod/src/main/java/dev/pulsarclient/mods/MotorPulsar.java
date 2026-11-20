@@ -1,6 +1,7 @@
 package dev.pulsarclient.mods;
 
 import dev.pulsarclient.PulsarClient;
+import dev.pulsarclient.config.PerfilCompleto;
 import dev.pulsarclient.core.MotorFlags;
 import dev.pulsarclient.core.MotorHooks;
 import dev.pulsarclient.settings.ActionSetting;
@@ -632,7 +633,11 @@ public class MotorPulsar extends PulsarMod {
         profile.setOptions(nomes.toArray(new String[0]));
     }
 
-    /** O perfil atual (opções do Motor e os gráficos do jogo) como texto JSON. */
+    /**
+     * O perfil atual como texto JSON: opções do Motor, gráficos e opções gerais do jogo (FOV, brilho,
+     * sensibilidade, teclas) e todos os mods do Pulsar (ligados ou não, HUD e opções de cada um).
+     * Contas e login nunca entram.
+     */
     public JsonObject perfilAtual(String nome) {
         JsonObject motor = new JsonObject();
         for (Setting st : settings()) {
@@ -651,11 +656,13 @@ public class MotorPulsar extends PulsarMod {
         jogo.addProperty("fps_max", gs.limitFramerate);
         jogo.addProperty("vsync", gs.enableVsync);
         jogo.addProperty("particulas", gs.particleSetting);
+        PerfilCompleto.exportarGeral(gs, jogo);
         JsonObject o = new JsonObject();
-        o.addProperty("v", 1);
+        o.addProperty("v", 2);
         o.addProperty("nome", nome);
         o.add("motor", motor);
         o.add("jogo", jogo);
+        o.add("mods", PerfilCompleto.exportarMods(PulsarClient.get().mods(), id()));
         return o;
     }
 
@@ -717,7 +724,7 @@ public class MotorPulsar extends PulsarMod {
     }
 
     /** Aplica um perfil lido de um código ou arquivo. */
-    void aplicarPerfil(JsonObject o) {
+    public void aplicarPerfil(JsonObject o) {
         JsonObject motor = o.getAsJsonObject("motor");
         for (Setting st : settings()) {
             if (FORA_DO_PERFIL.contains(st.key()) || st instanceof ActionSetting || !motor.has(st.key())) continue;
@@ -746,6 +753,10 @@ public class MotorPulsar extends PulsarMod {
         } catch (Exception e) {
             System.err.println("[Pulsar] Motor: parte dos gráficos do perfil não foi lida: " + e);
         }
+        // Perfil completo (da 1.0.2 em diante): opções gerais do jogo e todos os mods do Pulsar.
+        // Códigos antigos não têm essas partes, e aí só o Motor e os gráficos mudam, como antes.
+        PerfilCompleto.aplicarGeral(mc, jogo);
+        if (o.has("mods") && o.get("mods").isJsonObject()) PerfilCompleto.aplicarMods(PulsarClient.get().mods(), o.getAsJsonObject("mods"), id());
         appliedParticles = -1;
         hidePlants = isEnabled() && !plants.get();
         appliedPlants = hidePlants;
@@ -806,7 +817,7 @@ public class MotorPulsar extends PulsarMod {
     private void copiarCodigo() {
         String nome = profile.index() >= PROFILES.length ? profile.get() : nomeLimpo(nomePerfil.get());
         GuiScreen.setClipboardString(codificar(perfilAtual(nome)));
-        avisar("Código copiado! Cole no Discord para a pessoa, e ela usa \"Colar perfil recebido\".");
+        avisar("Código copiado com tudo: Motor, mods, HUD e teclas. Cole no Discord, e a pessoa usa \"Colar perfil recebido\".");
     }
 
     private void colarCodigo() {

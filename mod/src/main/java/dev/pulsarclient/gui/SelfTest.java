@@ -549,6 +549,8 @@ public class SelfTest {
                 System.out.println("[Pulsar] Perfil: código com " + codigo.length() + " letras");
                 log(volta != null && "Teste".equals(volta.get("nome").getAsString()) && volta.get("motor").equals(perfil.get("motor"))
                         && dev.pulsarclient.mods.MotorPulsar.decodificar("PULSAR-PERFIL:lixo") == null ? "perfil-ok" : "perfil-falhou");
+                // Perfil completo: leva os mods ligados, a posição da HUD e os atalhos, menos os de login.
+                log(testarPerfilCompleto(motor) ? "perfil-completo-ok" : "perfil-completo-falhou");
                 // Efeitos: esconder a Resistência ao fogo não esconde a Força.
                 dev.pulsarclient.mods.Efeitos efeitos = (dev.pulsarclient.mods.Efeitos) PulsarClient.get().mod("efeitos");
                 for (dev.pulsarclient.settings.Setting st : efeitos.settings())
@@ -970,5 +972,33 @@ public class SelfTest {
 
     private static void log(String step) {
         System.out.println("[Pulsar] selftest: " + step);
+    }
+    /** Muda o FPS e os Atalhos de Texto, copia o perfil, desfaz e cola: tem que voltar como estava, sem o /login. */
+    private static boolean testarPerfilCompleto(dev.pulsarclient.mods.MotorPulsar motor) {
+        dev.pulsarclient.mods.HudMod fps = (dev.pulsarclient.mods.HudMod) PulsarClient.get().mod("fps");
+        Setting atalhos = null;
+        for (Setting st : PulsarClient.get().mod("atalhos_texto").settings()) if (st.key().equals("atalhos")) atalhos = st;
+        boolean ligado = fps.isEnabled();
+        int x = fps.x;
+        com.google.gson.JsonElement listaAntes = atalhos.save();
+        try {
+            fps.setEnabled(!ligado);
+            fps.x = 123;
+            atalhos.load(new com.google.gson.JsonParser().parse("[{\"tecla\":0,\"texto\":\"/login senha123\"},{\"tecla\":64,\"texto\":\"/lobby\"}]"));
+            String codigo = dev.pulsarclient.mods.MotorPulsar.codificar(motor.perfilAtual("Completo"));
+            System.out.println("[Pulsar] Perfil completo: código com " + codigo.length() + " letras");
+            fps.setEnabled(ligado);
+            fps.x = 7;
+            atalhos.load(new com.google.gson.JsonArray());
+            motor.aplicarPerfil(dev.pulsarclient.mods.MotorPulsar.decodificar(codigo));
+            String lista = atalhos.save().toString();
+            return fps.isEnabled() == !ligado && fps.x == 123 && lista.contains("/lobby") && !lista.contains("senha123")
+                    && !codigo.isEmpty() && !new String(codigo).contains("senha123");
+        } finally {
+            fps.setEnabled(ligado);
+            fps.x = x;
+            atalhos.load(listaAntes);
+            PulsarClient.get().save();
+        }
     }
 }
