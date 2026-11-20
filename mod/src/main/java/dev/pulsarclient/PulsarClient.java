@@ -1,5 +1,6 @@
 package dev.pulsarclient;
 
+import dev.pulsarclient.config.PerfilCompleto;
 import dev.pulsarclient.config.PulsarConfig;
 import dev.pulsarclient.cosmeticos.Cosmeticos;
 import dev.pulsarclient.gui.GuiPulsarPanel;
@@ -177,6 +178,8 @@ public class PulsarClient {
 
         SonsLocais.instalar(Minecraft.getMinecraft().mcDataDir);
         config = new PulsarConfig(Minecraft.getMinecraft().mcDataDir);
+        // O padrão de fábrica de cada mod, antes do config: o perfil compartilhado leva só o que a pessoa mudou.
+        PerfilCompleto.guardarPadroes(mods);
         config.load(mods);
 
         ClientRegistry.registerKeyBinding(keyPanel);
