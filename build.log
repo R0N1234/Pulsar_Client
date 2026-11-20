@@ -1,0 +1,484 @@
+[Pulsar] Minecraft 1.8.9, modo forge, pasta /home/runner/work/_temp/e2e/minecraft, memória 2 GB
+[Pulsar] Java 8 não encontrado em /home/runner/work/_temp/e2e/runtime/java8, baixando (só na primeira vez)
+[Pulsar] Baixando Java 8: 0% (0.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 10% (4.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 20% (8.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 30% (12.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 40% (16.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 50% (20.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 60% (24.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 70% (28.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 80% (31.9 de 39.9 MB)
+[Pulsar] Baixando Java 8: 90% (36.0 de 39.9 MB)
+[Pulsar] Baixando Java 8: 100% (39.9 de 39.9 MB)
+[Pulsar] Instalando o Java 8 em /home/runner/work/_temp/e2e/runtime/java8
+[Pulsar] Java: /home/runner/work/_temp/e2e/runtime/java8/jdk8u514-b01-jre/bin/java
+[Pulsar] Java: openjdk version "1.8.0_514"
+[MCLC]: MCLC version 3.18.2
+[MCLC]: Using Java version 1.8.0_514 64-bit
+[MCLC]: Cache directory created.
+[MCLC]: Cached version_manifest.json
+[MCLC]: Parsed version from version manifest
+[MCLC]: Cached 1.8.9.json
+[MCLC]: Downloaded and extracted natives
+[MCLC]: Set native path to /home/runner/work/_temp/e2e/minecraft/natives/1.8.9
+[MCLC]: Attempting to download Minecraft version jar
+[MCLC]: Downloaded version jar and wrote version json
+[MCLC]: Detected Forge in options, getting dependencies
+[MCLC]: Generating Forge version json, this might take a bit
+[MCLC]: Collected class paths
+[MCLC]: Using : to separate class paths
+[MCLC]: Attempting to download assets
+[MCLC]: Downloaded assets
+[MCLC]: Set launch options
+[MCLC]: Launching with arguments -XX:-UseAdaptiveSizePolicy -XX:-OmitStackTraceInFastThrow -Dfml.ignorePatchDiscrepancies=true -Dfml.ignoreInvalidMinecraftCertificates=true -Djava.library.path=/home/runner/work/_temp/e2e/minecraft/natives/1.8.9 -Xmx2G -Xms1G -Xss1M -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=16M -Dfml.readTimeout=180 -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 -Dpulsar.selftest=true -Dpulsar.ponte=37169 -Dpulsar.chave=5b855a439a235b546db7d7c4a632ba95fe6a5ad878888111 -Dpulsar.rede=http://127.0.0.1:8799 -Dlog4j.configurationFile=log4j2_17-111.xml -cp /home/runner/work/_temp/e2e/minecraft/pulsar/forge/forge-1.8.9-11.15.1.2318-1.8.9-universal.jar:/home/runner/work/_temp/e2e/minecraft/libraries/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/ow2/asm/asm-all/5.0.3/asm-all-5.0.3.jar:/home/runner/work/_temp/e2e/minecraft/libraries/lzma/lzma/0.0.1/lzma-0.0.1.jar:/home/runner/work/_temp/e2e/minecraft/libraries/net/sf/jopt-simple/jopt-simple/4.6/jopt-simple-4.6.jar:/home/runner/work/_temp/e2e/minecraft/libraries/java3d/vecmath/1.5.2/vecmath-1.5.2.jar:/home/runner/work/_temp/e2e/minecraft/libraries/net/sf/trove4j/trove4j/3.0.3/trove4j-3.0.3.jar:/home/runner/work/_temp/e2e/minecraft/libraries/jline/jline/2.13/jline-2.13.jar:/home/runner/work/_temp/e2e/minecraft/libraries/com/typesafe/config/1.2.1/config-1.2.1.jar:/home/runner/work/_temp/e2e/minecraft/libraries/com/typesafe/akka/akka-actor_2.11/2.3.3/akka-actor_2.11-2.3.3.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/scala-lang/scala-actors-migration_2.11/1.1.0/scala-actors-migration_2.11-1.1.0.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/scala-lang/plugins/scala-continuations-library_2.11/1.0.2/scala-continuations-library_2.11-1.0.2.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/scala-lang/plugins/scala-continuations-plugin_2.11.1/1.0.2/scala-continuations-plugin_2.11.1-1.0.2.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/scala-lang/scala-library/2.11.1/scala-library-2.11.1.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/scala-lang/scala-reflect/2.11.1/scala-reflect-2.11.1.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/scala-lang/scala-parser-combinators_2.11/1.0.1/scala-parser-combinators_2.11-1.0.1.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/scala-lang/scala-swing_2.11/1.0.1/scala-swing_2.11-1.0.1.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/scala-lang/scala-xml_2.11/1.0.2/scala-xml_2.11-1.0.2.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/scala-lang/scala-compiler/2.11.1/scala-compiler-2.11.1.jar:/home/runner/work/_temp/e2e/minecraft/libraries/oshi-project/oshi-core/1.1/oshi-core-1.1.jar:/home/runner/work/_temp/e2e/minecraft/libraries/com/mojang/netty/1.8.8/netty-1.8.8.jar:/home/runner/work/_temp/e2e/minecraft/libraries/net/java/dev/jna/jna/3.4.0/jna-3.4.0.jar:/home/runner/work/_temp/e2e/minecraft/libraries/net/java/dev/jna/platform/3.4.0/platform-3.4.0.jar:/home/runner/work/_temp/e2e/minecraft/libraries/com/paulscode/codecjorbis/20101023/codecjorbis-20101023.jar:/home/runner/work/_temp/e2e/minecraft/libraries/com/paulscode/codecwav/20101023/codecwav-20101023.jar:/home/runner/work/_temp/e2e/minecraft/libraries/com/paulscode/libraryjavasound/20101123/libraryjavasound-20101123.jar:/home/runner/work/_temp/e2e/minecraft/libraries/com/paulscode/librarylwjglopenal/20100824/librarylwjglopenal-20100824.jar:/home/runner/work/_temp/e2e/minecraft/libraries/com/ibm/icu/icu4j-core-mojang/51.2/icu4j-core-mojang-51.2.jar:/home/runner/work/_temp/e2e/minecraft/libraries/com/paulscode/soundsystem/20120107/soundsystem-20120107.jar:/home/runner/work/_temp/e2e/minecraft/libraries/io/netty/netty-all/4.0.23.Final/netty-all-4.0.23.Final.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/apache/commons/commons-lang3/3.3.2/commons-lang3-3.3.2.jar:/home/runner/work/_temp/e2e/minecraft/libraries/com/google/guava/guava/17.0/guava-17.0.jar:/home/runner/work/_temp/e2e/minecraft/libraries/commons-io/commons-io/2.4/commons-io-2.4.jar:/home/runner/work/_temp/e2e/minecraft/libraries/commons-codec/commons-codec/1.9/commons-codec-1.9.jar:/home/runner/work/_temp/e2e/minecraft/libraries/net/java/jutils/jutils/1.0.0/jutils-1.0.0.jar:/home/runner/work/_temp/e2e/minecraft/libraries/net/java/jinput/jinput/2.0.5/jinput-2.0.5.jar:/home/runner/work/_temp/e2e/minecraft/libraries/com/google/code/gson/gson/2.2.4/gson-2.2.4.jar:/home/runner/work/_temp/e2e/minecraft/libraries/com/mojang/realms/1.7.59/realms-1.7.59.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/apache/commons/commons-compress/1.8.1/commons-compress-1.8.1.jar:/home/runner/work/_temp/e2e/minecraft/libraries/com/mojang/authlib/1.5.21/authlib-1.5.21.jar:/home/runner/work/_temp/e2e/minecraft/libraries/commons-logging/commons-logging/1.1.3/commons-logging-1.1.3.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/apache/httpcomponents/httpclient/4.3.3/httpclient-4.3.3.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/apache/logging/log4j/log4j-api/2.0-beta9/log4j-api-2.0-beta9.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/apache/logging/log4j/log4j-core/2.0-beta9/log4j-core-2.0-beta9.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/apache/httpcomponents/httpcore/4.3.2/httpcore-4.3.2.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/lwjgl/lwjgl/lwjgl_util/2.9.4-nightly-20150209/lwjgl_util-2.9.4-nightly-20150209.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/lwjgl/lwjgl/lwjgl/2.9.4-nightly-20150209/lwjgl-2.9.4-nightly-20150209.jar:/home/runner/work/_temp/e2e/minecraft/libraries/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209.jar:/home/runner/work/_temp/e2e/minecraft/libraries/tv/twitch/twitch/6.5/twitch-6.5.jar:/home/runner/work/_temp/e2e/minecraft/versions/1.8.9/1.8.9.jar net.minecraft.launchwrapper.Launch --username PulsarTeste --version 1.8.9 --gameDir /home/runner/work/_temp/e2e/minecraft/pulsar/instancia-1.8.9 --assetsDir /home/runner/work/_temp/e2e/minecraft/assets --assetIndex 1.8 --uuid 8fab0eee-219e-31ee-816f-85dfd43508ee --accessToken 8fab0eee-219e-31ee-816f-85dfd43508ee --userProperties {} --userType mojang --tweakClass net.minecraftforge.fml.common.launcher.FMLTweaker
+[19:39:08] [main/INFO]: Loading tweak class name net.minecraftforge.fml.common.launcher.FMLTweaker
+[19:39:08] [main/INFO]: Using primary tweak class name net.minecraftforge.fml.common.launcher.FMLTweaker
+[19:39:08] [main/INFO]: Calling tweak class net.minecraftforge.fml.common.launcher.FMLTweaker
+[19:39:08] [main/INFO]: Forge Mod Loader version 11.15.1.2318 for Minecraft 1.8.9 loading
+[19:39:08] [main/INFO]: Java is OpenJDK 64-Bit Server VM, version 1.8.0_514, running on Linux:amd64:7.0.0-1020-azure, installed at /home/runner/work/_temp/e2e/runtime/java8/jdk8u514-b01-jre
+[19:39:08] [main/INFO]: Loading tweak class name net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker
+[19:39:08] [main/INFO]: Loading tweak class name net.minecraftforge.fml.common.launcher.FMLDeobfTweaker
+[19:39:08] [main/INFO]: Calling tweak class net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker
+[19:39:08] [main/INFO]: Calling tweak class net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker
+[19:39:08] [main/INFO]: Calling tweak class net.minecraftforge.fml.relauncher.CoreModManager$FMLPluginWrapper
+[19:39:09] [main/INFO]: Found valid fingerprint for Minecraft. Certificate fingerprint cd99959656f753dc28d863b46769f7f8fbaefcfc
+[19:39:09] [main/ERROR]: FML appears to be missing any signature data. This is not a good thing
+[19:39:09] [main/INFO]: Calling tweak class net.minecraftforge.fml.relauncher.CoreModManager$FMLPluginWrapper
+[19:39:09] [main/INFO]: Calling tweak class net.minecraftforge.fml.common.launcher.FMLDeobfTweaker
+[19:39:10] [main/INFO]: Calling tweak class net.minecraftforge.fml.relauncher.CoreModManager$FMLPluginWrapper
+[19:39:10] [main/INFO]: Loading tweak class name net.minecraftforge.fml.common.launcher.TerminalTweaker
+[19:39:10] [main/INFO]: Calling tweak class net.minecraftforge.fml.common.launcher.TerminalTweaker
+[19:39:10] [main/INFO]: Launching wrapped minecraft {net.minecraft.client.main.Main}
+[19:39:10] [Client thread/ERROR]: Can't find the resource index file: /home/runner/work/_temp/e2e/minecraft/assets/indexes/1.8.json
+[19:39:10] [Client thread/INFO]: Setting user: PulsarTeste
+[19:39:12] [Client thread/INFO]: LWJGL Version: 2.9.4
+[19:39:14] [Client thread/INFO]: Could not load splash.properties, will create a default one
+[19:39:14] [Client thread/INFO]: [net.minecraftforge.fml.client.SplashProgress:start:246]: ---- Minecraft Crash Report ----
+
+WARNING: coremods are present:
+  Pulsar Client (pulsar-client-1.0.2.jar)
+Contact their authors BEFORE contacting forge
+
+// Ouch. That hurt :(
+
+Time: 11/20/26 7:39 PM
+Description: Loading screen debug info
+
+This is just a prompt for computer specs to be printed. THIS IS NOT A ERROR
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- System Details --
+Details:
+	Minecraft Version: 1.8.9
+	Operating System: Linux (amd64) version 7.0.0-1020-azure
+	Java Version: 1.8.0_514, Temurin
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode), Temurin
+	Memory: 813312000 bytes (775 MB) / 1073741824 bytes (1024 MB) up to 2147483648 bytes (2048 MB)
+	JVM Flags: 11 total; -XX:-UseAdaptiveSizePolicy -XX:-OmitStackTraceInFastThrow -Xmx2G -Xms1G -Xss1M -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=16M
+	IntCache: cache: 0, tcache: 0, allocated: 0, tallocated: 0
+	FML: 
+	Loaded coremods (and transformers): 
+Pulsar Client (pulsar-client-1.0.2.jar)
+  dev.pulsarclient.core.SplashTransformer
+  dev.pulsarclient.core.MotorTransformer
+  dev.pulsarclient.core.GanchosTransformer
+	GL info: ' Vendor: 'Mesa' Version: '4.5 (Compatibility Profile) Mesa 26.0.8-1ubuntu0.3' Renderer: 'llvmpipe (LLVM 21.1.8, 256 bits)'
+[19:39:14] [Client thread/INFO]: [dev.pulsarclient.core.SplashTransformer:transform:42]: [Pulsar] Tela de carregamento do Pulsar instalada em net.minecraftforge.fml.client.SplashProgress$3
+[19:39:14] [Client thread/INFO]: MinecraftForge v11.15.1.2318 Initialized
+[19:39:14] [Client thread/INFO]: Replaced 229 ore recipies
+[19:39:14] [Thread-6/INFO]: [dev.pulsarclient.core.GanchosTransformer:fonte:109]: [Pulsar] Fonte: ganchos instalados em FontRenderer (func_78266_a, func_78277_a, func_78263_a, func_78256_a)
+[19:39:14] [Thread-6/INFO]: [dev.pulsarclient.core.GanchosTransformer:fonte:131]: [Pulsar] Fonte: espaçamento com fração instalado (doDraw)
+[19:39:14] [Client thread/INFO]: Found 0 mods from the command line. Injecting into mod discoverer
+[19:39:14] [Client thread/INFO]: Searching /home/runner/work/_temp/e2e/minecraft/pulsar/instancia-1.8.9/mods for mods
+[19:39:15] [Client thread/INFO]: Forge Mod Loader has identified 4 mods to load
+[19:39:15] [Client thread/INFO]: Attempting connection with missing mods [mcp, FML, Forge, pulsar] at CLIENT
+[19:39:15] [Client thread/INFO]: Attempting connection with missing mods [mcp, FML, Forge, pulsar] at SERVER
+[19:39:16] [Client thread/INFO]: Reloading ResourceManager: Default, FMLFileResourcePack:Forge Mod Loader, FMLFileResourcePack:Minecraft Forge, FMLFileResourcePack:Pulsar Client
+[19:39:16] [Client thread/INFO]: Processing ObjectHolder annotations
+[19:39:16] [Client thread/INFO]: Found 384 ObjectHolder annotations
+[19:39:16] [Client thread/INFO]: Identifying ItemStackHolder annotations
+[19:39:16] [Client thread/INFO]: Found 0 ItemStackHolder annotations
+[19:39:16] [Client thread/INFO]: Configured a dormant chunk cache size of 0
+[19:39:16] [Forge Version Check/INFO]: [Forge] Starting version check at http://files.minecraftforge.net/maven/net/minecraftforge/forge/promotions_slim.json
+[19:39:16] [Client thread/INFO]: Applying holder lookups
+[19:39:16] [Client thread/INFO]: Holder lookups applied
+[19:39:16] [Client thread/INFO]: Injecting itemstacks
+[19:39:16] [Client thread/INFO]: Itemstack injection complete
+[19:39:16] [Client thread/INFO]: [tv.twitch.StandardCoreAPI:<init>:16]: If on Windows, make sure to provide all of the necessary dll's as specified in the twitchsdk README. Also, make sure to set the PATH environment variable to point to the directory containing the dll's.
+[19:39:16] [Client thread/ERROR]: Couldn't initialize twitch stream
+[19:39:16] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[19:39:16] [Client thread/INFO]: [dev.pulsarclient.core.MotorTransformer:transform:100]: [Pulsar] Motor: gancho de animações instalado (func_94248_c)
+[19:39:16] [Thread-7/INFO]: Initializing LWJGL OpenAL
+[19:39:16] [Thread-7/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
+ALSA lib confmisc.c:855:(parse_card) [error.core] cannot find card '0'
+ALSA lib conf.c:5211:(_snd_config_evaluate) [error.core] function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) [error.core] error evaluating strings
+ALSA lib conf.c:5211:(_snd_config_evaluate) [error.core] function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1342:(snd_func_refer) [error.core] error evaluating name
+ALSA lib conf.c:5211:(_snd_config_evaluate) [error.core] function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5734:(snd_config_expand) [error.core] Evaluate error: No such file or directory
+ALSA lib pcm.c:2722:(snd_pcm_open_noupdate) [error.pcm] Unknown PCM default
+AL lib: (EE) alsa_open_playback: Could not open playback device 'default': No such file or directory
+[19:39:17] [Thread-7/ERROR]: Error in class 'LibraryLWJGLOpenAL'
+[19:39:17] [Thread-7/ERROR]: Unable to initialize OpenAL.  Probable cause: OpenAL not supported.
+[19:39:17] [Thread-7/WARN]: ERROR MESSAGE:
+[19:39:17] [Thread-7/INFO]: Could not locate OpenAL library.
+[19:39:17] [Thread-7/WARN]: STACK TRACE:
+[19:39:17] [Thread-7/INFO]: org.lwjgl.openal.AL.create(AL.java:156)
+[19:39:17] [Thread-7/INFO]: org.lwjgl.openal.AL.create(AL.java:102)
+[19:39:17] [Thread-7/INFO]: org.lwjgl.openal.AL.create(AL.java:206)
+[19:39:17] [Thread-7/INFO]: paulscode.sound.libraries.LibraryLWJGLOpenAL.init(LibraryLWJGLOpenAL.java:164)
+[19:39:17] [Thread-7/INFO]: paulscode.sound.SoundSystem.CommandNewLibrary(SoundSystem.java:1576)
+[19:39:17] [Thread-7/INFO]: paulscode.sound.SoundSystem.CommandQueue(SoundSystem.java:2572)
+[19:39:17] [Thread-7/INFO]: paulscode.sound.CommandThread.run(CommandThread.java:121)
+[19:39:17] [Sound Library Loader/WARN]: ERROR MESSAGE:
+[19:39:17] [Sound Library Loader/INFO]: Could not locate OpenAL library.
+[19:39:17] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[19:39:17] [Thread-9/INFO]: Switching to No Sound
+[19:39:17] [Thread-9/INFO]: (Silent Mode)
+[19:39:17] [Sound Library Loader/INFO]: Sound engine started
+[19:39:18] [Client thread/INFO]: Max texture size: 16384
+[19:39:18] [Client thread/INFO]: Created: 16x16 textures-atlas
+[19:39:19] [Client thread/INFO]: [dev.pulsarclient.core.GanchosTransformer:encantoItem:276]: [Pulsar] Aura de Encanto: gancho dos itens instalado (func_180451_a, 2 lugares)
+[19:39:19] [Client thread/INFO]: [dev.pulsarclient.core.MotorTransformer:transform:100]: [Pulsar] Motor: gancho de entidades instalado (func_178635_a)
+[19:39:19] [Client thread/INFO]: [dev.pulsarclient.core.GanchosTransformer:corDano:249]: [Pulsar] Impacto: gancho da cor do dano instalado (func_177092_a)
+[19:39:19] [Client thread/INFO]: [dev.pulsarclient.core.GanchosTransformer:poseEmote:332]: [Pulsar] Emotes: gancho instalado em ModelBiped (func_78087_a, 1 saídas)
+[19:39:19] [Client thread/INFO]: [dev.pulsarclient.core.GanchosTransformer:encantoArmadura:307]: [Pulsar] Aura de Encanto: gancho da armadura instalado (func_177183_a, 1 lugares)
+[19:39:19] [Client thread/INFO]: [dev.pulsarclient.core.GanchosTransformer:balanco:225]: [Pulsar] Animações: gancho do balanço instalado (func_78440_a, 4 lugares)
+[19:39:19] [Client thread/INFO]: [dev.pulsarclient.core.MotorTransformer:transform:100]: [Pulsar] Motor: gancho de blocos instalado (func_175018_a)
+[19:39:19] [Client thread/INFO]: [dev.pulsarclient.core.MotorTransformer:transform:100]: [Pulsar] Motor: gancho de partículas instalado (func_78873_a)
+[19:39:19] [Client thread/INFO]: [dev.pulsarclient.mods.SonsLocais:instalar:61]: [Pulsar] Sons locais: lendo de /home/runner/work/_temp/e2e/minecraft/pulsar/instancia-1.8.9/pulsar/sons
+[19:39:19] [Client thread/INFO]: [dev.pulsarclient.gui.Janela:aplicar:25]: [Pulsar] Ícone da janela: logo do Pulsar
+[19:39:19] [Client thread/INFO]: [dev.pulsarclient.rede.Rede:iniciar:241]: [Pulsar] Rede: usando http://127.0.0.1:8799
+[19:39:19] [Client thread/INFO]: [dev.pulsarclient.PulsarClient:init:205]: [Pulsar] Pulsar Client 1.0.2 iniciado com 58 mods
+[19:39:19] [Client thread/INFO]: [dev.pulsarclient.PulsarClient:init:206]: [Pulsar] Motor: ganchos ativos entidades=true baús=false blocos=true animações=true partículas=true
+[19:39:19] [Client thread/INFO]: Injecting itemstacks
+[19:39:19] [Client thread/INFO]: Itemstack injection complete
+[19:39:19] [Client thread/INFO]: Forge Mod Loader has successfully loaded 4 mods
+[19:39:19] [Client thread/INFO]: Reloading ResourceManager: Default, FMLFileResourcePack:Forge Mod Loader, FMLFileResourcePack:Minecraft Forge, FMLFileResourcePack:Pulsar Client, Sons do Pulsar
+[19:39:19] [Client thread/INFO]: SoundSystem shutting down...
+[19:39:20] [Client thread/WARN]: Author: Paul Lamb, www.paulscode.com
+[19:39:20] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[19:39:20] [Thread-11/INFO]: Initializing LWJGL OpenAL
+[19:39:20] [Thread-11/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
+ALSA lib confmisc.c:855:(parse_card) 
+[error.core] 
+cannot find card '0'
+ALSA lib conf.c:5211:(_snd_config_evaluate) [error.core] function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) [error.core] error evaluating strings
+ALSA lib conf.c:5211:(_snd_config_evaluate) [error.core] function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1342:(snd_func_refer) [error.core] error evaluating name
+ALSA lib conf.c:5211:(_snd_config_evaluate) [error.core] function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5734:(snd_config_expand) [error.core] Evaluate error: No such file or directory
+ALSA lib pcm.c:2722:(snd_pcm_open_noupdate) [error.pcm] Unknown PCM default
+AL lib: (EE) alsa_open_playback: Could not open playback device 'default': No such file or directory
+[19:39:20] [Thread-11/ERROR]: Error in class 'LibraryLWJGLOpenAL'
+[19:39:20] [Thread-11/ERROR]: Unable to initialize OpenAL.  Probable cause: OpenAL not supported.
+[19:39:20] [Thread-11/WARN]: ERROR MESSAGE:
+[19:39:20] [Thread-11/INFO]: Could not locate OpenAL library.
+[19:39:20] [Thread-11/WARN]: STACK TRACE:
+[19:39:20] [Thread-11/INFO]: org.lwjgl.openal.AL.create(AL.java:156)
+[19:39:20] [Thread-11/INFO]: org.lwjgl.openal.AL.create(AL.java:102)
+[19:39:20] [Thread-11/INFO]: org.lwjgl.openal.AL.create(AL.java:206)
+[19:39:20] [Thread-11/INFO]: paulscode.sound.libraries.LibraryLWJGLOpenAL.init(LibraryLWJGLOpenAL.java:164)
+[19:39:20] [Thread-11/INFO]: paulscode.sound.SoundSystem.CommandNewLibrary(SoundSystem.java:1576)
+[19:39:20] [Thread-11/INFO]: paulscode.sound.SoundSystem.CommandQueue(SoundSystem.java:2572)
+[19:39:20] [Thread-11/INFO]: paulscode.sound.CommandThread.run(CommandThread.java:121)
+[19:39:20] [Sound Library Loader/WARN]: ERROR MESSAGE:
+[19:39:20] [Sound Library Loader/INFO]: Could not locate OpenAL library.
+[19:39:20] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[19:39:20] [Thread-13/INFO]: Switching to No Sound
+[19:39:20] [Thread-13/INFO]: (Silent Mode)
+[19:39:21] [Client thread/INFO]: Max texture size: 16384
+[19:39:21] [Sound Library Loader/INFO]: Sound engine started
+[19:39:21] [Client thread/INFO]: Created: 512x512 textures-atlas
+[19:39:21] [Client thread/INFO]: [dev.pulsarclient.core.GanchosTransformer:chatInteiro:357]: [Pulsar] Chat: guarda até 20000 linhas (2 limites trocados em func_146237_a)
+[19:39:21] [Client thread/INFO]: [dev.pulsarclient.gui.Universo:draw:63]: [Pulsar] Universo: céu 360 girando
+[19:39:22] [Client thread/INFO]: [dev.pulsarclient.mods.GravidadeItens:onTick:57]: [Pulsar] Gravidade de Itens: instalada
+[19:39:22] [Pulsar - ponte/INFO]: [dev.pulsarclient.mods.Musica$1:chegou:57]: [Pulsar] Barra Pulsar: tocando Órbita Lenta
+[19:39:22] [Client thread/INFO]: [dev.pulsarclient.mods.FontePulsar:carregar:137]: [Pulsar] Fonte do Pulsar carregada: 337 letras, espaçamento com fração
+[19:39:22] [Client thread/INFO]: [dev.pulsarclient.mods.MotorPulsar:instalarMolduras:211]: [Pulsar] Motor: molduras leves instaladas
+[19:39:22] [Client thread/INFO]: [dev.pulsarclient.core.MotorTransformer:transform:100]: [Pulsar] Motor: gancho de blocos especiais instalado (func_180546_a)
+[19:39:22] [Client thread/INFO]: [dev.pulsarclient.mods.MotorPulsar:instalarMolduras:225]: [Pulsar] Motor: placas leves instaladas
+[19:39:22] [Client thread/INFO]: [dev.pulsarclient.mods.MotorPulsar:semConferenciaGl:263]: [Pulsar] Motor: conferência de erros do OpenGL desligada
+[19:39:22] [Client thread/INFO]: Reloading ResourceManager: Default, FMLFileResourcePack:Forge Mod Loader, FMLFileResourcePack:Minecraft Forge, FMLFileResourcePack:Pulsar Client, Sons do Pulsar
+[19:39:23] [Client thread/INFO]: SoundSystem shutting down...
+[19:39:23] [Client thread/WARN]: Author: Paul Lamb, www.paulscode.com
+[19:39:23] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[19:39:23] [Thread-15/INFO]: Initializing LWJGL OpenAL
+[19:39:23] [Thread-15/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
+ALSA lib confmisc.c:855:(parse_card) 
+[error.core] cannot find card '0'
+ALSA lib conf.c:5211:(_snd_config_evaluate) [error.core] function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) [error.core] error evaluating strings
+ALSA lib conf.c:5211:(_snd_config_evaluate) [error.core] function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1342:(snd_func_refer) [error.core] error evaluating name
+ALSA lib conf.c:5211:(_snd_config_evaluate) [error.core] function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5734:(snd_config_expand) [error.core] Evaluate error: No such file or directory
+ALSA lib pcm.c:2722:(snd_pcm_open_noupdate) [error.pcm] Unknown PCM default
+AL lib: (EE) alsa_open_playback: Could not open playback device 'default': No such file or directory
+[19:39:23] [Thread-15/ERROR]: Error in class 'LibraryLWJGLOpenAL'
+[19:39:23] [Thread-15/ERROR]: Unable to initialize OpenAL.  Probable cause: OpenAL not supported.
+[19:39:23] [Thread-15/WARN]: ERROR MESSAGE:
+[19:39:23] [Thread-15/INFO]: Could not locate OpenAL library.
+[19:39:23] [Thread-15/WARN]: STACK TRACE:
+[19:39:23] [Thread-15/INFO]: org.lwjgl.openal.AL.create(AL.java:156)
+[19:39:23] [Thread-15/INFO]: org.lwjgl.openal.AL.create(AL.java:102)
+[19:39:23] [Thread-15/INFO]: org.lwjgl.openal.AL.create(AL.java:206)
+[19:39:23] [Thread-15/INFO]: paulscode.sound.libraries.LibraryLWJGLOpenAL.init(LibraryLWJGLOpenAL.java:164)
+[19:39:23] [Thread-15/INFO]: paulscode.sound.SoundSystem.CommandNewLibrary(SoundSystem.java:1576)
+[19:39:23] [Thread-15/INFO]: paulscode.sound.SoundSystem.CommandQueue(SoundSystem.java:2572)
+[19:39:23] [Thread-15/INFO]: paulscode.sound.CommandThread.run(CommandThread.java:121)
+[19:39:23] [Sound Library Loader/WARN]: ERROR MESSAGE:
+[19:39:23] [Sound Library Loader/INFO]: Could not locate OpenAL library.
+[19:39:23] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[19:39:24] [Client thread/INFO]: Max texture size: 16384
+[19:39:24] [Thread-17/INFO]: Switching to No Sound
+[19:39:24] [Thread-17/INFO]: (Silent Mode)
+[19:39:24] [Client thread/INFO]: Created: 512x512 textures-atlas
+[19:39:24] [Sound Library Loader/INFO]: Sound engine started
+[19:39:24] [Client thread/INFO]: [dev.pulsarclient.mods.FontePulsar$EstadoGl:preparar:236]: [Pulsar] Fonte: estado do OpenGL lido do jogo, sem perguntar ao driver
+[19:39:25] [Pulsar - rede/INFO]: [dev.pulsarclient.rede.Rede:pulsar:351]: [Pulsar] Rede: conectado como PulsarTeste (offline), nível 1
+[e2e] Sinal Discord: ligado menu 
+[19:39:27] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: menu
+[19:39:29] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:music.menu
+[19:39:31] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: painel
+[19:39:34] [Client thread/INFO]: [dev.pulsarclient.gui.GuiPulsarPanel:testarBarra:674]: [Pulsar] Barra de rolagem: embaixo 2144 de 2144, em cima 0
+[19:39:34] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: barra-ok
+[19:39:34] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: motor
+[19:39:37] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: video
+[19:39:40] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: esc
+[19:39:43] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: hud
+[19:39:43] [Client thread/INFO]: [dev.pulsarclient.mods.Musica:capa:86]: [Pulsar] Barra Pulsar: capa 16x16
+[19:39:46] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: atalhos
+[19:39:49] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: travas
+[19:39:52] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: teclas
+[19:39:55] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: texturas
+[19:39:58] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: mira
+[19:39:58] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:music.menu
+[19:40:01] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: paleta
+[19:40:04] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: sugestoes
+[19:40:04] [Client thread/INFO]: [dev.pulsarclient.gui.Conta$2:run:151]: [Pulsar] Conta trocada para PulsarTroca
+[19:40:07] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: conta
+[19:40:13] [Client thread/INFO]: [dev.pulsarclient.gui.Conta$2:run:151]: [Pulsar] Conta trocada para NickTeste (offline)
+[19:40:16] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: contas
+[19:40:19] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: criando-mundo
+[19:40:20] [Server thread/INFO]: Starting integrated minecraft server version 1.8.9
+[19:40:20] [Server thread/INFO]: Generating keypair
+[19:40:20] [Server thread/INFO]: Converting map!
+[19:40:20] [Server thread/INFO]: Scanning folders...
+[19:40:20] [Server thread/INFO]: Total conversion count is 0
+[19:40:20] [Server thread/INFO]: Injecting existing block and item data into this server instance
+[19:40:20] [Server thread/INFO]: Applying holder lookups
+[19:40:20] [Server thread/INFO]: Holder lookups applied
+[19:40:20] [Server thread/INFO]: Loading dimension 0 (Pulsar Teste) (net.minecraft.server.integrated.IntegratedServer@77af5633)
+[19:40:20] [Server thread/INFO]: Loading dimension 1 (Pulsar Teste) (net.minecraft.server.integrated.IntegratedServer@77af5633)
+[19:40:20] [Server thread/INFO]: Loading dimension -1 (Pulsar Teste) (net.minecraft.server.integrated.IntegratedServer@77af5633)
+[19:40:20] [Server thread/INFO]: Preparing start region for level 0
+[19:40:21] [Server thread/INFO]: Changing view distance to 8, from 10
+[19:40:21] [Netty Local Client IO #0/INFO]: Server protocol version 2
+[19:40:21] [Netty Server IO #1/INFO]: Client protocol version 2
+[19:40:21] [Netty Server IO #1/INFO]: Client attempting to join with 4 mods : FML@8.0.99.99,Forge@11.15.1.2318,mcp@9.19,pulsar@1.0.2
+[19:40:21] [Netty Local Client IO #0/INFO]: [Netty Local Client IO #0] Client side modded connection established
+[19:40:21] [Server thread/INFO]: [Server thread] Server side modded connection established
+[19:40:21] [Server thread/INFO]: NickTeste[local:E:0085d68c] logged in with entity id 0 at (-1242.5, 4.0, 662.5)
+[19:40:21] [Server thread/INFO]: NickTeste joined the game
+[19:40:22] [Client thread/INFO]: [dev.pulsarclient.cosmeticos.Cosmeticos:onRender:263]: [Pulsar] Cosméticos: camada de acessórios em 2 bonecos
+[e2e] Sinal Discord: ligado sozinho 
+[19:40:25] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: mundo-pronto
+[e2e] Rádio: tocando space_station 40%
+[19:40:25] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:music.game
+[19:40:28] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: mundo
+[19:40:28] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:testarFov:825]: [Pulsar] FOV correndo: normal 1.15, sem zoom 1.0
+[19:40:28] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: fov-ok
+[19:40:31] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: orbita
+[19:40:34] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: inventario
+[19:40:37] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: tab
+[19:40:40] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: cores
+[19:40:40] [Client thread/WARN]: Could not find uniform named InSize in the specified shader program.
+[19:40:40] [Client thread/INFO]: [dev.pulsarclient.mods.CoresVivas:criar:91]: [Pulsar] Cores Vivas: shader carregado
+[19:40:43] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: fogo
+[19:40:46] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: baixando-textura
+[19:40:46] [Pulsar - baixando f8thful/INFO]: [dev.pulsarclient.gui.Texturas$1:run:122]: [Pulsar] Texturas: F8thful baixado
+[19:40:49] [Client thread/INFO]: Reloading ResourceManager: Default, FMLFileResourcePack:Forge Mod Loader, FMLFileResourcePack:Minecraft Forge, FMLFileResourcePack:Pulsar Client, Sons do Pulsar, F8thful - 1.8.9 - v1.2.zip
+[19:40:49] [Client thread/INFO]: SoundSystem shutting down...
+[19:40:49] [Client thread/WARN]: Author: Paul Lamb, www.paulscode.com
+[19:40:49] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[19:40:50] [Thread-21/INFO]: Initializing LWJGL OpenAL
+[19:40:50] [Thread-21/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
+ALSA lib confmisc.c:855:(parse_card) [error.core] cannot find card '0'
+ALSA lib conf.c:5211:(_snd_config_evaluate) [error.core] function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) [error.core] error evaluating strings
+ALSA lib conf.c:5211:(_snd_config_evaluate) [error.core] function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1342:(snd_func_refer) [error.core] error evaluating name
+ALSA lib conf.c:5211:(_snd_config_evaluate) [error.core] function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5734:(snd_config_expand) [error.core] Evaluate error: No such file or directory
+ALSA lib pcm.c:2722:(snd_pcm_open_noupdate) [error.pcm] Unknown PCM default
+AL lib: (EE) alsa_open_playback: Could not open playback device 'default': No such file or directory
+[19:40:50] [Thread-21/ERROR]: Error in class 'LibraryLWJGLOpenAL'
+[19:40:50] [Thread-21/ERROR]: Unable to initialize OpenAL.  Probable cause: OpenAL not supported.
+[19:40:50] [Thread-21/WARN]: ERROR MESSAGE:
+[19:40:50] [Thread-21/INFO]: Could not locate OpenAL library.
+[19:40:50] [Thread-21/WARN]: STACK TRACE:
+[19:40:50] [Thread-21/INFO]: org.lwjgl.openal.AL.create(AL.java:156)
+[19:40:50] [Thread-21/INFO]: org.lwjgl.openal.AL.create(AL.java:102)
+[19:40:50] [Thread-21/INFO]: org.lwjgl.openal.AL.create(AL.java:206)
+[19:40:50] [Thread-21/INFO]: paulscode.sound.libraries.LibraryLWJGLOpenAL.init(LibraryLWJGLOpenAL.java:164)
+[19:40:50] [Thread-21/INFO]: paulscode.sound.SoundSystem.CommandNewLibrary(SoundSystem.java:1576)
+[19:40:50] [Thread-21/INFO]: paulscode.sound.SoundSystem.CommandQueue(SoundSystem.java:2572)
+[19:40:50] [Thread-21/INFO]: paulscode.sound.CommandThread.run(CommandThread.java:121)
+[19:40:50] [Sound Library Loader/WARN]: ERROR MESSAGE:
+[19:40:50] [Sound Library Loader/INFO]: Could not locate OpenAL library.
+[19:40:50] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[19:40:50] [Client thread/INFO]: Max texture size: 16384
+[19:40:50] [Thread-23/INFO]: Switching to No Sound
+[19:40:50] [Thread-23/INFO]: (Silent Mode)
+[19:40:50] [Client thread/INFO]: Created: 256x256 textures-atlas
+[19:40:51] [Client thread/INFO]: [dev.pulsarclient.gui.Texturas:usar:204]: [Pulsar] Texturas: usando F8thful
+[19:40:51] [Sound Library Loader/INFO]: Sound engine started
+[19:40:57] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: textura
+[19:41:00] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: texturasjogo
+[19:41:03] [Client thread/INFO]: [dev.pulsarclient.PulsarClient:pressToggleKey:333]: [Pulsar] Tecla G: Telescópio desligado
+[19:41:03] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: tecla
+[19:41:06] [Client thread/INFO]: [dev.pulsarclient.PulsarClient:pressToggleKey:333]: [Pulsar] Tecla G: Telescópio ligado
+[19:41:09] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: zoom
+[19:41:15] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: zoom-ok
+[19:41:18] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:waitWorld:262]: [Pulsar] Molduras leves desenhadas: 123
+[19:41:18] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: molduras-ok
+[19:41:18] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:waitWorld:264]: [Pulsar] Blocos fora dos chunks: 6, placas sem texto: 677
+[19:41:18] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: plantas-ok
+[19:41:18] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: placas-ok
+[19:41:18] [Client thread/WARN]: Could not find uniform named InSize in the specified shader program.
+[19:41:18] [Client thread/INFO]: [dev.pulsarclient.mods.RastroCometa:criar:89]: [Pulsar] Rastro de Cometa: shader carregado
+[19:41:21] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: hudjogo
+[19:41:24] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: amigos
+[e2e] Sinal Discord: ligado sozinho 
+[19:41:27] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: hudnovo
+[19:41:30] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: itens
+[19:41:30] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:waitWorld:305]: [Pulsar] Bonecos: 527 desenhos de jogador, 221 simplificados
+[19:41:30] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: bonecos
+[19:41:30] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: bonecos-pele
+[19:41:30] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:waitWorld:315]: [Pulsar] Aura de Encanto: itens=true armadura=true, itens 356, armaduras 90
+[19:41:30] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: encanto-ok
+[19:41:30] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: pacote-ok
+[19:41:30] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: chefe-ok
+[19:41:30] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: musica-ok
+[19:41:30] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: universo-ok
+[19:41:33] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: nebulosa
+[19:41:34] [Client thread/INFO]: [dev.pulsarclient.mods.Nebulosa:criar:108]: [Pulsar] Nebulosa: shader carregado
+[19:41:34] [Server thread/INFO]: Saving and pausing game...
+[19:41:34] [Server thread/INFO]: Saving chunks for level 'Pulsar Teste'/Overworld
+[19:41:34] [Server thread/INFO]: Saving chunks for level 'Pulsar Teste'/Nether
+[19:41:34] [Server thread/INFO]: Saving chunks for level 'Pulsar Teste'/The End
+[19:41:36] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: nebulosa-ok
+[19:41:37] [Client thread/INFO]: [dev.pulsarclient.mods.Capturas:novaPrint:91]: [Pulsar] Capturas: print 2026-11-20_19.41.36.png
+[19:41:37] [Client thread/INFO]: [CHAT] §d[Capturas] §7Print copiada. [Abrir] [Copiar] [Pasta]
+[19:41:37] [Pulsar - capturas/INFO]: [dev.pulsarclient.mods.Capturas$1:run:125]: [Pulsar] Capturas: 2026-11-20_19.41.36.png copiada
+[19:41:39] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: capturas
+[19:41:42] [Client thread/INFO]: [dev.pulsarclient.cosmeticos.Cosmeticos:usarAcessorio:135]: [Pulsar] Cosméticos: acessório orbita
+[19:41:42] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: cosmeticos
+[19:41:45] [Client thread/INFO]: [dev.pulsarclient.cosmeticos.Cosmeticos:tocar:181]: [Pulsar] Cosméticos: emote supernova
+[19:41:45] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: emote
+[19:41:48] [Client thread/INFO]: [dev.pulsarclient.cosmeticos.Cosmeticos:usarAcessorio:135]: [Pulsar] Cosméticos: acessório coroa
+[19:41:48] [Client thread/INFO]: [dev.pulsarclient.cosmeticos.Cosmeticos:tocar:181]: [Pulsar] Cosméticos: emote facepalm
+[19:41:48] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: coroa
+[19:41:51] [Client thread/INFO]: [dev.pulsarclient.cosmeticos.Cosmeticos:usarAcessorio:135]: [Pulsar] Cosméticos: acessório asas
+[19:41:51] [Client thread/INFO]: [dev.pulsarclient.cosmeticos.Cosmeticos:tocar:181]: [Pulsar] Cosméticos: emote danca
+[19:41:51] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: asas
+[19:41:54] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:waitWorld:366]: [Pulsar] Cosméticos: 508 poses de emote, 257 acessórios desenhados, gancho true
+[19:41:54] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: emote-ok
+[19:41:54] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: acessorio-ok
+[19:41:54] [Client thread/INFO]: [dev.pulsarclient.cosmeticos.Cosmeticos:usarAcessorio:135]: [Pulsar] Cosméticos: acessório orbita
+[19:41:58] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.chestopen
+[19:42:00] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: kit
+[19:42:03] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:waitWorld:391]: [Pulsar] Kit PvP: 3 itens levados ao lugar
+[19:42:03] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: organizado
+[19:42:06] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:conferirKit:784]: [Pulsar] Kit PvP no servidor: peitoral 1xitem.chestplateDiamond@0, poção 1xitem.potion@16418, maçãs 8xitem.appleGold@0, pedra guardada true, movidos 3
+[19:42:06] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: kit-ok
+[19:42:07] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.chestclosed
+[19:42:09] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: kiteditor
+[19:42:14] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:note.pling
+[19:42:15] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: batata
+[19:42:15] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: batata-aviso-ok
+[19:42:15] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: batata-pisca-ok
+[19:42:15] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:note.pling
+[19:42:16] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:note.pling
+[19:42:19] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:note.pling
+[19:42:19] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:note.pling
+[19:42:19] [Client thread/INFO]: [dev.pulsarclient.mods.AntiBatata:comecarAComer:211]: [Pulsar] Anti-Batata: comendo a maçã do espaço 2 com 20 ticks de regeneração
+[19:42:19] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.eat
+[19:42:20] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.eat
+[19:42:20] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.eat
+[19:42:20] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.eat
+[19:42:20] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.eat
+[19:42:20] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.eat
+[19:42:21] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.eat
+[19:42:21] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.burp
+[19:42:21] [Client thread/INFO]: [dev.pulsarclient.mods.AntiBatata:continuarComendo:222]: [Pulsar] Anti-Batata: maçã comida, voltando para o espaço 1
+[19:42:23] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:note.pling
+[19:42:24] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:note.pling
+[19:42:24] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:conferirBatata:625]: [Pulsar] Anti-Batata no servidor: maçãs 2, regeneração 23, espaço na mão 1, comidas 1
+[19:42:24] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: batata-ok
+[19:42:25] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:note.pling
+[e2e] Sinal Discord: ligado sozinho 
+[19:42:28] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.pop
+[19:42:28] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.pop
+[19:42:28] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.pop
+[19:42:28] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.pop
+[19:42:28] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.pop
+[19:42:28] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.pop
+[19:42:28] [Client thread/INFO]: [dev.pulsarclient.mods.FiltroColeta:jogarFora:324]: [Pulsar] Filtro de Coleta: descartou 1x minecraft:iron_chestplate
+[19:42:28] [Client thread/INFO]: [dev.pulsarclient.mods.FiltroColeta:jogarFora:324]: [Pulsar] Filtro de Coleta: descartou 1x pocao:1:splash
+[19:42:28] [Client thread/INFO]: [dev.pulsarclient.mods.FiltroColeta:jogarFora:324]: [Pulsar] Filtro de Coleta: descartou 2x minecraft:golden_apple:0
+[19:42:28] [Client thread/INFO]: [dev.pulsarclient.mods.FiltroColeta:jogarFora:324]: [Pulsar] Filtro de Coleta: descartou 1x minecraft:bowl
+[19:42:30] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:conferirFiltro:674]: [Pulsar] Filtro de Coleta no servidor: 1x item.swordDiamond; 1x item.helmetDiamond; 16x tile.stonebrick; descartados 5
+[19:42:30] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: filtro-ok
+[19:42:33] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: filtro
+[19:42:36] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: batatapainel
+[19:42:42] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: focar-aviso
+[19:42:42] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.click
+[19:42:42] [Client thread/INFO]: [dev.pulsarclient.mods.FocarJogador:focar:99]: [Pulsar] Focar Jogador: focado em Boneco1
+[19:42:45] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: focar
+[19:42:45] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:waitWorld:457]: [Pulsar] Focar Jogador: caixa 45, nome 45
+[19:42:45] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: focar-ok
+[19:42:45] [Client thread/INFO]: [dev.pulsarclient.mods.FocarJogador:focar:86]: [Pulsar] Focar Jogador: foco tirado de Boneco1
+[19:42:45] [Client thread/WARN]: Unable to play unknown soundEvent: minecraft:random.click
+[19:42:46] [Client thread/INFO]: [dev.pulsarclient.mods.Sequencias:contar:322]: [Pulsar] Sequências: boneco1 eliminado (jogo)
+[19:42:46] [Client thread/INFO]: [dev.pulsarclient.mods.Sequencias:mostrar:393]: [Pulsar] Sequências: FIRST BLOOD (1) · voz do Pulsar
+[19:42:48] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: sequencia
+[19:42:48] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:waitWorld:479]: [Pulsar] Sequências: abates 1, desenhos 86, som do jar true, som local true
+[19:42:48] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: sequencia-ok
+[19:42:48] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: sons-locais-ok
+[19:42:48] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: sequencia-chat-ok
+[19:42:48] [Client thread/INFO]: [dev.pulsarclient.mods.Sequencias:mostrar:393]: [Pulsar] Sequências: DOUBLE KILL (2) · som local double_kill.ogg
+[19:42:51] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: sequencia-dupla-ok
+[19:42:51] [Client thread/INFO]: [dev.pulsarclient.mods.Sequencias:mostrar:393]: [Pulsar] Sequências: MULTI KILL (3) · voz do Pulsar
+[19:42:51] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: sequencia-arena-ok
+[19:42:54] [Client thread/INFO]: [dev.pulsarclient.mods.Sequencias:procurarVozes:168]: [Pulsar] Sequências: vozes na pasta: MASCULINO (1 de 12) Teste (1 de 12)
+[19:42:54] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:waitWorld:514]: [Pulsar] Sequências: vozes [MASCULINO, Teste], Teste/multi_kill -> multikill.ogg, MASCULINO double_kill variações 2, MASCULINO multi_kill -> voz do Pulsar
+[19:42:54] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: vozes-ok
+[19:42:55] [Client thread/INFO]: [dev.pulsarclient.mods.Sequencias:mostrar:393]: [Pulsar] Sequências: FIRST BLOOD (teste) · voz do Pulsar
+[19:42:57] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: testar-todos-ok
+[e2e] Gravação: iniciar 1080p 30fps clipe 30s
+[19:42:58] [Client thread/INFO]: [dev.pulsarclient.mods.Gravacao:resposta:189]: [Pulsar] Gravação: iniciar -> ok (gravando) (clipe guardando)
+[19:42:58] [Client thread/INFO]: [CHAT] §c[Gravação] §7Gravando. Aperte F9 para parar.
+[e2e] Gravação: clipe 1080p 30fps clipe 30s
+[19:43:01] [Client thread/INFO]: [dev.pulsarclient.mods.Gravacao:resposta:189]: [Pulsar] Gravação: clipe -> ok (gravando) (clipe guardando)
+[19:43:01] [Client thread/INFO]: [CHAT] §c[Gravação] §7Clipe salvo: §fteste.webm [Abrir] [Pasta]
+[19:43:03] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: gravacao
+[19:43:03] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:waitWorld:535]: [Pulsar] Gravação: pedidos [iniciar, clipe, parar]
+[19:43:03] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: gravacao-ok
+[19:43:03] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: novo-ok
+[19:43:03] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: novos
+[19:43:06] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:waitWorld:549]: [Pulsar] Perfil: código com 1846 letras
+[19:43:06] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: perfil-ok
+[19:43:06] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:testarPerfilCompleto:989]: [Pulsar] Perfil completo: código com 1842 letras
+[19:43:06] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: perfil-completo-ok
+[19:43:06] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: efeitos-ok
+[19:43:06] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: colisao-ok
+[e2e] Rádio: parado
+[19:43:09] [Client thread/INFO]: [dev.pulsarclient.gui.SelfTest:log:974]: [Pulsar] selftest: fim
